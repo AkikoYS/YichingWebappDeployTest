@@ -1,0 +1,464 @@
+/* =========
+    main
+=========== */
+/* index.htmlのタイトル */
+h2 {
+    font-size: 1em;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #666;
+}
+
+/* ルビ */
+rt {
+    font-size: 0.6em;
+    color: #666;
+    font-family: sans-serif;
+}
+
+/* 占い開始 */
+#question-input {
+    width: 90%;
+    max-width: 400px;
+    /* 横幅を抑えめに */
+    height: 5.5em;
+    /* 高さを確保して複数行対応 */
+    font-size: 1.1em;
+    padding: 10px 14px;
+    margin: 12px auto;
+    display: block;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    resize: none;
+    /* ユーザーによるリサイズを禁止 */
+    overflow-y: auto;
+    /* 必要に応じて縦スクロール */
+    overflow-x: hidden;
+    /* 横スクロールは禁止 */
+    white-space: normal;
+    /* 折り返しを有効に */
+    line-height: 1.6;
+}
+
+#question-section h2 {
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+#start-button {
+    background-color: #c9302c;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    transition: background-color 0.3s ease;
+}
+
+#start-button:hover {
+    background-color: #333;
+}
+
+#start-button:active {
+    background-color: #310066;
+}
+
+#info-container {
+    max-width: 700px;
+    display: block;
+    margin: 30px auto;
+}
+
+#result {
+    border: none;
+    padding: 0;
+    margin: 0;
+    height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+#reset-button:hover {
+    background-color: #c9302c;
+}
+
+/*#lottie-spinnerはspinner.cssにある*/
+/* ================================
+   進行状況メッセージ表示
+================================= */
+#progress-container {
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: flex-start;
+    width: fit-content;
+    margin-inline: auto;
+}
+
+.spinner-progress-message {
+    display: inline-flex;
+    white-space: nowrap;
+    line-height: 1.2;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #666;
+    font-size: 0.9em;
+    /* ✅ こちらを優先したいフォントサイズ */
+    height: 24px;
+    width: auto;
+}
+
+@media (max-width: 768px) {
+    .spinner-progress-message {
+        font-size: 0.9em;
+    }
+}
+
+.custom-line {
+    text-align: center;
+    color: #c9302c;
+    display: block;
+}
+
+/*卦のタイトル*/
+.hexagram-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+/*卦のふりがな*/
+.hexagram-reading {
+    font-size: 1.1em;
+}
+
+/*卦の画像（SVG）*/
+.hexagram-svg object {
+    display: block;
+    width: 100px;
+    height: 100px;
+    margin: 10px auto;
+}
+
+/* SVG画像（<img> 用） */
+.hexagram-svg img {
+    display: block;
+    width: 100px;
+    height: auto;
+    margin: 0 auto 30px;
+}
+
+/*卦の説明文*/
+.description-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    text-align: left;
+    padding-left: 10%;
+    padding-right: 10%;
+    /* ✅ paddingを幅に含める（これ重要） */
+}
+
+.description-text-henko {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    text-align: left;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+/*卦のイメージ*/
+.description-image {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-top: 20px;
+    text-align: left;
+    padding-left: 10%;
+    padding-right: 10%;
+    margin-bottom: 35px;
+}
+
+/*卦の画像*/
+.hexagram-svg object {
+    width: 80px;
+    height: auto;
+}
+
+/* 占い結果を読み取ってます.... */
+.waiting-message {
+    text-align: center;
+}
+
+/* ================================
+   共通ボタンスタイル（バリアント含む）
+================================= */
+.variant-button {
+    padding: 8px 18px;
+    font-size: 0.95em;
+    background-color: #310066;
+    color: white !important;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin: 0;
+    color: #333;
+    /* ボタン間の隙間は親で調整 */
+}
+
+.variant-button:hover {
+    background-color: #0d3643;
+}
+
+#back-to-original-button {
+    display: block;
+    margin: 30px auto;
+}
+
+/* ================================
+   ボタンラッパー（裏卦・総卦・互卦など）
+================================= */
+/*裏卦・総卦・互卦ボタン　および、本卦に戻るボタン*/
+.variant-button-wrapper {
+    margin-top: 2ch;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    /* ボタン間隔 */
+}
+
+/*ログを保存するボタン*/
+#save-button {
+    background-color: #c9302c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#save-button:hover {
+    background-color: #0d3643;
+}
+
+/* --------------
+「他の内容を占う」ボタンのスタイル 
+----------------*/
+#reset-button {
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+/* ================================
+   総合易断ボタンのスタイル
+================================= */
+#final-fortune-button {
+    background-color: #c9302c;
+    /* 赤みのある紫 */
+    color: white;
+    font-weight: bold;
+    padding: 15px 30px;
+    margin: 20px auto 30px auto;
+    display: block;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+#final-fortune-button:hover {
+    background-color: #333;
+}
+
+#final-fortune-button:active {
+    background-color: #310066;
+}
+
+/* ==============
+易断サマリー 
+===============*/
+.fortune-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    /* 半透明の黒 */
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+}
+
+.fortune-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.final-fortune {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 1s ease, padding 1s ease;
+    padding: 0 20px;
+    opacity: 0;
+    transform: scaleY(0.95);
+    transform-origin: top center;
+}
+
+.final-fortune.expanded {
+    max-height: 1000px;
+    opacity: 1;
+    transform: scaleY(1);
+    transition: all 1s ease;
+    padding: 20px;
+}
+
+#confetti-lottie {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 600px;
+    pointer-events: none;
+    z-index: 10;
+    display: none;
+}
+
+.fortune-summary {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    background-color: #f9f6ff;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 30px 30px;
+    color: #333;
+    line-height: 1.7;
+    font-size: 1em;
+    max-width: 680px;
+    margin: 0 auto;
+    /* 優しい影 */
+}
+
+.fortune-summary h3 {
+    font-size: 1.3em;
+    margin-bottom: 16px;
+    color: #310066;
+    text-align: center;
+}
+
+.fortune-summary p {
+    margin-bottom: 12px;
+    text-align: justify;
+}
+
+/* スマホ対応 */
+@media (max-width: 480px) {
+    .fortune-summary {
+        padding: 16px;
+        font-size: 0.95em;
+    }
+}
+
+/*fadeのアニメーション*/
+.fade {
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.fade.show {
+    opacity: 1;
+}
+
+/* 保存できますnotice */
+.save-notice {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: #f0f8ff;
+    border-left: 4px solid #007acc;
+    color: #333;
+    font-size: 0.95rem;
+    font-family: sans-serif;
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* 保存しましたリンク */
+.save-link {
+    color: #ffffff;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.save-link:hover {
+    font-weight: bold;
+    /* お好みの色に変更可能 */
+    color: #12f0e1;
+    text-decoration: none;
+
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/*有料版CTA*/
+.ai-cta-box {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 480px;
+    background-color: #fffdf7;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.95em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.ai-cta-box p {
+    margin: 0.5em 0;
+    font-size: 0.95em;
+    color: #444;
+}
+
+.ai-cta-box button {
+    margin-top: 10px;
+    background-color: #440088;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.ai-cta-box button:hover {
+    background-color: #5e1ba6;
+}

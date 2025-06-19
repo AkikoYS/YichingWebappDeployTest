@@ -1,0 +1,118 @@
+<!-- log.html -->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六十四卦</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/note-style.css">
+    <link rel="stylesheet" href="style/base.css">
+    <link rel="stylesheet" href="style/modal.css">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
+
+    <!-- <script src="public/modal.js" defer></script> -->
+
+</head>
+
+<body>
+    <div class="background-image"></div>
+    <header class="main-header">
+        <div class="title-container">
+            <div class="title-container">
+                <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+            </div>
+        </div>
+        <nav class="nav-menu" id="nav-menu">
+            <ul>
+                <li><a href="index.html" class="nav-link">易経くじ</a></li>
+                <li><a href="about-Iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><span class="nav-link active">六十四卦</span></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+            </ul>
+        </nav>
+        <!-- PC用のgoogleログイン -->
+        <div class="login-container">
+            <button id="login-button" class="auth-button">Googleでログイン</span></button>
+            <button id="logout-button" class="auth-button" style="display: none;">ログアウト</button>
+        </div>
+        <!-- スマホ用 コンテナー -->
+        <div class="auth-hamburger-wrapper">
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!-- スマホ用 Google アイコン -->
+            <div class="auth-icon-container">
+                <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                    title="ログイン中 - タップでログアウト" />
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container"><img src="assets/images/book.jpg" class="hero-page" alt="六十四卦について">
+        <h2 class="h2-mobile">六十四卦とはなにか</h2>
+
+        <p>六十四卦と卦辞を考案したのは周王朝を創始した武王の父である<strong>文王</strong>といわれています。八卦（乾・兌・離・震・巽・坎・艮・坤）はいずれも三本の爻（こう）で構成され、陰陽の組み合わせによって自然界の基本的な現象や性質を象徴します。これを上下に組み合わせることで、64通りの卦が生まれ、より複雑で具体的な自然現象や人間社会の事象を象徴的に表現できるようになりました。
+        </p>
+        <p>六十四卦は、それぞれが独自の象徴と意味を持ち、自然界の現象や人間社会の出来事、心理状態などを表現しています。各卦には<strong>「卦辞（かじ）」</strong>と呼ばれる短い解説文が付されており、さらに各爻には<strong>「爻辞（こうじ）」</strong>という詳細な解説が存在します。
+        </p>
+        <div class="hide-on-mobile">
+            <p>六十四卦の構造はつぎのように整理されます。</p>
+
+            <ul>
+                <li><strong>上卦（外卦）</strong>：卦の上部に位置する三爻で構成され、外的な状況や環境を象徴</li>
+
+                <li><strong>下卦（内卦）</strong>：卦の下部に位置する三爻で構成され、内的な状態や主体の性質を象徴</li>
+
+                <li><strong>六爻</strong>：下から上へ順に「初爻」「二爻」「三爻」「四爻」「五爻」「上爻」と呼ばれ、それぞれが時間の流れや事象の進展段階を示します</li>
+            </ul>
+            <p>上卦を横軸、下卦を縦軸にとって六十四卦をリスト化したものが、<a href="#"
+                    onclick="document.getElementById('hexTable').style.display = 'table'; document.getElementById('hexTable').scrollIntoView({behavior: 'smooth'}); return false;">こちらの表</a>です。たとえば、初爻（=最初に引かれる一番下の爻）から上爻（=最後にひかれる一番上の爻）まですべて「陽(ー)
+                」なら、下卦は「乾（天）」、上卦も「乾（天）」となり、組み合わせた卦は<strong>「乾為天（䷀）」</strong>となります。</p>
+
+            <p>一方、初爻から五爻までが「陽（ー）」、上爻が「陰（--）」であれば、下卦が「乾（天）」、上卦は「兌（沢）」となり、組み合わせた卦は<strong>「沢天夬（䷪）」</strong>となります。
+            </p>
+
+            <p>この表の右上から左下の対角線上にある8つの卦はどれも上卦と下卦が同じ形をしており、<a href="bagua.html" alt="bagua">八卦</a>の性質が強く出た卦となります。
+            </p>
+            <p>ちなみに『易経』で解説されている六十四卦はこの表のように整然とした順番には並んでおらず、乾為天を第一卦、火水未済を第六十四卦として、一見規則性のないランダムな配列となっています（<a href="#"
+                    style=" color: #1e90ff; cursor: pointer;"
+                    onclick="toggleHexagramOrder(); document.getElementById('hexTable').scrollIntoView({behavior: 'smooth'}); return false;">卦番号順の表</a>）。誰が決めたかもわからないこうした順序は、天地から万物が生まれたのち、精妙に変化して循環する有様を見事に捉えたものです。実際、何がどのように変化していくのかは、<strong>序卦伝（じょかでん）</strong>というテキストに詳しく説明されています。こうして並んだ六十四卦のうち、<strong>上経三十卦</strong>（=一卦から三十卦まで）は、自然界の原理原則を、<strong>下卦三十四卦</strong>（三十一卦から六十四卦）は人間界の原理原則を示したものと言われています。
+                この配列はまず、天地から万物が生まれたのち、物事が精妙に変化し、循環する有様を見事に捉えたものです。実際、何がどう変化していくのかについてのこの配列の理由は<strong>序卦伝（じょかでん）</strong>という解説テキストに詳しく説明されています。この配列のうち、<strong>上経三十卦</strong>（=一卦から三十卦まで）は、自然界の原理原則を、<strong>下卦三十四卦</strong>（三十一卦から六十四卦）は人間界の原理原則を示しています。
+            </p>
+        </div>
+    </main>
+
+    <!-- モーダル -->
+    <div id="hexagram-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 卦一覧 -->
+    <button id="toggleBtn" class="toggle-button" onclick="toggleHexagramOrder()">卦番号順で表示</button>
+    <!-- PC用 -->
+    <table class="hexagram-table" id="hexTable"></table>
+    <!-- スマホ用 -->
+    <div id="hex-grid" class="hexagram-grid" style="display:none;"></div>
+
+
+    <footer class="simple-footer">
+        Iching — Book of Change ©2025
+        <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
+    </footer>
+    <script src="toggle-table.js"></script>
+    <script src="ui.js"></script>
+    <script type="module" src="firebase/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>決済完了｜AI助言送信中</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style/base.css" />
+    <link rel="stylesheet" href="style/success.css" />
+</head>
+
+<body>
+    <div class="background-image">
+    </div>
+    <div class="layout">
+        <header class="main-header" style="margin-bottom:0;">
+            <div class="title-container">
+                <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+            </div>
+            <nav class="nav-menu" id="nav-menu">
+                <ul>
+                    <li><a href="index.html" class="nav-link">易経くじ</a></li>
+                    <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                    <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                    <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                    <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                    <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                    <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+                </ul>
+            </nav>
+            <!-- PC用のgoogleログイン -->
+            <div class="login-container">
+                <button id="login-button" class="auth-button">Googleでログイン</span></button>
+                <button id="logout-button" class="auth-button" style="display: none;">ログアウト</button>
+            </div>
+            <!-- スマホ用 コンテナー -->
+            <div class="auth-hamburger-wrapper">
+                <!-- ハンバーガー -->
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <!-- スマホ用 Google アイコン -->
+                <div class="auth-icon-container">
+                    <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                        title="ログイン中 - タップでログアウト" />
+                </div>
+            </div>
+        </header>
+        <main class="container">
+            <p>🎉 決済が完了しました！</p>
+            <p id="status">AI助言を送信しています... 🌀</p>
+
+            <div id="toast" class="toast-message" style="display: none;"></div>
+
+        </main>
+        <footer>
+            Iching — Book of Change ©2025
+            <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
+        </footer>
+    </div>
+
+    <script type="module" src="success.js"></script>
+    <script type="module" src="firebase/auth.js"></script>
+
+</body>
+
+</html>

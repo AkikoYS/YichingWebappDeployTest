@@ -1,0 +1,158 @@
+/* ------------------------------
+   アニメーション（八卦画像）
+------------------------------ */
+.rotate-on-load {
+    animation: spin 4s ease-out forwards;
+    display: block;
+    margin: 0 auto;
+}
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+@media (max-width: 768px) {
+    .rotate-on-load {
+        display: none;
+    }
+}
+
+/*---------------
+八卦カード／リストのcss
+-------------------*/
+
+/* 八卦シンボルの文字サイズ拡大 */
+.hexagram-symbol {
+    font-size: 1.5em;
+}
+
+main table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto 1.5em;
+    /* ✅ テーブルを中央に */
+}
+
+/* PCの通常表示 */
+@media (min-width: 769px) {
+    .mobile-card {
+        display: none;
+    }
+
+    main th,
+    main td {
+        border: 1px solid #ddd;
+        text-align: center;
+        padding: 5px 10px;
+        line-height: 1.2;
+    }
+
+    main th {
+        background-color: #f2f2f2;
+        font-size: 0.8em;
+        color: #666;
+        font-weight: bold;
+    }
+
+    main td {
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    .bigger-symbol {
+        font-size: 3em;
+    }
+
+    .name {
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .furigana {
+        font-size: 0.7em;
+    }
+
+    main td:first-child main td:nth-child(4) {
+        min-width: 6em;
+        /* ✅ 横幅を確保 */
+        white-space: nowrap;
+        /* ✅ 折り返さない */
+    }
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .desktop-row {
+        display: none;
+    }
+
+    main table {
+        border: none;
+    }
+
+    main thead {
+        display: none;
+    }
+
+    main tbody {
+        display: block;
+    }
+
+    .mobile-card {
+        display: block;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin: 1em 0;
+        padding: 1em;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .bagua-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        min-height: 90px;
+        padding-right: 220px;
+    }
+
+    .bagua-info {
+        margin-top: 1em;
+        padding-left: 30px;
+        font-size: 0.9em;
+        line-height: 1.5;
+        color: #444;
+    }
+
+    .bagua-info .label {
+        font-weight: bold;
+        font-size: 0.8em;
+        color: #222;
+    }
+
+    .bagua-name img {
+        padding-left: 10px;
+        width: 90px;
+        height: auto;
+        display: block;
+    }
+
+    .bagua-symbol {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 90px;
+        height: auto;
+        display: block;
+    }
+
+    .bagua-symbol img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+}

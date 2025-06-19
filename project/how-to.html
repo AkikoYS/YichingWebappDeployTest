@@ -1,0 +1,88 @@
+<!-- log.html -->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>占い方</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/note-style.css">
+    <link rel="stylesheet" href="style/base.css">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
+
+
+</head>
+
+<body>
+    <div class="background-image"></div>
+    <header class="main-header">
+        <div class="title-container">
+            <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+        </div>
+        <nav class="nav-menu" id="nav-menu">
+            <ul>
+                <li><a href="index.html" class="nav-link">易経くじ</a></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><span class="nav-link active">占い方</span></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read" class="nav-link">卦の見方</a></li>
+                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+            </ul>
+        </nav>
+        <!-- PC用のgoogleログイン -->
+        <div class="login-container">
+            <button id="login-button" class="auth-button">Googleでログイン</span></button>
+            <button id="logout-button" class="auth-button" style="display: none;">ログアウト</button>
+        </div>
+        <!-- スマホ用 コンテナー -->
+        <div class="auth-hamburger-wrapper">
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!-- スマホ用 Google アイコン -->
+            <div class="auth-icon-container">
+                <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                    title="ログイン中 - タップでログアウト" />
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <img src="assets/images/picture_howto.jpg" alt="くじの引き方" class="hero-page">
+        <h2 class="h2-mobile">易経くじの引き方</h2>
+
+        <ol>
+            <li>まず占いたい内容を空欄に記し、<strong>「占いを始める」</strong>ボタンを押してください。スピナーがあられます</li>
+            <li>占いたい内容を念じながらスピナーをクリックしてください。一回クリックすると回り始め、もう一度クリックすると止まり、初爻が陰か陽かが決まります。これを６回繰り返してください。初爻から上爻まで全部で６つの爻が出揃うと<strong>本卦</strong>の卦象が決まります。下に本卦が示す意味とイメージが表示されます
+            </li>
+            <li><strong>「裏の意味」</strong>ボタンを押すと、<strong>裏卦</strong>が、<strong>「客観的に見ると」</strong>ボタンを押すと<strong>総卦</strong>が、<strong>「物事の本質」</strong>を押すと<strong>互卦</strong>が示され、それぞれの意味とイメージが表示されます。
+            </li>
+            <li><strong>一番左にある「今後の展開」</strong>ボタンを押すと、<strong>「最後にスピナーをもう一度クリックしてください」></strong>という指示が現れます。指示に従い、スピナーをクリックすると回り始め、もう一回クリックすると、<strong>変爻</strong>が決まります。結果表示欄に変爻の<strong>爻辞</strong>が示されます。1では６回クリックしましたが、ここでは１回だけです。
+            </li>
+            <li>爻辞の下にある<strong>「長い目で見たらどうなるか？」</strong>ボタンを押すと、<strong>変卦</strong>が現れ、結果表示欄にその意味とイメージが表示されます。「総合的な易断」ボタンと「本卦に戻る」ボタンが変卦の下に表示されます。「総合的な易断」ボタンを押すと、本卦、変爻、変卦、裏卦、総卦、互卦を含む、総合的な易の診断結果が表示されます。<strong>「本卦に戻る」</strong>ボタンを押して、本卦に戻った後も<strong>「総合的な易断」</strong>ボタンを押すことができます。
+            </li>
+            <li>総合的な易断の内容は、PDFにしてダウンロードすることができます。</li>
+            <li>占いたい内容に対して出た本卦をはじめとする情報をログとして記録するには、Googleでログインしてから、<strong>「記録する」</strong>のボタンを押してください。結果がログ一覧のページに新規追加されます。同じログイン・ネームを使うと、どんなデバイスからでも同じログに占い結果を保存し、閲覧することができます
+            </li>
+            <li><strong>「他のことを占う」</strong>ボタンを押すと初期画面に戻ります。</li>
+            <li>追加されたログの閲覧、削除、集計などはログ一覧ページで行えます。</li>
+        </ol>
+    </main>
+
+
+    <footer class="simple-footer">
+        Iching — Book of Change ©2025
+        <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
+    </footer>
+
+    <script src="log.js"></script>
+    <script src="ui.js"></script>
+    <script type="module" src="firebase/auth.js"></script>
+</body>
+
+</html>
