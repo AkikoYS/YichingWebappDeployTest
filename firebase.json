@@ -1,0 +1,37 @@
+{
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    }
+<<<<<<< HEAD
+=======
+  },
+
+  "hosting": {
+    "public": "project",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/sendAdviceEmail",
+        "function": "sendAdviceEmail"
+      },
+      {
+        "source": "/stripe/**",
+        "function": "stripe"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+>>>>>>> 5711663 (Initial commit from iching-production)
+  }
+}

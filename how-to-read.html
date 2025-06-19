@@ -1,0 +1,95 @@
+<!-- log.html -->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卦の見方</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/note-style.css">
+    <link rel="stylesheet" href="style/base.css">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
+
+
+</head>
+
+<body>
+    <div class="background-image"></div>
+    <header class="main-header">
+        <div class="title-container">
+            <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+        </div>
+        <nav class="nav-menu" id="nav-menu">
+            <ul>
+                <li><a href="index.html" class="nav-link">易経くじ</a></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><span class="nav-link active">卦の見方</span></li>
+                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+            </ul>
+        </nav>
+        <!-- PC用のgoogleログイン -->
+        <div class="login-container">
+            <button id="login-button" class="auth-button">Googleでログイン</span></button>
+            <button id="logout-button" class="auth-button" style="display: none;">ログアウト</button>
+        </div>
+        <!-- スマホ用 コンテナー -->
+        <div class="auth-hamburger-wrapper">
+            <!-- ハンバーガー -->
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!-- スマホ用 Google アイコン -->
+            <div class="auth-icon-container">
+                <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                    title="ログイン中 - タップでログアウト" />
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <img src="assets/images/rock.jpg" alt="how-to-read-picture" class="hero-page">
+
+        <h2 class="h2-mobile">卦の見方</h2>
+        <p><strong>易は自分との対話</strong>：易は偶然に得られたシンボルをもとに直感で解釈していくものです。結果には、あなたの潜在意識の動き、隠れた願望や判断の死角、複雑な因果関係と時間から生じる物事の趨勢が見事に反映されています。象徴を自由に大胆に直感で自分のケースに当てはめて、人生の道標にしてください。自然と人生の法則に則った易経のことばを吸収し、実生活でも意識することで、徐々に運勢が好転していくでしょう。
+        </p>
+        <p><strong>占機のがすべからず</strong>：占いたいと思ったタイミングを逃さずに占いましょう。</p>
+        <p><strong>礼を尽くすべし</strong>：結果がわかっていることを天に尋ねないでください。また、内容はできるだけ具体的にしぼってください。易経ルーレットを回すときは、雑念を払い、集中して内容をこころに念じてください。
+        </p>
+        <p><strong>初筮は告ぐ</strong>：一つの事柄を何度も占ってはいけません。最初に出た結果が天の声です。</p>
+        <p><strong>結果語るべからず</strong>：易断は天の声です。良い結果にしろ悪い結果にせよ、むやみに口外してはいけません。</p>
+        <p><strong>易に通ずる者は占わず</strong>：易学を学んでいくと、運命は自分で作るものであり、観てもらうものではないことが徐々にわかってきます。世の中には変化するもの、変化しないものがあり、変化する場合、順序や展開に普遍的な決まりがあります。こうした原理を学ぶことで、物事の趨勢を変えていけることがわかってくるからです。そうなったら、運勢を調べるために易経くじは引く必要はなくなります。
+        </p>
+        <p><strong>本卦（ほんか）</strong>：偶然の作用による陰陽の組み合わせ、あなたの前に顕現するの卦のことで、64の異なる結果があります。これが占う内容に対する一義的な回答であり、易神のことばです。卦が示すさまざまなイメージや象徴を用いて、あなたの置かれた状況全体を理解するのに役立ててください。本卦だけで運勢を判断してもよいのですが、変爻、変卦を活用すると、イメージ、意味、徳の含意が豊かになり、ものごとを総合的、複層的に理解できるようになります。
+        </p>
+        <p><strong>変爻（へんこう）</strong>：「今後の展開」ボタンを押すと、ルーレットをもう一度だけ回すよう指示されます。その結果、初爻、二爻、三爻、四爻、五爻、上爻のどれかが選ばれ、その爻の指す意味（爻辞）が示されます。爻は「変化」を語るものなので、いま、あなたがどの段階にいるのかを理解することができます。<strong>初爻は物事の萌芽、二爻は急速な成長、三爻は困難に直面する時期、四爻は迷いの時期、五爻は安定と成熟の時期、六爻は極まって反転する直前の状態</strong>を示します。一般に順境の卦なら若い爻が望ましく、逆境の卦なら、上爻に近い方が望ましいです。
+        </p>
+        <p><strong>変卦（へんか）</strong>：本卦の陰陽のうち、変爻の陰陽のみを反転させることで得られる新しい卦が変卦です。変爻が出たところで「中長期的な展望」ボタンを押すと得られます。足元の状況である本卦から、物事が中長期的にどう変化していくかを示しており、<strong>「AからBに之（ゆ）く=変化していく」</strong>という意味なので、<strong>之卦（しか）</strong>ともいわれます。必ずその方向に変化するというよりは、そのように移り変わりやすいポテンシャルが内在しているという意味で受け取ってください。
+        </p>
+        <p><strong>裏卦（りか）</strong>：錯卦（さっけ）ともいいます。本卦の陰爻と陽爻をすべて逆にしたもので、物事を逆説的に示し、裏側の意味を知る鍵となります。「裏の意味」ボタンを押すと表示されます。
+        </p>
+        <p><strong>綜卦（そうけ）</strong>：本卦の図象を180度回転させ、下から上に並んだ爻を上から下に並べ直したものです。「客観的に運命を見ると」ボタンを押すと示されます。本卦が自分自身に見える景色、つまり主観的な状況であるのに対し、綜卦は物事を第三者の視点で見たすがたを示しており、立体的、現実的に物事を認識する助けとなります。たとえば、沢水困（&#x4DEE;）は一見、困難の中で喘いでいる逆境の卦ですが、それを客観的視点で捉え直すと、水風井（&#x4DEF;）という自己修養、内面を磨く卦となり、その苦労は無駄ではなく次なる成長と展開につながるものだというわかります。
+        </p>
+        <p><strong>互卦（ごけ）</strong>：本卦の二爻、三爻、四爻を内卦（＝下の３本）、三爻、四爻、五爻を外卦（＝上の3本）とした卦を互卦といいます。勢いの弱い初爻と無位である上爻をのぞいた中心部だけを使った爻であるため、物事の本質や核心を示す卦です。
+        </p>
+
+    </main>
+
+
+    <footer class="simple-footer">
+        Iching — Book of Change ©2025
+        <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
+    </footer>
+
+    <script src="log.js"></script>
+    <script src="ui.js"></script>
+    <script type="module" src="firebase/auth.js"></script>
+</body>
+
+</html>

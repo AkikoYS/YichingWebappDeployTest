@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "yichingapp-a5f90"
+<<<<<<< HEAD
+  }
+}
+=======
+  },
+  "targets": {},
+  "etags": {}
+}
+>>>>>>> 5711663 (Initial commit from iching-production)

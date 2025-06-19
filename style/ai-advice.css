@@ -1,0 +1,151 @@
+/* body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Hiragino Kaku Gothic ProN", Arial, Meiryo, sans-serif;
+    background-color: #f9f8f6;
+    color: #333;
+    margin: 0;
+    padding: 2em;
+} */
+
+body.ai-advice-page {
+    background-color: transparent;
+    position: relative;
+}
+
+body.ai-advice-page .background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background-image: url("../assets/images/forest.jpg");
+    /* ✅ 正しいパスに注意 */
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+
+.ai-advice-container {
+    max-width: 600px;
+    margin: auto;
+    background: #fff;
+    padding: 2em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    font-size: 1.2em;
+    margin-bottom: 0.5em;
+    text-align: center;
+    color: #333
+}
+
+.intro-box {
+    border-radius: 12px;
+    padding: 1.5em;
+    margin: 0 auto;
+    max-width: 500px;
+    font-size: 0.8em;
+    background: linear-gradient(to bottom right, #fdf9ff, #f7f0fa);
+    box-shadow: 0 2px 6px rgba(106, 27, 154, 0.2);
+    margin-bottom: 1.5em;
+}
+
+.question-section {
+    margin-top: 1.5em;
+}
+
+.question-step {
+    margin-bottom: 2em;
+}
+
+.chat-log {
+    margin-bottom: 1em;
+    padding: 1em;
+    background: #fafafa;
+    border-left: 4px solid #ccc;
+    white-space: pre-wrap;
+}
+
+.hidden {
+    display: none;
+}
+
+input,
+textarea {
+    width: 100%;
+    font-size: 1em;
+    padding: 0.8em;
+    margin-top: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+button.next-btn,
+button.send-button,
+button[type="submit"] {
+    margin: 1.5em auto 0;
+    display: block;
+    background-color: #4a148c;
+    color: white;
+    border: none;
+    padding: 0.75em 1.5em;
+    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button.next-btn:hover,
+button.send-button:hover,
+button[type="submit"]:hover {
+    background-color: #2a0055;
+}
+
+.final-message {
+    margin-top: 2em;
+    padding: 1.2em;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f0f0f5;
+    color: #333;
+    font-size: 1em;
+    text-align: center;
+}
+
+/*トースト表示*/
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #323232;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+
+footer {
+    background-color: #fff;
+    text-align: center;
+    padding: 15px 0;
+    font-family: "Georgia", serif;
+    font-size: 0.9em;
+    color: #666;
+    border-top: 1px solid #ddd;
+}

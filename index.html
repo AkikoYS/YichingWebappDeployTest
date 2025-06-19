@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>易経くじ</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/base.css">
+    <link rel="stylesheet" href="style/spinner.css">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#310066" />
+    <!-- <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.ico"> -->
+
+</head>
+
+<body>
+    <div class="background-image"></div>
+    <header class="main-header">
+        <div class="title-container">
+            <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+        </div>
+        <nav class="nav-menu" id="nav-menu">
+            <ul>
+                <li><span class="nav-link active">易経くじ</span></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+            </ul>
+        </nav>
+        <!-- PC用のgoogleログイン -->
+        <div class="login-container">
+            <button id="login-button" class="auth-button">Googleでログイン</span></button>
+            <button id="logout-button" class="auth-button" style="display: none;">ログアウト</button>
+        </div>
+        <!-- スマホ用 コンテナー -->
+        <div class="auth-hamburger-wrapper">
+            <!-- ハンバーガー -->
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!-- スマホ用 Google アイコン -->
+            <div class="auth-icon-container">
+                <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                    title="ログイン中 - タップでログアウト" />
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div id="question-section" class="fade show">
+            <h2 style="text-align:center">天に問いたい内容を記してください（任意）</h2>
+            <textarea id="question-input" maxlength="50" placeholder="例：転職するべきでしょうか？"></textarea>
+            <div id="question-warning" style="color: red; font-size: 0.9em; text-align: center; display: none;">
+                文字数は50字以内にしてください。
+            </div>
+            <button id="start-button">占いを始める</button>
+            <div id="info-container">
+                <p class="info-text" style="text-align: center; font-size: 0.8em; color: #666;">
+                    易断は無料です。<br>あなたの状況に寄り添った具体的なアドバイス（¥100）もご用意しています。 </p>
+            </div>
+        </div>
+
+        <div id="main-app" class="fade">
+            <h2 id="instructionText" style="text-align:center">こころに念じながら６回クリックしてください</h2>
+
+            <!-- Lottieで表示するスピナー -->
+            <div id="lottie-spinner"></div>
+
+
+            <!-- 進行状況を表示するコンテナ -->
+            <div id="progress-container" style="gap: 10px"></div>
+
+            <!-- 暗転オーバーレイ -->
+            <div id="fortune-overlay" class="fortune-overlay hidden"></div>
+
+            <!-- 卦の内容表示 -->
+            <div id="result"></div>
+
+            <!-- もう一度引くボタン -->
+            <button id="reset-button" style="display: none; margin: 30px auto; display: block;">他の内容を占う</button>
+        </div>
+    </main>
+
+    <footer class="simple-footer">
+        Iching — Book of Change ©2025
+        <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
+    </footer>
+
+    <!-- JavaScriptを読み込む -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.11/lottie.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script src="logic.js"></script>
+    <script src="ui.js" defer></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="firebase/auth.js"></script>
+    <!-- <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('✅ Service Worker registered', reg))
+                    .catch(err => console.error('❌ Service Worker registration failed:', err));
+            });
+        }
+    </script> -->
+
+</body>
+
+</html>
