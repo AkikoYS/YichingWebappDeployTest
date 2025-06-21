@@ -3,16 +3,8 @@
     "source": "functions",
     "runtime": "nodejs20"
   },
-  "emulators": {
-    "functions": {
-      "port": 5001
-    }
-<<<<<<< HEAD
-=======
-  },
-
   "hosting": {
-    "public": "project",
+    "public": "project", // ← あなたのHTMLファイルがあるディレクトリ名
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -24,7 +16,7 @@
         "function": "sendAdviceEmail"
       },
       {
-        "source": "/stripe/**",
+        "source": "/stripe/createCheckoutSession",
         "function": "stripe"
       },
       {
@@ -32,6 +24,13 @@
         "destination": "/index.html"
       }
     ]
->>>>>>> 5711663 (Initial commit from iching-production)
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "hosting": {
+      "port": 5000
+    }
   }
 }
