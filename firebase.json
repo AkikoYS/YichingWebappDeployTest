@@ -4,7 +4,7 @@
     "runtime": "nodejs20"
   },
   "hosting": {
-    "public": "project", // ← あなたのHTMLファイルがあるディレクトリ名
+    "public": "project", 
     "ignore": [
       "firebase.json",
       "**/.*",
