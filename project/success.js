@@ -1,20 +1,12 @@
-// success.js
-import { auth } from "./firebase/firebase.js";
+import { sendAdviceToServer, markAsSent, showToast } from "./ai-advice.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const uid = localStorage.getItem("lastPaymentUid");
-    if (!uid) return;
-
     try {
-        const res = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/sendAdviceEmail", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ uid })
-        });
-
-        const result = await res.json();
-        console.log("✅ メール送信結果:", result);
-    } catch (err) {
-        console.error("❌ メール送信失敗:", err);
+        const user = JSON.parse(localStorage.getItem("authUser")); // 例：ログインユーザー
+        await sendAdviceToServer({ isTest: false, email: user?.email });
+        markAsSent();
+        showToast("✅ 助言を送信しました（メールを確認してください）");
+    } catch (error) {
+        showToast("❌ 助言の送信に失敗しました");
     }
 });

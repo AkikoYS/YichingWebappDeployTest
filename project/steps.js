@@ -72,6 +72,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
             case 4:
                 localStorage.setItem("userNotes", value);
+                // ✅ 表示用ログとして追加（他と同じスタイル）
+                if (value) {
+                    // ✅ 表示用ログとして追加（空でなければ）
+                    const notesResponse = document.createElement("div");
+                    notesResponse.className = "chat-log";
+                    notesResponse.innerHTML = `<strong>その他の伝えたいこと</strong><br>${value}`;
+                    chatLog.appendChild(notesResponse);
+                }
+
                 break;
         }
 
@@ -86,18 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (testSendButton) {
         testSendButton.addEventListener("click", async () => {
-            //noteボタンのchatLog処理
-            const notesValue = document.getElementById("user-notes")?.value.trim();
-            if (notesValue && !document.querySelector(".chat-log strong")?.textContent.includes("その他の伝えたいこと")) {
-                const notesResponse = document.createElement("div");
-                notesResponse.className = "chat-log";
-                notesResponse.innerHTML = `<strong>その他の伝えたいこと</strong><br>${notesValue}`;
-                chatLog.appendChild(notesResponse);
-                // ✅ フォームの値をクリアして再表示を防ぐ
-                document.getElementById("user-notes").value = "";
-            }
 
             try {
+
                 document.getElementById("sendingStatus").style.display = "block";
                 await sendAdviceToServer({ isTest: true });
                 showToast("✅ テスト送信が完了しました（メールをご確認ください）");
@@ -109,5 +109,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
 });

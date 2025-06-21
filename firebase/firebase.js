@@ -1,3 +1,11 @@
+console.log("📦 firebase.js loaded");
+if (window.FIREBASE_CONFIG) {
+    console.log("✅ FIREBASE_CONFIG detected:", window.FIREBASE_CONFIG.apiKey);
+} else {
+    console.warn("❌ FIREBASE_CONFIG is undefined");
+}
+console.log("🧪 env:", typeof window.FIREBASE_CONFIG);
+
 // firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -8,16 +16,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+
 // Firebase 設定
-const firebaseConfig = {
-    apiKey: "AIzaSyAbRq3f8aIV4jT85w9QQEjHqGl1J2qYHKo",
-    authDomain: "yichingapp-a5f90.firebaseapp.com",
-    projectId: "yichingapp-a5f90",
-    storageBucket: "yichingapp-a5f90.appspot.com", // ✅ 修正済み
-    messagingSenderId: "294471771058",
-    appId: "1:294471771058:web:b7baf7525c131a39cbbaab",
-    measurementId: "G-3PM8FFGK1V"
-};
+const firebaseConfig = window.FIREBASE_CONFIG;
+// const firebaseConfig = {
+//     apiKey: window.ENV.FIREBASE_API_KEY,
+//     authDomain: "yichingapp-a5f90.firebaseapp.com",
+//     projectId: "yichingapp-a5f90",
+//     storageBucket: "yichingapp-a5f90.appspot.com", // ✅ 修正済み
+//     messagingSenderId: "294471771058",
+//     appId: "1:294471771058:web:b7baf7525c131a39cbbaab",
+//     measurementId: "G-3PM8FFGK1V"
+// };
 
 // Firebase 初期化
 const app = initializeApp(firebaseConfig);

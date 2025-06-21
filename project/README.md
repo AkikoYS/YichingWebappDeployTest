@@ -29,39 +29,49 @@ Using a spinning animation and six rounds of yin-yang determination, it generate
 - OpenAI API (planned future integration)
 
 ## 📁 Project Structure
-project/
-├── index.html
-├── about-iching.html
-├── bagua.html
-├── hexagrams.html
-├── how-to-read.html
-├── how-to.html
-├── log.html
-├── feedback.html     ←お問い合わせ関係
-├── service-worker.js ←PWA化
-├── manifest.json     ←PWA化
-├── firebase/
-│   ├── firebase.js   ← Firebaseの初期化
-│   └── auth.js       ← ログインUIと処理
-├── script.js         ← メインロジック（変更なし）
-├── logic.js
-├── ui.js
-├── toggle-table.js   ←hexagram.html内の六十四卦 
-├── heagrams.json     ←卦と爻のデータベース
-├── styles/
-│   ├── base.css      ←HeaderとFooter 
-│   ├── style.css     ←index.htmlのmain 
-│   ├── spinner.css   ←スピナーの挙動  
-|   |__ modal.css　　　←モーダル表示
-│   ├── note-style.css←index.html以外のページ
-|   ├── bagua.css　　　←bagua.htmlの表
-|
-├── assets/
-│   ├── images/
-│   ├── icons/
-│   └── animations/     ←スピナーのlottieAnimation
-|
-
+iching-production/
+├── .firebase/                  # Firebase キャッシュ情報
+├── functions/                 # Cloud Functions 関連
+│   ├── .env                   # 環境変数（APIキーなど）
+│   ├── index.js               # Cloud Functions エントリポイント
+│   ├── sendAdviceEmail.js     # AI助言メール送信処理
+│   ├── stripe.js              # Stripe 決済関連
+│   ├── storeAdvicePdf.js      # PDF生成・保存処理
+│   ├── fonts/
+│   │   └── NotoSansJP-Regular.js
+│   └── quotes.json            # ランダム名言データ
+├── project/                   # フロントエンドソース
+│   ├── index.html             # メイン画面
+│   ├── about-iching.html      # 易経の説明
+│   ├── hexagrams.html         # 六十四卦一覧
+│   ├── log.html               # ログページ
+│   ├── feedback.html          # お問い合わせページ
+│   ├── manifest.json          # PWA設定
+│   ├── service-worker.js      # PWAキャッシュ設定
+│   ├── firebase/
+│   │   ├── firebase.js        # Firebase初期化
+│   │   └── auth.js            # ログインUI制御
+│   ├── styles/
+│   │   ├── base.css
+│   │   ├── style.css
+│   │   ├── spinner.css
+│   │   ├── modal.css
+│   │   └── note-style.css
+│   ├── assets/
+│   │   ├── images/
+│   │   └── animations/        # Lottieアニメーション
+│   ├── script.js              # メインロジック
+│   ├── logic.js
+│   ├── ui.js
+│   ├── toggle-table.js
+│   ├── success.html           # 決済完了後ページ
+│   ├── success.js
+│   ├── payment.js
+│   └── hexagrams.json         # 卦データベース
+├── firebase.json              # Firebase 設定ファイル
+├── .firebaserc                # Firebase プロジェクトID指定
+├── README.md                  # ※これから追加
+└── .gitignore
 ## 🔐 Security
 
 Please **do not expose your OpenAI API key** in public repositories.  
@@ -75,5 +85,32 @@ Please contact the author for reuse or collaboration.
 ---
 
 *Created and maintained by Akiko Shimoyama*
+
+# 易経くじ Web App
+
+このアプリは、古代中国の占い書『易経』をもとにしたデジタル占いサービスです。
+
+## 機能
+- 本卦・変卦・裏卦など六卦を自動生成
+- Lottieアニメーションによるスピナー表示
+- Firebase を用いたログイン・決済・PDF送信機能
+- AIによる2000字〜5000字の助言生成
+
+## 技術スタック
+- HTML / CSS / JavaScript
+- Firebase (Hosting, Auth, Functions, Firestore)
+- Stripe 決済
+- OpenAI GPT API
+- jsPDF によるPDF生成
+
+## 今後の予定
+- モバイル最適化（PWA対応）
+- ユーザー管理と履歴共有機能
+- 多言語対応（英語／日本語）
+
+---
+
+**制作・運営**: Akiko Shimoyama  
+**リポジトリ**: https://github.com/AkikoYS/YichingWebappDeployTest
 
 

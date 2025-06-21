@@ -22,8 +22,8 @@ app.use(express.json());
 async function sendAdviceEmailWithPDF({ userName, userEmail, userQuestion, topic, situation, notes, hexagrams, fortunesSummary }) {
     if (!hexagrams?.original?.name) {
         throw new Error("hexagrams.original.name が不明です");
-      }
-      
+    }
+
     const prompt = `あなたは熟練の易者であり、相談者に誠実な助言を与えるAIです。相談者 ${userName} さんに対して、日本語で約5,000字のエッセイ方式のアドバイスを作成してください。箇条書きではなく、有機的に流れる文章にしてください。
 
 【0. 総合的な易断（前提）】
@@ -116,12 +116,13 @@ ${fortunesSummary}
     });
 }
 
-console.log("📦 受信したbody.original:", body.original);
-console.log("📦 受信したbody:", body);
+
 // ✅ Cloud Function ルートは "/" に対応
 app.post("/", async (req, res) => {
     try {
         const body = req.body;
+        console.log("📦 受信したbody.original:", body.original);
+        console.log("📦 受信したbody:", body);
 
         await sendAdviceEmailWithPDF({
             userName: body.userName,

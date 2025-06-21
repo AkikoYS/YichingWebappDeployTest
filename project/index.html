@@ -53,7 +53,6 @@
             </div>
         </div>
     </header>
-    <div id="debug" style="text-align: center; margin-top: 10px; color: red;"></div>
 
     <main class="main-container">
         <div id="question-section" class="fade show">
@@ -96,12 +95,13 @@
     </footer>
 
     <!-- JavaScriptを読み込む -->
+    <script src="/firebase/env.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.11/lottie.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script src="logic.js"></script>
     <script src="ui.js" defer></script>
     <script type="module" src="script.js"></script>
-    <script type="module" src="firebase/auth.js"></script>
+    <script type="module" src="/firebase/auth.js"></script>
     <!-- <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
