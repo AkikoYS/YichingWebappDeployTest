@@ -97,10 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
         testSendButton.addEventListener("click", async () => {
 
             try {
-
                 document.getElementById("sendingStatus").style.display = "block";
                 await sendAdviceToServer({ isTest: true });
                 showToast("✅ テスト送信が完了しました（メールをご確認ください）");
+                setCase(4, "chatLog");
             } catch (err) {
                 console.error(err);
                 showToast("❌ テスト送信に失敗しました。もう一度お試しください。");

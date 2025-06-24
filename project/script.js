@@ -1059,14 +1059,14 @@ function displayFinalFortune() {
     setTimeout(() => {
         hideSpinnerAndProgress();
 
-        const summaryHTML = generateFortuneSummaryHTML();
+        const summaryHTML = generateFortunesSummaryHTML();
         // const rubyHTML = applyRubyToHexagramNamesWithJson(summaryHTML, sixtyFourHexagrams);
         result.innerHTML = summaryHTML;
         setTimeout(() => {
-            const fortuneSummaryHTML = document.querySelector(".fortune-summary");
-            const fortuneSummaryText = fortuneSummaryHTML?.innerText || "";
-            localStorage.setItem("fortuneSummary", fortuneSummaryText);
-            console.log("🌟 fortuneSummary 保存:", fortuneSummaryText);
+            const fortunesSummaryHTML = document.querySelector(".fortune-summary");
+            const fortunesSummaryText = fortunesSummaryHTML?.innerText || "";
+            localStorage.setItem("fortunesSummary", fortunesSummaryText);
+            console.log("🌟 fortunesSummary 保存:", fortunesSummaryText);
         }, 100); // 少し遅らせてDOM反映を確実に
 
         const wrapper = document.getElementById("final-fortune-wrapper");
@@ -1162,7 +1162,7 @@ function displayFinalFortune() {
     }, 1000);
 }
 //総合的な易断の内容
-function generateFortuneSummaryHTML() {
+function generateFortunesSummaryHTML() {
     const reverseHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
     const souHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
     const goHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.go);

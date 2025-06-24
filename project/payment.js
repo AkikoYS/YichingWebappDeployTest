@@ -1,42 +1,41 @@
-import { auth } from "./firebase/firebase.js"; // ← これが必要（なければ上部に追加）
-import { markAsSent, showToast, sendAdviceToServer } from "./ai-advice.js";
+// ✅ Gen2 CORS完全対応版 Cloud Function
+const { onRequest } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
+const OpenAI = require("openai");
 
-document.addEventListener("DOMContentLoaded", () => {
-    const payBtn = document.getElementById("paymentButton");
-    if (payBtn) {
-        payBtn.addEventListener("click", async () => {
+const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 
-            const uid = auth?.currentUser?.uid;
-            if (!uid) {
-                alert("⚠️ Googleにログインしてから決済を開始してください。");
-                return;
-            }
+exports.sendAdviceEmail = onRequest({ secrets: [OPENAI_API_KEY] }, async (req, res) => {
+    // ✅ CORSプリフライト対応（手動）
+    if (req.method === "OPTIONS") {
+        res.set("Access-Control-Allow-Origin", "*");
+        res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.set("Access-Control-Allow-Headers", "Content-Type");
+        return res.status(204).send("");
+    }
 
-            try {
-                document.getElementById("sendingStatus").style.display = "block";
-                // 🔽 🔥 Firestore に助言データを保存（ここが重要）
-                const { uid } = await sendAdviceToServer({ isTest: false, email: auth?.currentUser?.email });
+    // ✅ POST以外は拒否
+    if (req.method !== "POST") {
+        return res.status(405).send("Method Not Allowed");
+    }
 
-                const endpoint = location.hostname === "localhost"
-                    ? "http://localhost:5001/yichingapp-a5f90/us-central1/createCheckoutSession"
-                    : "https://us-central1-yichingapp-a5f90.cloudfunctions.net/stripe/createCheckoutSession";
+    res.set("Access-Control-Allow-Origin", "*");
 
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ uid })
-                });
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error("サーバーエラー: " + text);
-                }
+    try {
+        const { summaryText, userName } = req.body;
+        const openai = new OpenAI({ apiKey: OPENAI_API_KEY.value() });
 
-                const { url } = await res.json();
-                window.location.href = url;
-            } catch (error) {
-                alert("❌ 決済開始に失敗しました: " + error.message);
-                document.getElementById("sendingStatus").style.display = "none";
-            }
+        const prompt = `ユーザー ${userName} に対するアドバイス。前提：${summaryText}`;
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [{ role: "user", content: prompt }],
         });
+
+        const advice = completion.choices[0]?.message?.content || "アドバイスの生成に失敗しました。";
+        return res.status(200).json({ advice });
+
+    } catch (err) {
+        console.error("OpenAIエラー:", err);
+        return res.status(500).json({ error: err.message });
     }
 });

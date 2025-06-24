@@ -4,33 +4,11 @@
     "runtime": "nodejs20"
   },
   "hosting": {
-    "public": "project", 
+    "public": "project",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/sendAdviceEmail",
-        "function": "sendAdviceEmail"
-      },
-      {
-        "source": "/stripe/createCheckoutSession",
-        "function": "stripe"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
     ]
-  },
-  "emulators": {
-    "functions": {
-      "port": 5001
-    },
-    "hosting": {
-      "port": 5000
-    }
   }
 }

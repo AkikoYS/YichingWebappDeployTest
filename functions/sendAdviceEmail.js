@@ -1,152 +1,138 @@
-require("dotenv").config();
-const functions = require("firebase-functions");
-const express = require("express");
-const cors = require("cors");
-const { jsPDF } = require("jspdf");
 const OpenAI = require("openai");
+const { jsPDF } = require("jspdf");
 const nodemailer = require("nodemailer");
 const { NotoSansJP } = require("./fonts/NotoSansJP-Regular.js");
-const fs = require("fs");
-const path = require("path");
 
-const quotesPath = path.join(__dirname, "quotes.json");
-const quotes = JSON.parse(fs.readFileSync(quotesPath, "utf-8"));
+const { defineSecret } = require("firebase-functions/params");
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// 🔐 Secrets
+const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
+const SMTP_USER = defineSecret("SMTP_USER");
+const SMTP_PASS = defineSecret("SMTP_PASS");
+const SMTP_HOST = defineSecret("SMTP_HOST");
+const SMTP_PORT = defineSecret("SMTP_PORT");
 
-const app = express();
-app.use(cors({ origin: true }));
-app.use(express.json());
-
-// ✅ PDF生成+メール送信関数
-async function sendAdviceEmailWithPDF({ userName, userEmail, userQuestion, topic, situation, notes, hexagrams, fortunesSummary }) {
-    if (!hexagrams?.original?.name) {
-        throw new Error("hexagrams.original.name が不明です");
+// 🌐 メイン関数（index.jsから呼び出される）
+async function sendAdviceEmail(req, res) {
+    // ✅ CORS プリフライト処理
+    if (req.method === "OPTIONS") {
+        res.set("Access-Control-Allow-Origin", "*");
+        res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.set("Access-Control-Allow-Headers", "Content-Type");
+        return res.status(204).send("");
     }
 
-    const prompt = `あなたは熟練の易者であり、相談者に誠実な助言を与えるAIです。相談者 ${userName} さんに対して、日本語で約5,000字のエッセイ方式のアドバイスを作成してください。箇条書きではなく、有機的に流れる文章にしてください。
+    res.set("Access-Control-Allow-Origin", "*");
+
+    if (req.method !== "POST") {
+        return res.status(405).send("Method Not Allowed");
+    }
+
+    try {
+        console.log("🧪 OPENAI_API_KEY (先頭5文字):", OPENAI_API_KEY.value()?.slice(0, 5) || "未定義");
+        console.log("🧪 SMTP_USER:", SMTP_USER.value() || "未定義");
+        console.log("🧪 SMTP_HOST:", SMTP_HOST.value() || "未定義");
+        console.log("🧪 SMTP_PORT:", SMTP_PORT.value() || "未定義");
+
+        const {
+            userName = "匿名",
+            userEmail = "",
+            userQuestion = "（未入力）",
+            topic = "",
+            situation = "",
+            notes = "",
+            fortunesSummary = "総合的な易断がありません。",
+            hexagrams = {}
+        } = req.body || {};
+
+        const {
+            original = {},
+            changed = {},
+            reverse = {},
+            sou = {},
+            go = {},
+            changedLineIndex = "0"
+        } = hexagrams;
+
+        if (!userEmail || !userEmail.includes("@")) {
+            return res.status(400).json({ error: "メールアドレスが不正です" });
+        }
+
+        const prompt = `あなたは熟練の易者であり、相談者に誠実で深い助言を与えるAIです。相談者 ${userName} さんに対して、日本語で約5,000字のエッセイ方式のアドバイスを作成してください。形式的な箇条書きではなく、論理的かつ有機的に流れる文章にしてください。
 
 【0. 総合的な易断（前提）】
-以下は、相談者に対する全体的な状況診断です。  
-この内容を**易断の出発点**として扱い、それを土台に分析やアドバイスを行ってください。
 ${fortunesSummary}
 
 【1. 重視する構成比と観点】
-- 本卦と変爻の解釈を全体の8割に充て、現在の状況とその変化の兆しを深く掘り下げてください。
-- 残りの2割で、以下の補助卦を必要に応じて補完的に解釈してください。
-  - 裏卦：別の側面から同じ問題を捉えたらこうである。
-  - 総卦：他者の気持ち、客観情勢、自分がどう見られているか
-  - 互卦：隠された問題、深層心理、本質的な構造
-  - 変卦：中長期的な未来像の暗示
-※ 補助卦は**羅列しない**でください。補助卦は全て言及する必要はありません。重要なものだけ説明してください。
+- 本卦と変爻の解釈を全体の7割に充て、現在の状況とその変化の兆しを深く掘り下げてください。
+- 残りの3割で、以下の補助的観点（裏卦・総卦・互卦）を使って、視野を広げたり内面を照らしたりしてください。
 
-【2. 文章の構成】
-- 導入：相談者の状況を要約
-- 展開：本卦の詳細分析 → 変爻を軸にした状況の変化
-- 補足：補助卦について（必要に応じて）
-- 提言：人生・人間関係・行動の具体的指針（ずばりという）
-- 結論：今後に向けた希望とまとめ
-
-【3. 執筆スタイル】
-※ 上記の構成は出力には含めず、自然な日本語の文章として展開してください。
-※ 導入と結論は短く簡潔に書いてください。
-※ 「1. 導入」などの番号付き見出しや、項目立て（箇条書き）は使わず、論理的かつ有機的に流れる読み物のようにしてください。
-※ 補助卦は解釈のみに使い、卦名を使って説明する必要はありません。
-※ 悪いこと、厳しいことも誠実に伝えてください。
-
-【4. 占断に用いる卦】
-- 本卦: ${hexagrams.original.name}
-- 変爻: 第${Number(hexagrams.changedLineIndex) + 1}爻
-- 変卦: ${hexagrams.changed.name}
-- 裏卦: ${hexagrams.reverse.name}
-- 総卦: ${hexagrams.sou.name}
-- 互卦: ${hexagrams.go.name}
-
-【5. 相談内容】
-- テーマ: ${userQuestion}
+【2. 相談内容】
+- 相談者: ${userName}
+- 質問内容: ${userQuestion}
 - 背景: ${topic}
-- 感情: ${situation}
-- 補足: ${notes}`;
+- 状況: ${situation}
+- メモ: ${notes}
 
-    const aiResponse = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-    });
+【3. 占断対象の卦】
+- 本卦: ${original.name || "不明"}
+- 変卦: ${changed.name || "不明"}
+- 裏卦: ${reverse.name || "不明"}
+- 総卦: ${sou.name || "不明"}
+- 互卦: ${go.name || "不明"}
+- 変爻: 第${Number(changedLineIndex) + 1}爻`;
 
-    const adviceText = aiResponse.choices[0].message.content;
-    const pdf = new jsPDF();
-    pdf.addFileToVFS("NotoSansJP-Regular.ttf", NotoSansJP);
-    pdf.addFont("NotoSansJP-Regular.ttf", "NotoSansJP", "normal");
-    pdf.setFont("NotoSansJP");
-    pdf.setFontSize(10);
-
-    const randomQuoteObj = quotes[Math.floor(Math.random() * quotes.length)];
-    let y = 30;
-    const quoteLines = pdf.splitTextToSize(randomQuoteObj.text, 170);
-    quoteLines.forEach(line => { pdf.text(line, 20, y); y += 6; });
-    pdf.text(`― ${randomQuoteObj.author}`, 195, y, { align: "right" });
-    y += 12;
-
-    const cleanText = adviceText.replace(/^#+\s*/gm, "").replace(/\n{2,}/g, "\n\n");
-    const bodyLines = pdf.splitTextToSize(cleanText, 160);
-    pdf.setFontSize(11.5);
-    bodyLines.forEach(line => {
-        if (y > 270) { pdf.addPage(); y = 20; }
-        pdf.text(line, 15, y);
-        y += 6.5;
-    });
-
-    const pdfBase64 = pdf.output("datauristring").split(',')[1];
-    const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASSWORD },
-    });
-
-    await transporter.sendMail({
-        from: `"易経くじAI" <${process.env.GMAIL_USER}>`,
-        to: userEmail,
-        subject: `${userName}さんへのAI助言PDF`,
-        html: `${userName}さま<br><br>易経AIアドバイスを添付しました。<br><br>`,
-        attachments: [{
-            filename: "advice.pdf",
-            content: Buffer.from(pdfBase64, "base64"),
-            encoding: "base64",
-            contentType: "application/pdf",
-        }],
-    });
-}
-
-
-// ✅ Cloud Function ルートは "/" に対応
-app.post("/", async (req, res) => {
-    try {
-        const body = req.body;
-        console.log("📦 受信したbody.original:", body.original);
-        console.log("📦 受信したbody:", body);
-
-        await sendAdviceEmailWithPDF({
-            userName: body.userName,
-            userEmail: body.userEmail,
-            userQuestion: body.userQuestion,
-            topic: body.topic,
-            situation: body.situation,
-            notes: body.notes,
-            hexagrams: {
-                original: body.original,
-                changed: body.changed,
-                reverse: body.reverse,
-                sou: body.sou,
-                go: body.go,
-                changedLineIndex: body.changedLineIndex
-            },
-            fortunesSummary: body.summaryText
+        const openai = new OpenAI({ apiKey: OPENAI_API_KEY.value() });
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [{ role: "user", content: prompt }]
         });
 
-        res.status(200).json({ message: "送信成功" });
-    } catch (error) {
-        console.error("送信エラー:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
+        const advice = completion.choices[0]?.message?.content || "アドバイスの生成に失敗しました。";
 
-module.exports = functions.https.onRequest(app); // ✅ 関数名は index.js 側で付ける
+        const pdf = new jsPDF();
+        pdf.addFileToVFS("NotoSansJP-Regular.ttf", NotoSansJP);
+        pdf.addFont("NotoSansJP-Regular.ttf", "NotoSansJP", "normal");
+        pdf.setFont("NotoSansJP");
+        pdf.setFontSize(10);
+
+        const lines = pdf.splitTextToSize(advice, 180);
+        lines.forEach((line, i) => {
+            pdf.text(line, 10, 20 + i * 7);
+        });
+
+        const pdfBuffer = pdf.output("arraybuffer");
+
+        const transporter = nodemailer.createTransport({
+            host: SMTP_HOST.value(),
+            port: parseInt(SMTP_PORT.value(), 10),
+            secure: true,
+            auth: {
+                user: SMTP_USER.value(),
+                pass: SMTP_PASS.value()
+            }
+        });
+
+        await transporter.sendMail({
+            from: `"易経AI" <${SMTP_USER.value()}>`,
+            to: userEmail,
+            subject: "【易経AI】あなたへの助言PDFをお届けします",
+            text: "ご依頼のAI助言PDFを添付いたします。ご確認ください。",
+            attachments: [
+                {
+                    filename: "advice.pdf",
+                    content: Buffer.from(pdfBuffer)
+                }
+            ]
+        });
+
+        return res.status(200).json({ success: true });
+
+    } catch (err) {
+        console.error("❌ 全体エラー:", err);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+// ✅ index.jsで使うためにエクスポート
+module.exports = sendAdviceEmail;
