@@ -1,13 +1,3 @@
-// console.log("🔍 originalHexagram raw:", localStorage.getItem("originalHexagram"));
-// console.log("🔍 parsed:", JSON.parse(localStorage.getItem("originalHexagram")));
-
-// try {
-//     const parsed = JSON.parse(localStorage.getItem("currentFortune"));
-//     console.log("✅ Parsed currentFortune:", parsed);
-// } catch (e) {
-//     console.error("❌ JSON parse error:", e);
-// }
-
 import { db } from "./firebase/firebase.js";
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -88,22 +78,25 @@ export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
         console.error("❌ Firestore 保存失敗:", err);
     }
 
-    // ✅ テスト送信（Cloud Functionへ）
-    if (isTest) {
-        console.log("📤 fullData 送信内容:", JSON.stringify(fullData, null, 2));
+        // ✅ テスト送信（Cloud Functionへ）
+        if (isTest) {
+            console.log("📤 fullData 送信内容:", JSON.stringify(fullData, null, 2));
 
-        const API_URL = "https://us-central1-yichingapp-a5f90.cloudfunctions.net/sendAdviceEmail";
+            const uid = crypto.randomUUID();
+            fullData.uid = uid;
 
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fullData),
-        });
+            // ✅ PDF生成＋保存（Firestoreへのuid + pdfPath書き込みもここで実行される前提）
+            const saveRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/generateAndSavePDF", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(fullData),
+            });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`サーバーエラー: ${response.status}\n${errorText}`);
-        }
+            if (!saveRes.ok) {
+                const errorText = await saveRes.text();
+                throw new Error(`PDF保存失敗: ${saveRes.status}\n${errorText}`);
+            }
 
-        return await response.json();
-    }}
+            // ✅ 送信は Firestore トリガーに任せる（sendSavedPDFは呼ばない）
+            return await saveRes.json();
+        }}

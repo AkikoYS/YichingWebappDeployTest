@@ -86,7 +86,8 @@
                 <div class="question-step hidden">
                     <label for="user-notes">助言を受けるにあたり、それ以外にも伝えておいた方がいいことがあればご自由にどうぞ：</label>
                     <textarea id="user-notes" name="notes" maxlength="200" placeholder="任意：背景や気になる点など"></textarea>
-
+                    </div>
+                    <div class="button-group">
                     <button type="button" id="paymentButton" class="send-button">100円で助言を受ける</button>
                     <button type="button" id="testSendButton" class="send-button">💡 テスト送信（決済なし）</button>
 
@@ -110,7 +111,6 @@
     <script type="module" src="/firebase/auth.js"></script>
     <script type="module" src="ai-advice.js"></script>
     <script type="module" src="steps.js"></script>
-    <script type="module" src="payment.js"></script>
 </body>
 
 </html>

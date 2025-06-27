@@ -61,7 +61,8 @@ h1 {
     margin-bottom: 2em;
 }
 
-.chat-log {
+.chat-log,
+.chat-log.notes {
     margin-bottom: 1em;
     padding: 1em;
     background: #fafafa;
@@ -84,7 +85,32 @@ textarea {
     resize: vertical;
 }
 
-button.next-btn,
+/* 軽めの「次へ」ボタン専用スタイル */
+.next-btn {
+    margin: 20px auto 0;
+    background: #eee;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 0.4em 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background 0.2s ease;
+}
+
+.next-btn:hover {
+    background: #ddd;
+}
+
+/* ✅ テスト送信完了ボタンのスタイル */
+#testSendButton.sent {
+    background-color: #28a745;
+    /* 緑 */
+    color: white;
+    border: none;
+    cursor: default;
+}
+
 button.send-button,
 button[type="submit"] {
     margin: 1.5em auto 0;
@@ -99,7 +125,7 @@ button[type="submit"] {
     transition: background-color 0.3s;
 }
 
-button.next-btn:hover,
+
 button.send-button:hover,
 button[type="submit"]:hover {
     background-color: #2a0055;
