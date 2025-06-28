@@ -1,4 +1,4 @@
-// ✅ Firebase + Secrets 初期化（ESM + v2 対応）
+// ✅ Firebase + Secrets 初期化（ESM + v2 対応）, 作られたPDFをメール送信する、HTTPリクエストがないのでCORS必要なし
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { defineSecret } from "firebase-functions/params";
 import admin from "firebase-admin";

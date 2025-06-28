@@ -1,11 +1,11 @@
+//v2+ESM
+
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import Stripe from "stripe";
 
 // ✅ シークレット
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
-
-
 
 // ✅ 本番URL or ローカルテスト用URL
 const DOMAIN_URL = "https://yichingapp-a5f90.web.app";
@@ -15,13 +15,17 @@ export const stripeCheckout = onRequest(
     {
         secrets: [STRIPE_SECRET_KEY],
         timeoutSeconds: 30,
+        cors: ["https://yichingapp-a5f90.web.app"], // ← ★これを追加
     },
     async (req, res) => {
         // ✅ Stripe 初期化
         const stripe = new Stripe(STRIPE_SECRET_KEY.value(), {
             apiVersion: "2023-10-16",
         });
+        console.log("📥 Stripe API リクエスト内容:", req.body);
         const { uid } = req.body || {};
+        console.log("📥 抽出した uid:", uid);
+
         if (!uid) return res.status(400).json({ error: "UIDが不足しています" });
 
         try {

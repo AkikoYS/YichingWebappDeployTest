@@ -58,41 +58,46 @@
                 <div class="question-step">
                     <label for="user-name">あなたをなんとお呼びしましょうか？</label>
                     <input id="user-name" type="text" placeholder="例：たろう" />
-                    <button type="button" class="next-btn">次へ</button>
+                    <button type="button" class="next-btn">次へ>></button>
                 </div>
 
                 <!-- ステップ2: 背景入力 -->
                 <div class="question-step hidden">
                     <label id="label-topic" for="user-background">どんな背景や経緯がありましたか？</label>
                     <textarea id="user-background" rows="3" placeholder="例：その問題には家族の事情が絡んでいます"></textarea>
-                    <button type="button" class="next-btn">次へ</button>
+                    <button type="button" class="next-btn">次へ>></button>
                 </div>
 
                 <!-- ステップ3: 感情入力 -->
                 <div class="question-step hidden">
                     <label id="label-situation" for="user-situation">現在の状況・お気持ち</label>
                     <textarea id="user-situation" rows="3" placeholder="例：何回も試してもうまくいかないので、もう半分諦め気分だ。"></textarea>
-                    <button type="button" class="next-btn">次へ</button>
+                    <button type="button" class="next-btn">次へ>></button>
                 </div>
 
                 <!-- ステップ4: メールアドレス -->
                 <div class="question-step hidden">
                     <label for="user-email">メールアドレスを教えてください（PDF送付先）：</label>
                     <input type="email" id="user-email" name="email" required placeholder="例：example@example.com" />
-                    <button type="button" class="next-btn">次へ</button>
+                    <button type="button" class="next-btn">次へ>></button>
                 </div>
 
                 <!-- ステップ5: その他 -->
                 <div class="question-step hidden">
                     <label for="user-notes">助言を受けるにあたり、それ以外にも伝えておいた方がいいことがあればご自由にどうぞ：</label>
                     <textarea id="user-notes" name="notes" maxlength="200" placeholder="任意：背景や気になる点など"></textarea>
-                    </div>
-                    <div class="button-group">
+                </div>
+                <!-- 決済前の情報記入用の抑止 -->
+                <div id="formWarning">
+                    最後まで情報を入力してください。 </div>
+
+
+                <div class="button-group">
                     <button type="button" id="paymentButton" class="send-button">100円で助言を受ける</button>
-                    <button type="button" id="testSendButton" class="send-button">💡 テスト送信（決済なし）</button>
+                    <button type="button" id="testSendButton" class="send-button">無料で受け取る</button>
 
                     <div id="sendingStatus" style="display:none; text-align:center; margin-top:10px;">
-                        <span>送信中です...🌀</span>
+                        <span>送信されました。PDFがメールに届きます。</span>
                     </div>
                 </div>
             </form>

@@ -85,21 +85,30 @@ textarea {
     resize: vertical;
 }
 
+#formWarning {
+    display: none;
+    color: red;
+    font-size: 0.9em;
+}
+
 /* 軽めの「次へ」ボタン専用スタイル */
 .next-btn {
+    display: block;
     margin: 20px auto 0;
-    background: #eee;
-    color: #333;
-    border: 1px solid #ccc;
+    background: none;
+    border: none;
+    color: #4a148c;
+    font-weight: bold;
     padding: 0.4em 1em;
-    border-radius: 4px;
     cursor: pointer;
     font-size: 0.95em;
-    transition: background 0.2s ease;
+    font-style: italic;
+    transition: background 0.2s ease, color 0.2s ease;
+    text-align: right;
 }
 
 .next-btn:hover {
-    background: #ddd;
+    color: blue;
 }
 
 /* ✅ テスト送信完了ボタンのスタイル */

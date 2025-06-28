@@ -1,6 +1,8 @@
 // ✅ steps.js（フォーム進行と送信処理）
 
 import { showToast, sendAdviceToServer } from "./ai-advice.js";
+import { db } from "./firebase/firebase.js";
+import { doc, setDoc, serverTimestamp } from "./firebase/firestore";
 
 document.addEventListener("DOMContentLoaded", () => {
     // ✅ 要素取得
@@ -8,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const steps = document.querySelectorAll(".question-step");
     const chatLog = document.getElementById("chat-log");
     const nextButtons = document.querySelectorAll(".next-btn");
+    const testSendButton = document.getElementById("testSendButton");
     const paymentButton = document.getElementById("paymentButton");
     const notesStep = document.getElementById("user-notes")?.closest(".question-step");
 
@@ -25,10 +28,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const souHexagram = JSON.parse(localStorage.getItem("souHexagram") || "{}");
     const goHexagram = JSON.parse(localStorage.getItem("goHexagram") || "{}");
     const changedLineIndex = localStorage.getItem("changedLineIndex") || "0";
+    const emailInput = document.getElementById("userEmail");
+    const formWarning = document.getElementById("formWarning");
 
     const summaryText = `あなたの占いたい内容は<strong>「${userQuestion}」</strong>でした。<br>あなたが得たのは、本卦は<strong>${originalHexagram.name || "（不明）"}</strong>、変爻は<strong>${Number(changedLineIndex) + 1}爻</strong>でした。<br>（裏卦:<strong>${reverseHexagram.name || "不明"}</strong>、総卦:<strong>${souHexagram.name || "不明"}</strong>、互卦:<strong>${goHexagram.name || "不明"}</strong>、変卦:<strong>${changedHexagram.name || "不明"}</strong>）`;
     introBox.innerHTML = `${summaryText}<br>これらの情報に鑑みて5000字程度の具体的な助言をさしあげますので、<br>よろしければ、状況をもう少し詳しく教えてください。`;
     localStorage.setItem("summaryText", summaryText);
+
+
+    //eメールを記入したらwarningが消える
+    if (emailInput && formWarning) {
+        emailInput.addEventListener("input", () => {
+            if (isFormComplete()) {
+                formWarning.style.display = "none";
+            }
+        });
+    }
+    console.log(emailInput, formWarning);
 
     // ✅ ステップ切り替え
     function showNextStep() {
@@ -88,17 +104,15 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", handleStepInput);
     });
 
-    function renderUserNotesIfAny() {
-        const notes = localStorage.getItem("userNotes");
-        const chatLog = document.getElementById("chat-log");
-        if (notes && !document.querySelector(".chat-log.notes")) {
-            const div = document.createElement("div");
-            div.className = "chat-log notes";
-            div.innerHTML = `<strong>その他の伝えたいこと</strong><br>${notes.replace(/\n/g, "<br>")}`;
-            chatLog.appendChild(div);
-        }
-    }
+    //ヴァリデーション関数
+    function isFormComplete() {
+        const userName = document.getElementById("user-name")?.value?.trim();
+        const userTopic = document.getElementById("user-background")?.value?.trim();
+        const userSituation = document.getElementById("user-situation")?.value?.trim();
+        const userEmail = document.getElementById("user-email")?.value?.trim();
 
+        return userName && userTopic && userSituation && userEmail;
+    }
     // ✅ 共通：userNotesを保存し、chat-logに出す
     function saveAndRenderUserNotes() {
         const notesInput = document.getElementById("user-notes");
@@ -123,12 +137,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // ✅ テスト送信ボタン
     if (testSendButton) {
         testSendButton.addEventListener("click", async () => {
+            //情報未入力の抑止
+            if (!isFormComplete()) {
+                const msg = document.getElementById("formWarning");
+                if (msg) msg.style.display = "block";
+                return;
+            } else {
+                const msg = document.getElementById("formWarning");
+                if (msg) msg.style.display = "none";
+            }
             saveAndRenderUserNotes();
             // ✅ ボタン状態変更（文言と色）
             testSendButton.textContent = "✔ 送信済";
             testSendButton.disabled = true;
             testSendButton.classList.add("sent"); // CSSクラスで色変更
-            
+
             const notesStep = document.querySelector("#user-notes")?.closest(".question-step");
             if (notesStep) {
                 notesStep.style.display = "none";
@@ -138,6 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             try {
                 document.getElementById("sendingStatus").style.display = "block";
+
                 await sendAdviceToServer({ isTest: true });
                 showToast("✅ テスト送信が完了しました（メールをご確認ください）");
             } catch (err) {
@@ -152,54 +176,55 @@ document.addEventListener("DOMContentLoaded", () => {
     // ✅ 決済送信ボタン
     if (paymentButton) {
         paymentButton.addEventListener("click", async () => {
-            const notesStep = document.getElementById("user-notes")?.closest(".question-step");
-            saveAndRenderUserNotes();
-
-            if (notesStep) notesStep.style.display = "none";
-
-            await new Promise(requestAnimationFrame);
-
-            const button = paymentButton;
-            button.disabled = true;
-            button.textContent = "送信中...";
-
             const uid = crypto.randomUUID();
 
-            // ✅ Firestoreに素材だけ保存（PDFはまだ生成しない）
-            try {
-                const firestoreRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/saveUserData", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        uid,
-                        userName: localStorage.getItem("userName") || "",
-                        userEmail: localStorage.getItem("userEmail") || "",
-                        userQuestion: localStorage.getItem("userQuestion") || "",
-                        topic: localStorage.getItem("userBackground") || "",
-                        situation: localStorage.getItem("userSituation") || "",
-                        notes: localStorage.getItem("userNotes") || "",
-                        fortunesSummary: localStorage.getItem("summaryText") || "",
-                        hexagrams: {
-                            original: JSON.parse(localStorage.getItem("originalHexagram") || "{}"),
-                            changed: JSON.parse(localStorage.getItem("changedHexagram") || "{}"),
-                            reverse: JSON.parse(localStorage.getItem("reverseHexagram") || "{}"),
-                            sou: JSON.parse(localStorage.getItem("souHexagram") || "{}"),
-                            go: JSON.parse(localStorage.getItem("goHexagram") || "{}"),
-                            changedLineIndex: localStorage.getItem("changedLineIndex") || "0",
-                        }
-                    }),
-                });
+            // ✅ 入力チェック
+            const userName = localStorage.getItem("userName") || "";
+            const userEmail = localStorage.getItem("userEmail") || "";
+            const userQuestion = localStorage.getItem("userQuestion") || "";
+            const topic = localStorage.getItem("userBackground") || "";
+            const situation = localStorage.getItem("userSituation") || "";
+            const notes = localStorage.getItem("userNotes") || "";
+            const fortunesSummary = localStorage.getItem("summaryText") || "";
 
-                if (!firestoreRes.ok) throw new Error("Firestore保存に失敗");
+            const originalHexagram = localStorage.getItem("originalHexagram") || "{}";
+            const changedHexagram = localStorage.getItem("changedHexagram") || "{}";
+            const reverseHexagram = localStorage.getItem("reverseHexagram") || "{}";
+            const souHexagram = localStorage.getItem("souHexagram") || "{}";
+            const goHexagram = localStorage.getItem("goHexagram") || "{}";
+            const changedLineIndex = localStorage.getItem("changedLineIndex") || "0";
+
+            const firestoreData = {
+                uid,
+                userName,
+                userEmail,
+                userQuestion,
+                topic,
+                situation,
+                notes,
+                fortunesSummary,
+                originalHexagram,
+                changedHexagram,
+                reverseHexagram,
+                souHexagram,
+                goHexagram,
+                changedLineIndex,
+                createdAt: serverTimestamp(),
+            };
+
+            // ✅ Firestoreに保存
+            try {
+                await setDoc(doc(db, "adviceRequests", uid), firestoreData);
+                console.log("✅ Firestore 保存成功:", uid);
             } catch (err) {
-                console.error("❌ Firestore保存エラー:", err);
-                showToast("情報の保存に失敗しました。もう一度お試しください。");
+                console.error("❌ Firestore 保存失敗:", err);
+                showToast("情報の保存に失敗しました");
                 return;
             }
 
-            // ✅ Stripe決済処理（uidをmetadataとsuccess_urlに含める）
+            // ✅ Stripeセッション作成・遷移
             try {
-                const stripeRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/stripe", {
+                const stripeRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/stripeCheckout", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ uid })
@@ -210,11 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const { url } = await stripeRes.json();
                 window.location.href = url;
             } catch (err) {
-                console.error("❌ 決済送信エラー:", err);
-                showToast("送信に失敗しました。もう一度お試しください。");
-            } finally {
-                button.disabled = false;
-                button.textContent = "100円で助言を受ける";
+                console.error("❌ Stripe遷移失敗:", err);
+                showToast("決済ページへの遷移に失敗しました");
             }
         });
-    }})
+    }
+})    

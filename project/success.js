@@ -1,28 +1,26 @@
 import { showToast } from "./ai-advice.js";
+import { db } from "./firebase/firebase.js"; // ここはプロジェクト内の firebase.js を参照
+import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        const uid = new URLSearchParams(window.location.search).get("uid");
-        if (!uid) {
-            showToast("❌ ユーザー情報が取得できませんでした");
-            return;
-        }
-
-        // ✅ Firestore REST API でPDF送信済みか確認
-        const res = await fetch(
-            `https://firestore.googleapis.com/v1/projects/yichingapp-a5f90/databases/(default)/documents/adviceRequests/${uid}`
-        );
-        const data = await res.json();
-
-        const sent = data?.fields?.pdfSent?.booleanValue === true;
-
-        if (sent) {
-            showToast("✅ 助言PDFを送信しました。メールをご確認ください。");
-        } else {
-            showToast("⏳ PDFの送信がまだ完了していません。少し待ってから再読み込みしてください。");
-        }
-    } catch (error) {
-        console.error("❌ 成功画面でのFirestore取得エラー:", error);
-        showToast("❌ 助言の送信状態を確認できませんでした");
+document.addEventListener("DOMContentLoaded", () => {
+    const uid = new URLSearchParams(window.location.search).get("uid");
+    if (!uid) {
+        showToast("❌ ユーザー情報が取得できませんでした");
+        return;
     }
-});
+
+    const docRef = doc(db, "adviceRequests", uid);
+    let toastShown = false;
+    showToast("🌀 AI助言を送信しています…");
+
+    onSnapshot(docRef, (docSnap) => {
+        console.log("snapshot triggered:", docSnap.exists(), docSnap?.data()?.pdfPath);
+        if (!toastShown && docSnap.exists() && docSnap.data().pdfPath) {
+            toastShown = true;
+            showToast("✅ 助言PDFを送信しました。メールが届くまで楽しみにお待ちください。");
+        }
+    }, (err) => {
+        console.error("onSnapshot error:", err);
+        showToast("❌ データ取得に失敗しました");
+    });
+    });

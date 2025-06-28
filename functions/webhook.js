@@ -1,10 +1,11 @@
 import { onRequest } from "firebase-functions/v2/https";
+import Stripe from "stripe";
 import { defineSecret } from "firebase-functions/params";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import nodemailer from "nodemailer";
-import Stripe from "stripe";
+
 
 // ✅ シークレットの定義
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
@@ -57,6 +58,8 @@ export const webhook = onRequest(
             const session = event.data.object;
             const uid = session.metadata?.uid;
 
+            console.log("🔁 webhook で受け取った uid:", uid); // ← ここに追加！
+
             if (!uid) {
                 console.error("❌ UIDが webhook に含まれていません");
                 return res.status(400).send("Missing UID");
@@ -64,15 +67,13 @@ export const webhook = onRequest(
 
             try {
                 // ✅ Cloud Function 経由で PDF生成を呼び出し
-                await fetch(
-                    `https://us-central1-yichingapp-a5f90.cloudfunctions.net/generateAndSavePDF`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ uid }),
-                    }
-                );
+                const response = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/generateAndSavePDF", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ uid }),
+                });
 
+                if (!response.ok) throw new Error("PDF生成Cloud Functionの呼び出しに失敗");
                 // ✅ 保存処理が終わるまで3秒待機（必要ならリトライ設計に）
                 await new Promise((resolve) => setTimeout(resolve, 3000));
 

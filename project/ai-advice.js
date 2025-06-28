@@ -1,5 +1,11 @@
-import { db } from "./firebase/firebase.js";
-import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+    collection,
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db } from "./firebase/firebase.js"; // 適宜パス調整
+
 
 // ✅ トースト表示
 export function showToast(message) {
@@ -19,38 +25,36 @@ export function markAsSent() {
 export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
     const uid = crypto.randomUUID();
 
-    // 🔍 必須データ取得 & 検証
+    // 🔍 必須データ取得
     const userName = localStorage.getItem("userName") || "匿名";
     const userEmail = email || localStorage.getItem("userEmail") || "";
     const userBackground = localStorage.getItem("userBackground") || "";
     const userSituation = localStorage.getItem("userSituation") || "";
     const userNotes = localStorage.getItem("userNotes") || "";
     const userQuestion = localStorage.getItem("userQuestion") || "";
-    const fortunesSummary = localStorage.getItem("fortunesSummary") || "";
+    const fortunesSummary = localStorage.getItem("summaryText") || ""; // ←修正点
+
     const changedLineIndex = localStorage.getItem("changedLineIndex") || "0";
 
     const parseHex = (key) => {
         const raw = localStorage.getItem(key);
-        if (!raw) return {};
+        if (!raw) return "{}";
         try {
-            return JSON.parse(raw);
+            JSON.parse(raw); // 検証だけ
+            return raw;
         } catch (e) {
             console.error(`❌ ${key} のパースに失敗:`, e);
-            return {};
+            return "{}";
         }
     };
 
-    let originalHexagram = parseHex("originalHexagram");
-    if (!originalHexagram.name) {
-        throw new Error("❌ originalHexagram.name が不明です");
-    }
-
+    const originalHexagram = parseHex("originalHexagram");
     const changedHexagram = parseHex("changedHexagram");
     const reverseHexagram = parseHex("reverseHexagram");
     const souHexagram = parseHex("souHexagram");
     const goHexagram = parseHex("goHexagram");
 
-    const fullData = {
+    const firestoreData = {
         uid,
         userName,
         userEmail,
@@ -58,45 +62,42 @@ export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
         topic: userBackground,
         situation: userSituation,
         notes: userNotes,
-        hexagrams: {
-            original: originalHexagram,
-            changed: changedHexagram,
-            reverse: reverseHexagram,
-            sou: souHexagram,
-            go: goHexagram,
-            changedLineIndex
-        },
-        fortunesSummary: fortunesSummary,
-        timestamp: serverTimestamp()
+        fortunesSummary,
+        originalHexagram,
+        changedHexagram,
+        reverseHexagram,
+        souHexagram,
+        goHexagram,
+        changedLineIndex,
+        createdAt: serverTimestamp(),
     };
 
-    // ✅ Firestore保存
+    // ✅ Firestoreに保存
+    console.log("📤 Firestore へ保存直前 uid:", uid);
+    console.log("📤 保存するデータ:", firestoreData);
     try {
-        await addDoc(collection(db, "payments_pending"), fullData);
-        console.log("✅ Firestore 保存成功");
+        await setDoc(doc(db, "adviceRequests", uid), firestoreData);
+        console.log("✅ Firestore にデータ保存済:", uid);
     } catch (err) {
         console.error("❌ Firestore 保存失敗:", err);
+        throw new Error("Firestoreへの保存に失敗しました");
     }
 
-        // ✅ テスト送信（Cloud Functionへ）
-        if (isTest) {
-            console.log("📤 fullData 送信内容:", JSON.stringify(fullData, null, 2));
+    if (isTest) {
+        // ✅ Cloud Function 呼び出し（uidのみ）
+        const response = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/generateAndSavePDF", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uid })
+        });
 
-            const uid = crypto.randomUUID();
-            fullData.uid = uid;
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`PDF生成リクエスト失敗: ${response.status}\n${errorText}`);
+        }
 
-            // ✅ PDF生成＋保存（Firestoreへのuid + pdfPath書き込みもここで実行される前提）
-            const saveRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/generateAndSavePDF", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(fullData),
-            });
-
-            if (!saveRes.ok) {
-                const errorText = await saveRes.text();
-                throw new Error(`PDF保存失敗: ${saveRes.status}\n${errorText}`);
-            }
-
-            // ✅ 送信は Firestore トリガーに任せる（sendSavedPDFは呼ばない）
-            return await saveRes.json();
-        }}
+        const result = await response.json();
+        console.log("✅ PDF生成レスポンス:", result);
+        return result;
+    }
+}
