@@ -69,6 +69,10 @@ export const sendSavedPDF = onDocumentUpdated(
                         },
                     ],
                 });
+                await updateDoc(doc(db, "adviceRequests", uid), {
+                    status: "completed",
+                    pdfSentAt: Timestamp.now()
+                  });
 
                 console.log(`✅ メール送信完了: ${userEmail}`);
             } else {

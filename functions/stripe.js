@@ -11,7 +11,7 @@ const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const DOMAIN_URL = "https://yichingapp-a5f90.web.app";
 
 // ✅ Cloud Function 本体
-export const stripeCheckout = onRequest(
+export const stripe = onRequest(
     {
         secrets: [STRIPE_SECRET_KEY],
         timeoutSeconds: 30,
@@ -39,7 +39,7 @@ export const stripeCheckout = onRequest(
                             unit_amount: 100, // ✅ 金額（100円 = ¥100）
                             product_data: {
                                 name: "易経AI助言PDF",
-                                description: "AIによる2000文字の助言PDFをメールでお届けします",
+                                description: "AIによる5000文字の助言PDFをメールでお届けします",
                             },
                         },
                         quantity: 1,

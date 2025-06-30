@@ -22,25 +22,23 @@ export function markAsSent() {
 }
 
 // ✅ 助言送信用関数（Firestore保存とCloud Function送信）
-export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
-    const uid = crypto.randomUUID();
+export async function sendAdviceToServer({ isTest = false, email = "", uid = null } = {}) {
+    uid = uid || crypto.randomUUID();
 
-    // 🔍 必須データ取得
     const userName = localStorage.getItem("userName") || "匿名";
     const userEmail = email || localStorage.getItem("userEmail") || "";
     const userBackground = localStorage.getItem("userBackground") || "";
     const userSituation = localStorage.getItem("userSituation") || "";
     const userNotes = localStorage.getItem("userNotes") || "";
     const userQuestion = localStorage.getItem("userQuestion") || "";
-    const fortunesSummary = localStorage.getItem("summaryText") || ""; // ←修正点
-
+    const fortunesSummary = localStorage.getItem("summaryText") || "";
     const changedLineIndex = localStorage.getItem("changedLineIndex") || "0";
 
     const parseHex = (key) => {
         const raw = localStorage.getItem(key);
         if (!raw) return "{}";
         try {
-            JSON.parse(raw); // 検証だけ
+            JSON.parse(raw);
             return raw;
         } catch (e) {
             console.error(`❌ ${key} のパースに失敗:`, e);
@@ -72,9 +70,9 @@ export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
         createdAt: serverTimestamp(),
     };
 
-    // ✅ Firestoreに保存
     console.log("📤 Firestore へ保存直前 uid:", uid);
     console.log("📤 保存するデータ:", firestoreData);
+
     try {
         await setDoc(doc(db, "adviceRequests", uid), firestoreData);
         console.log("✅ Firestore にデータ保存済:", uid);
@@ -84,7 +82,6 @@ export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
     }
 
     if (isTest) {
-        // ✅ Cloud Function 呼び出し（uidのみ）
         const response = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/generateAndSavePDF", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -100,4 +97,7 @@ export async function sendAdviceToServer({ isTest = false, email = "" } = {}) {
         console.log("✅ PDF生成レスポンス:", result);
         return result;
     }
+
+    return { uid }; // 決済用には uid を返す
 }
+  

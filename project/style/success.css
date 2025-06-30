@@ -53,6 +53,24 @@ p {
     margin-bottom: 1.5em;
 }
 
+#lottie-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    z-index: 0;
+    pointer-events: none;
+    /* クリックをブロックしない */
+}
+
+main.container {
+    position: relative;
+    /* 背景を含むため relative */
+    z-index: 1;
+}
+
 .toast-message {
     position: fixed;
     bottom: 20px;

@@ -49,10 +49,14 @@
             </div>
         </header>
         <main class="container">
-            <p>🎉 決済が完了しました！</p>
-            <p id="status">AI助言を送信しています... 🌀</p>
+            <div id="lottie-background"></div>
+            <h2>ありがとうございます</h2>
+            <p>AIによる助言の生成がはじまりました。</p>
+            <p><strong>ご登録のメールアドレス宛にPDF形式でお届けします。</strong></p>
+            <p>２４時間を過ぎても届かない場合は、管理人までご一報ください：</p>
+            <p><a href="mailto:info@ichingapp.com">info@ichingapp.com</a></p>
 
-            <div id="toast" class="toast-message" style="display: none;"></div>
+            <!-- <div id="toast" class="toast-message" style="display: none;"></div> -->
 
         </main>
         <footer>
@@ -60,10 +64,11 @@
             <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
         </footer>
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.0/lottie.min.js"></script>
     <script src="firebase/env.js"></script>
     <script type="module" src="firebase/auth.js"></script>
     <script type="module" src="success.js">
+
     </script>
 </body>
 

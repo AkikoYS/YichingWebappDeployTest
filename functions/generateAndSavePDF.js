@@ -149,17 +149,45 @@ ${fortunesSummary}
 
 この内容を踏まえ、相談者の状況を理解し、心を整理し、次の一歩を踏み出す力になるような助言文をお願いします。`;
 
-            const completion = await openai.chat.completions.create({
-                model: "gpt-4",
-                messages: [
-                    { role: "system", content: "あなたは易経に精通した専門家であり、5000文字の日本語の実用的な助言文を書くことが得意です。" },
-                    { role: "user", content: prompt },
-                ],
-                max_tokens: 4000, // 必要に応じて調整
-                temperature: 0.8, // 創造性を少し上げるのも可
-            });
-
-            const adviceText = completion.choices[0]?.message?.content || "";
+            let adviceText;
+            try {
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-4",
+                    messages: [
+                        { role: "system", content: "あなたは易経に精通した専門家であり、5000文字の日本語の実用的な助言文を書くことが得意です。" },
+                        { role: "user", content: prompt },
+                    ],
+                    max_tokens: 4000, // 必要に応じて調整
+                    temperature: 0.8, // 創造性を少し上げるのも可
+                });
+                adviceText = completion.choices[0].message.content;
+            } catch (error) {
+                //retry構文
+                if (error.response?.status === 429) {
+                    console.warn("⚠️ RateLimit に達しました。5秒後に再試行します。");
+                    await new Promise(r => setTimeout(r, 5000)); // 5秒待機
+                    // ✅ 再試行
+                    try {
+                        const retry = await openai.createChatCompletion({
+                            model: "gpt-4",
+                            messages: [{ role: "system", content: "あなたは易経に精通した専門家であり、5000文字の日本語の実用的な助言文を書くことが得意です。" },
+                            { role: "user", content: prompt },],
+                            temperature: 0.8
+                        });
+                        adviceText = retry.data.choices[0].message.content;
+                    } catch (err2) {
+                        console.error("❌ 再試行でも失敗しました");
+                        await db.collection("adviceRequests").doc(uid).update({
+                            status: "error",
+                            errorMessage: "OpenAI RateLimit exceeded twice",
+                            lastTriedAt: Timestamp.now()
+                        });
+                        throw err2; // エラー終了
+                    }
+                } else {
+                    throw error;
+                }
+            }
 
             // ✅ PDF 作成
             const pdf = new jsPDF();
@@ -200,10 +228,10 @@ ${fortunesSummary}
                 }
                 // 禁則処理（句点・読点が行頭に来ないよう調整）
                 let adjustedLine = line;
-                if (/^[、。]/.test(line)) {
+                if (/^[、。]/.test(adjustedLine)) {
                     line = "　" + line;
                 }
-                pdf.text(line, 20, y);
+                pdf.text(adjustedline, 20, y);
                 y += 7;
             });
 
@@ -213,6 +241,11 @@ ${fortunesSummary}
             const file = bucket.file(`pdfs/${uid}.pdf`);
             await file.save(buffer, {
                 metadata: { contentType: "application/pdf" },
+            });
+            // ✅ status を更新
+            await db.doc(`adviceRequests/${uid}`).update({
+                status: "pdfGenerated",
+                lastTriedAt: admin.firestore.Timestamp.now()
             });
             // ✅ FirestoreにpdfPathを書き戻し（これが sendSavedPDF.js のトリガー条件）
             await db.collection("adviceRequests").doc(uid).set({

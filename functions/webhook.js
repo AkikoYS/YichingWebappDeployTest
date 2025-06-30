@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import { onRequest } from "firebase-functions/v2/https";
 import Stripe from "stripe";
 import { defineSecret } from "firebase-functions/params";
@@ -14,6 +15,7 @@ const SMTP_USER = defineSecret("SMTP_USER");
 const SMTP_PASS = defineSecret("SMTP_PASS");
 const SMTP_HOST = defineSecret("SMTP_HOST");
 const SMTP_PORT = defineSecret("SMTP_PORT");
+const endpointSecret = 'whsec_mlFXfp6ZzTdTQqrAPtv61EHVaGq7MBkn';
 
 // ✅ Firebase 初期化
 if (!getApps().length) {
@@ -42,17 +44,30 @@ export const webhook = onRequest(
 
         const sig = req.headers["stripe-signature"];
         let event;
-
+//署名チェックのスキップ（本番環境では戻す）
+        // try {
+        //     event = stripe.webhooks.constructEvent(
+        //         req.rawBody,
+        //         sig,
+        //         STRIPE_WEBHOOK_SECRET.value()
+        //     );
+        // } catch (err) {
+        //     console.error("❌ Webhook署名検証エラー:", err);
+        //     return res.status(400).send(`Webhook Error: ${err.message}`);
+        // }
         try {
-            event = stripe.webhooks.constructEvent(
-                req.rawBody,
-                sig,
-                STRIPE_WEBHOOK_SECRET.value()
-            );
+            if (process.env.NODE_ENV === 'production') {
+                const sig = req.headers['stripe-signature'];
+                event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
+            } else {
+                // テスト用：署名チェックをスキップ
+                event = req.body;
+            }
         } catch (err) {
-            console.error("❌ Webhook署名検証エラー:", err);
-            return res.status(400).send(`Webhook Error: ${err.message}`);
-        }
+            console.error('⚠️ Webhook signature verification failed.', err.message);
+            res.status(400).send(`Webhook Error: ${err.message}`);
+            return;
+          }
 
         if (event.type === "checkout.session.completed") {
             const session = event.data.object;
