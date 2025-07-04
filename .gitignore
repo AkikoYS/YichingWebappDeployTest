@@ -74,5 +74,7 @@ project/firebase/firebase.js
 # secrets
 project/firebase/env.js
 
-# GCP SDK 一式を除外
+# Google Cloud SDK 関連を除外
 google-cloud-sdk/
+*.tar.gz
+*.bin
