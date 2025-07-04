@@ -1224,7 +1224,24 @@ function renderSaveButton(pdfUri) {
 }
 //結果保存ログ（Firebase）
 function saveCurrentFortuneToLog(pdfUri) {
-    if (!originalHexagram || !cachedChangedHexagram || cachedChangedLineIndex === null) {
+    // 🔄 localStorage から復元（もしグローバル変数が未定義なら）
+    originalHexagram ??= JSON.parse(localStorage.getItem("originalHexagram") || "{}");
+    cachedChangedHexagram ??= JSON.parse(localStorage.getItem("changedHexagram") || "{}");
+    reverseHexagram ??= JSON.parse(localStorage.getItem("reverseHexagram") || "{}");
+    souHexagram ??= JSON.parse(localStorage.getItem("souHexagram") || "{}");
+    goHexagram ??= JSON.parse(localStorage.getItem("goHexagram") || "{}");
+    cachedChangedLineIndex ??= parseInt(localStorage.getItem("changedLineIndex"), 10);
+    userQuestion ??= localStorage.getItem("userQuestion") || "";
+    fortunesSummary ??= document.querySelector(".fortune-summary")?.innerText || "";
+    userQuestion ??= localStorage.getItem("userQuestion") || "";
+    fortunesSummary ??= document.querySelector(".fortune-summary")?.innerText || "";
+
+    console.log("🟢 saveToFirestore() 実行");
+
+    console.log("📌 userQuestion:", userQuestion);
+    console.log("📌 fortunesSummary:", fortunesSummary);
+
+    if (!fortunesSummary.trim()) {
         showToast("保存に必要な情報がそろっていません。", {
             id: "incomplete-toast",
             isWarning: true,
@@ -1232,7 +1249,7 @@ function saveCurrentFortuneToLog(pdfUri) {
         });
         return;
     }
-
+    
     const timestamp = new Date().toLocaleString("ja-JP", {
         year: "2-digit",
         month: "2-digit",
@@ -1244,41 +1261,13 @@ function saveCurrentFortuneToLog(pdfUri) {
     const logEntry = {
         timestamp,
         question: userQuestion || "(未記入)",
-        original: {
-            number: originalHexagram.number,
-            name: originalHexagram.name,
-            summary: originalHexagram.summary,
-            image: `hexagram_${String(originalHexagram.number).padStart(2, "0")}.svg`
-        },
-        changed: {
-            number: cachedChangedHexagram.number,
-            name: cachedChangedHexagram.name,
-            summary: cachedChangedHexagram.summary,
-            image: `hexagram_${String(cachedChangedHexagram.number).padStart(2, "0")}.svg`
-        },
-        changedLine: {
-            index: cachedChangedLineIndex,
-            label: getYaoName(cachedChangedLineIndex) + "爻",
-            yaoText: originalHexagram.yao_descriptions?.[(cachedChangedLineIndex + 1).toString()] || "不明"
-        },
-        reverse: {
-            number: originalHexagram.reverse,
-            name: getHexagramByNumber(originalHexagram.reverse)?.name,
-            summary: getHexagramByNumber(originalHexagram.reverse)?.summary,
-            image: `hexagram_${String(originalHexagram.reverse).padStart(2, "0")}.svg`
-        },
-        sou: {
-            number: originalHexagram.sou,
-            name: getHexagramByNumber(originalHexagram.sou)?.name,
-            summary: getHexagramByNumber(originalHexagram.sou)?.summary,
-            image: `hexagram_${String(originalHexagram.sou).padStart(2, "0")}.svg`
-        },
-        go: {
-            number: originalHexagram.go,
-            name: getHexagramByNumber(originalHexagram.go)?.name,
-            summary: getHexagramByNumber(originalHexagram.go)?.summary,
-            image: `hexagram_${String(originalHexagram.go).padStart(2, "0")}.svg`
-        },
+        fortunesSummary,
+        originalHexagram,
+        cachedChangedHexagram,
+        reverseHexagram,
+        souHexagram,
+        goHexagram,
+        cachedChangedLineIndex,
         pdfStatus: pdfUri ? "✅ PDFダウンロード済み" : "未ダウンロード"
     };
 
@@ -1357,6 +1346,7 @@ function generatePdfFromSummary(callback) {
         return;
     }
 
+    const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     pdf.addFileToVFS("NotoSansJP-Regular.ttf", NotoSansJP);
     pdf.addFont("NotoSansJP-Regular.ttf", "NotoSansJP", "normal");

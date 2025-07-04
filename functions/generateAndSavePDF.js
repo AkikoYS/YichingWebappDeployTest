@@ -10,6 +10,8 @@ import { generatePrompt } from "./prompt.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { stripHtml } from "string-strip-html";
+
 
 const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 
@@ -57,20 +59,15 @@ export const generateAndSavePDF = onRequest(
             const snapshot = await docRef.get();
             const data = snapshot.data();
             const {
-                originalHexagram = {},
-                changedHexagram = {},
-                reverseHexagram = {},
-                souHexagram = {},
-                goHexagram = {},
-                changedLineIndex = 0,
                 userName = "匿名",
                 userQuestion = "",
                 topic = "",
                 situation = "",
                 notes = "",
                 fortunesSummary = "",
-                changedYao = ""
             } = data;
+            // ✅ HTMLを除去
+            const strippedSummary = stripHtml(fortunesSummary).result.trim();
 
             logger.info("🧾 Prompt に渡されるデータ:", {
                 userName,
@@ -79,28 +76,15 @@ export const generateAndSavePDF = onRequest(
                 situation,
                 notes,
                 fortunesSummary,
-                originalHexagram,
-                changedHexagram,
-                reverseHexagram,
-                souHexagram,
-                goHexagram,
-                changedLineIndex,
-                changedYao
             });
+
             const prompt = generatePrompt({
                 userName,
                 userQuestion,
                 topic,
                 situation,
                 notes,
-                fortunesSummary,
-                originalHexagram,
-                changedHexagram,
-                reverseHexagram,
-                souHexagram,
-                goHexagram,
-                changedLineIndex,
-                changedYao
+                fortunesSummary: strippedSummary,
             });
 
             const openai = new OpenAI({ apiKey: OPENAI_API_KEY.value() });

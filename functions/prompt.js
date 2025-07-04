@@ -5,13 +5,7 @@ export function generatePrompt({
   situation,
   notes,
   fortunesSummary,
-  originalHexagram,
-  changedHexagram,
-  reverseHexagram,
-  souHexagram,
-  goHexagram,
-  changedLineIndex,
-  changedYao
+
 }) {
   return `あなたは熟練の易者であり、誠実かつ実践的な助言を行うAIです。
 
@@ -21,14 +15,6 @@ export function generatePrompt({
 
 【前提】  
 ${fortunesSummary}
-
-【卦の構成】  
-- 本卦: ${originalHexagram.name || "不明"}  
-- 変卦: ${changedHexagram.name || "不明"}  
-- 裏卦: ${reverseHexagram.name || "不明"}  
-- 総卦: ${souHexagram.name || "不明"}  
-- 互卦: ${goHexagram.name || "不明"}  
-- 変爻: 第${Number(changedLineIndex) + 1}爻（辞：${changedYao || "不明"}）
 
 【相談内容】  
 - 質問: ${userQuestion}  

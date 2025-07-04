@@ -51,5 +51,12 @@ function applyRubyToHexagramNamesWithJson(html, hexagramList) {
     return html;
 }
 
+//HTMLをテキストに転換
+export function stripHtml(html) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.innerText.trim();
+  }
+
 
 
