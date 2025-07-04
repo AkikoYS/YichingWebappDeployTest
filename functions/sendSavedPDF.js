@@ -1,8 +1,8 @@
-// ✅ Firebase + Secrets 初期化（ESM + v2 対応）, 作られたPDFをメール送信する、HTTPリクエストがないのでCORS必要なし
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { defineSecret } from "firebase-functions/params";
 import admin from "firebase-admin";
 import nodemailer from "nodemailer";
+import { Timestamp } from "firebase-admin/firestore";
 
 const SMTP_USER = defineSecret("SMTP_USER");
 const SMTP_PASS = defineSecret("SMTP_PASS");
@@ -15,6 +15,7 @@ const bucket = admin.storage().bucket();
 
 export const sendSavedPDF = onDocumentUpdated(
     {
+        retries: false,
         document: "adviceRequests/{uid}",
         secrets: [SMTP_USER, SMTP_PASS, SMTP_HOST, SMTP_PORT],
         timeoutSeconds: 60,
@@ -30,10 +31,16 @@ export const sendSavedPDF = onDocumentUpdated(
                 return;
             }
 
-            if (!before.pdfPath && after.pdfPath) {
+            // ✅ すでに送信完了していたら処理スキップ
+            if (after.status === "completed") {
+                console.log(`⏩ uid: ${uid} — すでに送信済み、処理スキップ`);
+                return;
+            }
+
+            // ✅ 新たに pdfPath が設定されたときのみ実行
+            if (!before.pdfPath && after.pdfPath && !after.pdfURL) {
                 const userName = after.userName || "匿名";
                 const userEmail = after.userEmail;
-
                 if (!userEmail) {
                     console.error("❌ メールアドレスがありません。");
                     return;
@@ -45,8 +52,8 @@ export const sendSavedPDF = onDocumentUpdated(
                     console.error("❌ PDFファイルがStorageに存在しません。");
                     return;
                 }
-                const [pdfBuffer] = await file.download();
 
+                const [pdfBuffer] = await file.download();
                 const transporter = nodemailer.createTransport({
                     host: SMTP_HOST.value(),
                     port: parseInt(SMTP_PORT.value(), 10),
@@ -69,14 +76,21 @@ export const sendSavedPDF = onDocumentUpdated(
                         },
                     ],
                 });
-                await updateDoc(doc(db, "adviceRequests", uid), {
+
+                const [signedUrl] = await file.getSignedUrl({
+                    action: 'read',
+                    expires: '2100-01-01',
+                });
+
+                await db.doc(`adviceRequests/${uid}`).update({
                     status: "completed",
-                    pdfSentAt: Timestamp.now()
-                  });
+                    pdfURL: signedUrl,
+                    pdfSentAt: Timestamp.now(),
+                });
 
                 console.log(`✅ メール送信完了: ${userEmail}`);
             } else {
-                console.log(`📭 uid: ${uid} — pdfPathの変更なし、処理スキップ`);
+                console.log(`📭 uid: ${uid} — pdfPathの変更なし、または既に送信済、スキップ`);
             }
         } catch (err) {
             console.error("❌ FirestoreトリガーPDF送信エラー:", err);

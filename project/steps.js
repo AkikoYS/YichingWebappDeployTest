@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const summaryText = `あなたの占いたい内容は<strong>「${userQuestion}」</strong>でした。<br>あなたが得たのは、本卦は<strong>${originalHexagram.name || "（不明）"}</strong>、変爻は<strong>${Number(changedLineIndex) + 1}爻</strong>でした。<br>（裏卦:<strong>${reverseHexagram.name || "不明"}</strong>、総卦:<strong>${souHexagram.name || "不明"}</strong>、互卦:<strong>${goHexagram.name || "不明"}</strong>、変卦:<strong>${changedHexagram.name || "不明"}</strong>）`;
     introBox.innerHTML = `${summaryText}<br>これらの情報に鑑みて5000字程度の具体的な助言をさしあげますので、<br>よろしければ、状況をもう少し詳しく教えてください。`;
-    localStorage.setItem("summaryText", summaryText);
+    sessionStorage.setItem("summaryText", summaryText);
 
     //eメールを記入したらwarningが消える
     if (emailInput && formWarning) {
@@ -93,19 +93,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 userName = value;
                 document.getElementById("label-topic").textContent = `${userName}さん、占いたい内容の背景を教えてください。`;
                 document.getElementById("label-situation").textContent = `${userName}さん、現在、どのような状況・お気持ちですか？`;
-                localStorage.setItem("userName", value);
+                sessionStorage.setItem("userName", value);
                 break;
             case 1:
-                localStorage.setItem("userBackground", value);
+                sessionStorage.setItem("userBackground", value);
                 break;
             case 2:
-                localStorage.setItem("userSituation", value);
+                sessionStorage.setItem("userSituation", value);
                 break;
             case 3:
-                localStorage.setItem("userEmail", value);
+                sessionStorage.setItem("userEmail", value);
                 break;
             case 4:
-                localStorage.setItem("userNotes", value);
+                sessionStorage.setItem("userNotes", value);
                 console.log("✅ userNotes saved:", value);
                 break;
         }
@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", handleStepInput);
     });
 
-
     // ✅ 共通：userNotesを保存し、chat-logに出す
     function saveAndRenderUserNotes() {
         const notesInput = document.getElementById("user-notes");
@@ -125,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!notes) return; // 内容が空なら処理しない
 
-        localStorage.setItem("userNotes", notes);
+        sessionStorage.setItem("userNotes", notes);
 
         // すでに chat-log.notes がある場合は何もしない
         if (document.querySelector(".chat-log.notes")) return;
@@ -141,34 +140,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ テスト送信ボタン
     if (testSendButton) {
+        // ✅ 強制リセット（開発中のみ有効） ← ★この行を追加
+        sessionStorage.removeItem("testAdviceSent");
+        // ✅ 初期状態チェック（sessionStorageに送信済み情報があれば反映）
+        const alreadySent = sessionStorage.getItem("testAdviceSent") === "true";
+        if (alreadySent) {
+            testSendButton.disabled = true;
+            testSendButton.textContent = "✔ 送信済";
+            testSendButton.classList.add("sent");
+        }
+
         testSendButton.addEventListener("click", async () => {
+            // 🔍 フォーム未入力なら警告を表示
             if (!isFormComplete()) {
-                const msg = document.getElementById("formWarning");
-                if (msg) msg.style.display = "block";
+                if (formWarning) formWarning.style.display = "block";
                 return;
             } else {
-                const msg = document.getElementById("formWarning");
-                if (msg) msg.style.display = "none";
+                if (formWarning) formWarning.style.display = "none";
             }
 
-            saveAndRenderUserNotes();
-
+            // ✅ ボタンを送信済みに変更
             testSendButton.textContent = "✔ 送信済";
             testSendButton.disabled = true;
             testSendButton.classList.add("sent");
+            sessionStorage.setItem("testAdviceSent", "true");
 
+            // ✅ メモを保存＆UIから非表示
+            saveAndRenderUserNotes();
             const notesStep = document.querySelector("#user-notes")?.closest(".question-step");
             if (notesStep) {
                 notesStep.style.display = "none";
                 console.log("✅ notesのstepを直接 display:none で非表示にしました");
             }
 
+            // ✅ 送信処理の実行
             try {
                 document.getElementById("sendingStatus").style.display = "block";
                 await sendAdviceToServer({ isTest: true });
                 showToast("✅ テスト送信が完了しました（メールをご確認ください）");
             } catch (err) {
-                console.error(err);
+                console.error("❌ テスト送信エラー:", err);
                 showToast("❌ テスト送信に失敗しました。もう一度お試しください。");
             } finally {
                 document.getElementById("sendingStatus").style.display = "none";
@@ -181,14 +192,14 @@ document.addEventListener("DOMContentLoaded", () => {
         paymentButton.addEventListener("click", async () => {
             saveAndRenderUserNotes();
 
-            paymentButton.textContent = "✔ 送信済";
-            paymentButton.disabled = true;
-            paymentButton.classList.add("sent");
-
             if (!isFormComplete()) {
                 if (formWarning) formWarning.style.display = "block";
                 return;
             }
+            // ✅ ボタン表示を送信中に更新（チェック後）
+            paymentButton.textContent = "✔ 送信済";
+            paymentButton.disabled = true;
+            paymentButton.classList.add("sent");
 
             const uid = crypto.randomUUID();
             try {

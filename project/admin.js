@@ -1,60 +1,83 @@
-import { db } from "./firebase/firebase.js"; // ✅ db, auth, firebaseReadyなども使える
-import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const dashboardBody = document.getElementById("dashboard-body");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    deleteDoc,
+    doc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-function formatDate(timestamp) {
-    if (!timestamp) return "";
-    const date = timestamp.toDate();
-    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
-}
+const firebaseConfig = {
+    apiKey: "AIzaSyDlyCmdke-eRYcPhsAsXGMmO6Cooy_6caI",
+    authDomain: "yichingapp-a5f90.firebaseapp.com",
+    projectId: "yichingapp-a5f90",
+    storageBucket: "yichingapp-a5f90.appspot.com",
+    messagingSenderId: "294471771058",
+    appId: "1:294471771058:web:b7baf7525c131a39cbbaab",
+};
 
-function getStatusColor(status) {
-    switch (status) {
-        case "completed": return "text-green-600";
-        case "error": return "text-red-600";
-        case "waiting": return "text-yellow-600";
-        case "pdfGenerating": return "text-blue-600";
-        default: return "text-gray-700";
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        console.log("✅ ログイン済み:", user.email);
+        await loadAdviceRequests();
+    } else {
+        alert("⚠️ このページはログインユーザー専用です。");
+        location.href = "/";
     }
-}
+});
 
-async function loadDashboard() {
-    const snapshot = await getDocs(collection(db, "adviceRequests"));
-    dashboardBody.innerHTML = "";
+async function loadAdviceRequests() {
+    const tableBody = document.getElementById("requestsTableBody");
+    tableBody.innerHTML = "";
 
-    snapshot.forEach(docSnap => {
+    const q = query(collection(db, "adviceRequests"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        const uid = docSnap.id;
         const row = document.createElement("tr");
 
         row.innerHTML = `
-      <td class="px-4 py-2 font-mono text-xs">${uid}</td>
-      <td class="px-4 py-2">${data.userEmail || "-"}</td>
-      <td class="px-4 py-2 font-semibold ${getStatusColor(data.status)}">${data.status || "-"}</td>
-      <td class="px-4 py-2">${formatDate(data.createdAt)}</td>
-      <td class="px-4 py-2">${formatDate(data.pdfSentAt)}</td>
-      <td class="px-4 py-2">
-        ${data.status === "error" ? `<button class="retry-btn text-sm text-blue-600 underline" data-uid="${uid}">再送</button>` : "-"}
+         <td>${data.pdfSentAt ? new Date(data.pdfSentAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
+      <td>${docSnap.id}</td>
+      <td>${data.userEmail || "-"}</td>
+      <td>${data.status || "-"}</td>
+      <td>${data.pdfSentAt ? new Date(data.pdfSentAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
+      <td>
+        ${data.pdfURL ? `<a href="${data.pdfURL}" target="_blank">📥</a>` : "-"}
+        <button data-uid="${docSnap.id}" class="delete-btn">🗑</button>
       </td>
     `;
 
-        dashboardBody.appendChild(row);
+        tableBody.appendChild(row);
     });
 
-    document.querySelectorAll(".retry-btn").forEach(button => {
-        button.addEventListener("click", async (e) => {
-            const uid = e.target.getAttribute("data-uid");
-            const docRef = doc(db, "adviceRequests", uid);
-            await updateDoc(docRef, {
-                status: "waiting",
-                lastTriedAt: new Date(),
-                retryCount: (data.retryCount || 0) + 1
-            });
-            alert(`再送信をキューに追加しました：${uid}`);
-            loadDashboard();
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+            const uid = e.currentTarget.dataset.uid;
+            if (confirm(`UID ${uid} を削除しますか？`)) {
+                await deleteDoc(doc(db, "adviceRequests", uid));
+                alert("✅ 削除しました");
+                loadAdviceRequests();
+            }
         });
     });
 }
 
-loadDashboard();
+document.getElementById("deleteAllBtn")?.addEventListener("click", async () => {
+    if (!confirm("⚠️ 本当に全データを削除しますか？")) return;
+    const snapshot = await getDocs(collection(db, "adviceRequests"));
+    for (const docSnap of snapshot.docs) {
+        await deleteDoc(doc(db, "adviceRequests", docSnap.id));
+    }
+    alert("✅ 全データを削除しました");
+    loadAdviceRequests();
+});

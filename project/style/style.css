@@ -462,3 +462,16 @@ rt {
 .ai-cta-box button:hover {
     background-color: #5e1ba6;
 }
+
+/*易断PDFのルビを整える*/
+.fortune-summary ruby {
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+.fortune-summary rt {
+    font-size: 0.6em;
+    font-family: "Noto Sans JP", sans-serif;
+    font-weight: normal;
+}

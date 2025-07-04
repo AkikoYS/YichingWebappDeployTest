@@ -30,7 +30,8 @@ body.ai-advice-page .background-image {
 .ai-advice-container {
     max-width: 600px;
     margin: auto;
-    background: #fff;
+    background-color: rgba(249, 248, 246, 0.65);
+    /* 半透明白背景で読みやすさアップ */
     padding: 2em;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -111,8 +112,8 @@ textarea {
     color: blue;
 }
 
-/* ✅ テスト送信完了ボタンのスタイル */
-#testSendButton.sent {
+/* ✅ 送信完了ボタンのスタイル */
+button.send-button.sent {
     background-color: #28a745;
     /* 緑 */
     color: white;

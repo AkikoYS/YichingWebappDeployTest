@@ -240,7 +240,7 @@ main,
     }
 
     .main-container {
-        width: 100% !important;
+        width: 95% !important;
         padding: 0 10px;
         /* 画面端に少し余白を残す場合。なければ 0 にしてOK */
         box-sizing: border-box;

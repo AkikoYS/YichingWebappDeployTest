@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "yichingapp-a5f90"
-  }
+    "default": "yichingapp-a5f90",
+    "staging": "yichingapp-a5f90"
+  },
+  "targets": {},
+  "etags": {}
 }

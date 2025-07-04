@@ -344,12 +344,12 @@ function saveFortuneToTemp() {
         selectedHexagram,
         userQuestion
     };
-    localStorage.setItem("iching_fortune_temp", JSON.stringify(state));
+    sessionStorage.setItem("iching_fortune_temp", JSON.stringify(state));
     console.log("✅ 状態を一時保存しました");
 }
 //復元関数
 function restoreFortuneFromTemp() {
-    const saved = localStorage.getItem("iching_fortune_temp");
+    const saved = sessionStorage.getItem("iching_fortune_temp");
     if (!saved) return;
 
     try {
@@ -859,8 +859,8 @@ document.getElementById("start-button").addEventListener("click", async () => {
         return;
     }
 
-    // // ✅ localStorage に保存（ai-advice.html 用）
-    // localStorage.setItem("userQuestion", userQuestion);
+    // // ✅ sessionStorage に保存（ai-advice.html 用）
+    // sessionStorage.setItem("userQuestion", userQuestion);
 
     // // ✅ Firestore に保存（ログイン済み想定）
     // try {
@@ -1065,7 +1065,7 @@ function displayFinalFortune() {
         setTimeout(() => {
             const fortunesSummaryHTML = document.querySelector(".fortune-summary");
             const fortunesSummaryText = fortunesSummaryHTML?.innerText || "";
-            localStorage.setItem("fortunesSummary", fortunesSummaryText);
+            sessionStorage.setItem("fortunesSummary", fortunesSummaryText);
             console.log("🌟 fortunesSummary 保存:", fortunesSummaryText);
         }, 100); // 少し遅らせてDOM反映を確実に
 
@@ -1351,28 +1351,29 @@ function generatePdfFromSummary(callback) {
     const summaryElement = document.querySelector(".fortune-summary");
     if (!summaryElement) return;
 
-    const originalBg = summaryElement.style.backgroundColor;
-    summaryElement.style.backgroundColor = "transparent";
+    const plainText = summaryElement.innerText?.trim();
+    if (!plainText) {
+        console.warn("⚠ PDF化するテキストが空です");
+        return;
+    }
 
-    html2pdf().set({
-        margin: 10,
-        filename: '易断結果.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            backgroundColor: null
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    })
-        .from(summaryElement)
-        .outputPdf('datauristring')
-        .then(pdfUri => {
-            summaryElement.style.backgroundColor = originalBg;
-            if (typeof callback === "function") {
-                callback(pdfUri);
-            }
-        });
+    const pdf = new jsPDF();
+    pdf.addFileToVFS("NotoSansJP-Regular.ttf", NotoSansJP);
+    pdf.addFont("NotoSansJP-Regular.ttf", "NotoSansJP", "normal");
+    pdf.setFont("NotoSansJP");
+    pdf.setFontSize(10);
+
+    const lines = pdf.splitTextToSize(plainText, 170);
+    lines.forEach((line, i) => {
+        pdf.text(line, 20, 30 + i * 7);
+    });
+
+    const pdfUri = pdf.output("datauristring");
+    if (typeof callback === "function") {
+        callback(pdfUri);
+    }
 }
+
 //firebaseの呼び込み
 firebaseReady.then(() => {
     console.log("🔥 Firebase 準備完了");

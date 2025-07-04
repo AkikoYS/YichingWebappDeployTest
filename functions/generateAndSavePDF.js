@@ -1,195 +1,119 @@
-// ✅ Firebase + Secrets 初期化（ESM + v2 対応）
+// ✅ Firebase v2 + jsPDF + OpenAI（uid = 助言ID）構成
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
+import * as logger from "firebase-functions/logger";
 import admin from "firebase-admin";
-import { jsPDF } from "jspdf";
 import OpenAI from "openai";
+import { jsPDF } from "jspdf";
+import { NotoSansJP } from "./fonts/NotoSansJP-Regular.js";
+import { generatePrompt } from "./prompt.js";
 import fs from "fs";
 import path from "path";
-import cors from "cors";
-import express from "express";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
-import { NotoSansJP } from "./fonts/NotoSansJP-Regular.js";
 
-// ✅ __dirname代替
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// ✅ グローバルスコープ
 const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 
-// ✅ Firebase 初期化
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
-// ✅ 名言データ取得
-const quotesPath = path.join(process.cwd(), "quotes.json");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const quotesPath = path.join(__dirname, "quotes.json");
 const quotes = JSON.parse(fs.readFileSync(quotesPath, "utf-8"));
 
-// ✅ Express + CORS
-const app = express();
-app.use(cors({ origin: true }));
-app.use(express.json());
-
-// ✅ メイン関数（v2 + ESM形式）
 export const generateAndSavePDF = onRequest(
     {
         secrets: [OPENAI_API_KEY],
         timeoutSeconds: 120,
-        cors: ["https://yichingapp-a5f90.web.app"]
+        memory: "512MiB",
     },
     async (req, res) => {
-
-        // ✅ CORS対応（OPTIONSリクエスト処理）
+        res.set("Access-Control-Allow-Origin", "*");
         if (req.method === "OPTIONS") {
-            res.set("Access-Control-Allow-Origin", "*");
-            res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+            res.set("Access-Control-Allow-Methods", "POST");
             res.set("Access-Control-Allow-Headers", "Content-Type");
-            res.set("Access-Control-Max-Age", "3600");
-            res.status(204).send(""); // No Content
-            return;
+            return res.status(204).send("");
         }
 
-        res.set("Access-Control-Allow-Origin", "*"); // ← 重要：本リクエストへの対応
-
         try {
-            // ✅ secrets
-            const apiKey = OPENAI_API_KEY.value(); // ✅ onRequest内で初めて.value()する
-            const openai = new OpenAI({ apiKey });
-            // const fullData = req.body;
-            // const {
-            //     uid,
-            //     userName = "匿名",
-            //     userEmail = "",
-            //     userQuestion = "",
-            //     topic = "",
-            //     situation = "",
-            //     notes = "",
-            //     fortunesSummary = "",
-            //     hexagrams = {},
-            // } = fullData;
-            const { uid } = req.body;
-            if (!uid) throw new Error("UIDがありません");
+            const { uid } = req.body || {};
+            if (!uid) {
+                logger.error("❌ リクエストにuidが含まれていません");
+                return res.status(400).send("uidは必須です");
+            }
 
-            console.log("📥 generateAndSavePDF 受け取った uid:", uid);
+            const docRef = db.doc(`adviceRequests/${uid}`);
 
-            const doc = await db.collection("adviceRequests").doc(uid).get();
-            if (!doc.exists) throw new Error("指定されたUIDのFirestoreデータが存在しません");
+            await db.runTransaction(async (t) => {
+                const snapshot = await t.get(docRef);
+                const data = snapshot.data();
+                if (data?.status === "processing" || data?.status === "completed") {
+                    throw new Error("⛔ すでに処理済または処理中（再送防止）");
+                }
+                t.set(docRef, { status: "processing" }, { merge: true });
+            });
 
+            const snapshot = await docRef.get();
+            const data = snapshot.data();
             const {
+                originalHexagram = {},
+                changedHexagram = {},
+                reverseHexagram = {},
+                souHexagram = {},
+                goHexagram = {},
+                changedLineIndex = 0,
                 userName = "匿名",
-                userEmail = "",
                 userQuestion = "",
                 topic = "",
                 situation = "",
                 notes = "",
                 fortunesSummary = "",
-                originalHexagram = "{}",
-                changedHexagram = "{}",
-                reverseHexagram = "{}",
-                souHexagram = "{}",
-                goHexagram = "{}",
-                changedLineIndex = "0",
-            } = doc.data();
+                changedYao = ""
+            } = data;
 
-            const hexagrams = {
-                original: JSON.parse(originalHexagram),
-                changed: JSON.parse(changedHexagram),
-                reverse: JSON.parse(reverseHexagram),
-                sou: JSON.parse(souHexagram),
-                go: JSON.parse(goHexagram),
-                changedLineIndex,
-            };
-
-            if (!uid) throw new Error("UIDがありません");
-
-            // ✅ Firestore 保存
-            await db.collection("adviceRequests").doc(uid).set({
-                uid,
+            logger.info("🧾 Prompt に渡されるデータ:", {
                 userName,
-                userEmail,
                 userQuestion,
                 topic,
                 situation,
                 notes,
                 fortunesSummary,
-                hexagrams,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                originalHexagram,
+                changedHexagram,
+                reverseHexagram,
+                souHexagram,
+                goHexagram,
+                changedLineIndex,
+                changedYao
+            });
+            const prompt = generatePrompt({
+                userName,
+                userQuestion,
+                topic,
+                situation,
+                notes,
+                fortunesSummary,
+                originalHexagram,
+                changedHexagram,
+                reverseHexagram,
+                souHexagram,
+                goHexagram,
+                changedLineIndex,
+                changedYao
             });
 
-            // ✅ OpenAI に送信するプロンプトの作成
-            const prompt = `あなたは熟練の易者で人生相談に対して真摯で実践的な助言を文章で提供する日本語の長文エッセイを専門とするライターAIです。相談者 ${userName} さんに対して、最低でも4000字、できれば5000字のエッセイ方式のアドバイスを作成してください。形式は、見出しをつけない**自然なエッセイスタイル**で、文章が論理的に展開されるようにしてください。
-**箇条書きや命令口調は避け**、親身でありながらも冷静な語り口で、読者が状況を多角的に捉え、前向きに行動を起こせるように導いてください。
+            const openai = new OpenAI({ apiKey: OPENAI_API_KEY.value() });
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4",
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 2000,
+            });
+            const adviceText = completion.choices[0].message.content;
 
---前提情報（要解釈）--
-${fortunesSummary}
+            const randomQuoteObj = quotes[Math.floor(Math.random() * quotes.length)];
+            const quoteText = `${randomQuoteObj.text}\n— ${randomQuoteObj.author}`;
 
---- 執筆の指針（構成の割合） ---
-- 本卦と変爻（全体の約7割）：
-　現在の状況と、そこから見えてくる変化の兆しや対応のヒントを掘り下げてください。
-- 補助的な卦（約3割）：
-　裏卦・総卦・互卦を通じて、心の奥にある想い、他者との関係、物事の本質を補完的に照らしてください。
-
---- 相談内容 ---
-- 相談者: ${userName}
-- 質問: ${userQuestion}
-- 背景: ${topic}
-- 状況: ${situation}
-- その他メモ: ${notes}
-
-【3. 占断対象の卦】
-- 本卦: ${hexagrams.original?.name || "不明"}
-- 変卦: ${hexagrams.changed?.name || "不明"}
-- 裏卦: ${hexagrams.reverse?.name || "不明"}
-- 総卦: ${hexagrams.sou?.name || "不明"}
-- 互卦: ${hexagrams.go?.name || "不明"}
-- 変爻: 第${Number(hexagrams.changedLineIndex) + 1}爻
-
-この内容を踏まえ、相談者の状況を理解し、心を整理し、次の一歩を踏み出す力になるような助言文をお願いします。`;
-
-            let adviceText;
-            try {
-                const completion = await openai.chat.completions.create({
-                    model: "gpt-4",
-                    messages: [
-                        { role: "system", content: "あなたは易経に精通した専門家であり、5000文字の日本語の実用的な助言文を書くことが得意です。" },
-                        { role: "user", content: prompt },
-                    ],
-                    max_tokens: 4000, // 必要に応じて調整
-                    temperature: 0.8, // 創造性を少し上げるのも可
-                });
-                adviceText = completion.choices[0].message.content;
-            } catch (error) {
-                //retry構文
-                if (error.response?.status === 429) {
-                    console.warn("⚠️ RateLimit に達しました。5秒後に再試行します。");
-                    await new Promise(r => setTimeout(r, 5000)); // 5秒待機
-                    // ✅ 再試行
-                    try {
-                        const retry = await openai.createChatCompletion({
-                            model: "gpt-4",
-                            messages: [{ role: "system", content: "あなたは易経に精通した専門家であり、5000文字の日本語の実用的な助言文を書くことが得意です。" },
-                            { role: "user", content: prompt },],
-                            temperature: 0.8
-                        });
-                        adviceText = retry.data.choices[0].message.content;
-                    } catch (err2) {
-                        console.error("❌ 再試行でも失敗しました");
-                        await db.collection("adviceRequests").doc(uid).update({
-                            status: "error",
-                            errorMessage: "OpenAI RateLimit exceeded twice",
-                            lastTriedAt: Timestamp.now()
-                        });
-                        throw err2; // エラー終了
-                    }
-                } else {
-                    throw error;
-                }
-            }
-
-            // ✅ PDF 作成
             const pdf = new jsPDF();
             pdf.addFileToVFS("NotoSansJP-Regular.ttf", NotoSansJP);
             pdf.addFont("NotoSansJP-Regular.ttf", "NotoSansJP", "normal");
@@ -197,67 +121,45 @@ ${fortunesSummary}
             pdf.setFontSize(10);
 
             let y = 30;
-            const quoteObj = quotes[Math.floor(Math.random() * quotes.length)];
-            const quoteText = `${quoteObj.text}\n— ${quoteObj.author}`;
-            const quoteLines = pdf.splitTextToSize(quoteText, 160);
-
-            // 飾り枠線と中央配置（名言）
-            const quotePadding = 10;
-            const quoteLineHeight = 7;
-            const quoteHeight = quoteLines.length * quoteLineHeight + quotePadding * 2;
-
-            const quoteBoxTop = y;
-            pdf.setDrawColor(150, 150, 200);
-            pdf.setLineWidth(0.5);
-            pdf.roundedRect(15, quoteBoxTop, 180, quoteHeight, 4, 4, 'D');
-
-            let quoteY = quoteBoxTop + quotePadding;
+            const quoteLines = pdf.splitTextToSize(quoteText, 170);
             quoteLines.forEach((line) => {
-                const textWidth = pdf.getTextWidth(line);
-                const x = (210 - textWidth) / 2;
-                pdf.text(line, x, quoteY);
-                quoteY += quoteLineHeight;
-            });
-            y = quoteBoxTop + quoteHeight + 15; // 次の内容の描画位置
-
-            const lines = pdf.splitTextToSize(adviceText, 170);
-            lines.forEach((line) => {
-                if (y > 280) {
-                    pdf.addPage();
-                    y = 20;
-                }
-                // 禁則処理（句点・読点が行頭に来ないよう調整）
-                let adjustedLine = line;
-                if (/^[、。]/.test(adjustedLine)) {
-                    line = "　" + line;
-                }
-                pdf.text(adjustedline, 20, y);
+                pdf.text(line, 20, y);
                 y += 7;
             });
 
-            const pdfBuffer = pdf.output("arraybuffer");
-            // ✅ Storage にアップロード
-            const buffer = Buffer.from(pdf.output("arraybuffer"));
-            const file = bucket.file(`pdfs/${uid}.pdf`);
-            await file.save(buffer, {
-                metadata: { contentType: "application/pdf" },
-            });
-            // ✅ status を更新
-            await db.doc(`adviceRequests/${uid}`).update({
-                status: "pdfGenerated",
-                lastTriedAt: admin.firestore.Timestamp.now()
-            });
-            // ✅ FirestoreにpdfPathを書き戻し（これが sendSavedPDF.js のトリガー条件）
-            await db.collection("adviceRequests").doc(uid).set({
-                pdfPath: `pdfs/${uid}.pdf`
-            }, { merge: true });
+            y += 10; // 名言と本文の間隔
 
-            console.log("📤 Firestore に pdfPath を書き込んだ uid:", uid); // ← ここにも
+            const lines = pdf.splitTextToSize(adviceText, 170);
+            lines.forEach((line) => {
+                pdf.text(line, 20, y);
+                y += 7;
+            });
 
-            return res.status(200).json({ success: true });
+            const buffer = pdf.output("arraybuffer");
+            const filePath = `pdfs/${uid}.pdf`;
+            await bucket.file(filePath).save(Buffer.from(buffer));
+
+            const [url] = await bucket.file(filePath).getSignedUrl({
+                action: "read",
+                version: "v4",
+                expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+            });
+
+            await docRef.update({
+                status: "completed",
+                pdfPath: filePath,
+                pdfURL: url,
+                completedAt: new Date(),
+            });
+
+            res.status(200).send({ message: "PDF生成成功", url });
         } catch (err) {
-            console.error("❌ PDF生成エラー:", err);
-            return res.status(500).json({ error: err.message });
+            logger.error("❌ PDF生成エラー:", err);
+            if (req.body?.uid) {
+                const ref = db.doc(`adviceRequests/${req.body.uid}`);
+                await ref.set({ status: "error", errorMessage: err.message }, { merge: true });
+            }
+            res.status(500).send({ error: err.message });
         }
     }
 );
