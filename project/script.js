@@ -1340,29 +1340,22 @@ function generatePdfFromSummary(callback) {
     const summaryElement = document.querySelector(".fortune-summary");
     if (!summaryElement) return;
 
-    const plainText = summaryElement.innerText?.trim();
-    if (!plainText) {
-        console.warn("⚠ PDF化するテキストが空です");
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.addFileToVFS("NotoSansJP-Regular.ttf", NotoSansJP);
-    pdf.addFont("NotoSansJP-Regular.ttf", "NotoSansJP", "normal");
-    pdf.setFont("NotoSansJP");
-    pdf.setFontSize(10);
-
-    const lines = pdf.splitTextToSize(plainText, 170);
-    lines.forEach((line, i) => {
-        pdf.text(line, 20, 30 + i * 7);
-    });
-
-    const pdfUri = pdf.output("datauristring");
-    if (typeof callback === "function") {
-        callback(pdfUri);
-    }
-}
+    html2pdf()
+        .set({
+            margin: 10,
+            filename: `易経くじ_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+        })
+        .from(summaryElement)
+        .outputPdf('datauristring') // ← ここが callback 用
+        .then((pdfUri) => {
+            if (typeof callback === "function") {
+                callback(pdfUri); // ✅ pdfUri をログや保存に使える
+            }
+        });
+  }
 
 //firebaseの呼び込み
 firebaseReady.then(() => {
