@@ -139,94 +139,91 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ✅ テスト送信ボタン
-    if (testSendButton) {
-        // ✅ 強制リセット（開発中のみ有効） ← ★この行を追加
-        sessionStorage.removeItem("testAdviceSent");
-        // ✅ 初期状態チェック（sessionStorageに送信済み情報があれば反映）
-        const alreadySent = sessionStorage.getItem("testAdviceSent") === "true";
-        if (alreadySent) {
-            testSendButton.disabled = true;
-            testSendButton.textContent = "✔ 送信済";
-            testSendButton.classList.add("sent");
+    testSendButton.addEventListener("click", async () => {
+        saveAndRenderUserNotes(); // ✅ メモを先に保存
+
+        if (!isFormComplete()) {
+            if (formWarning) formWarning.style.display = "block";
+            return;
+        } else {
+            if (formWarning) formWarning.style.display = "none";
         }
 
-        testSendButton.addEventListener("click", async () => {
-            // 🔍 フォーム未入力なら警告を表示
-            if (!isFormComplete()) {
-                if (formWarning) formWarning.style.display = "block";
-                return;
-            } else {
-                if (formWarning) formWarning.style.display = "none";
-            }
+        // ✅ ボタンUI更新
+        testSendButton.textContent = "✔ 送信済";
+        testSendButton.disabled = true;
+        testSendButton.classList.add("sent");
+        sessionStorage.setItem("testAdviceSent", "true");
 
-            // ✅ ボタンを送信済みに変更
-            testSendButton.textContent = "✔ 送信済";
-            testSendButton.disabled = true;
-            testSendButton.classList.add("sent");
-            sessionStorage.setItem("testAdviceSent", "true");
+        // ✅ ステータス表示
+        document.getElementById("sendingStatus").style.display = "block";
 
-            // ✅ メモを保存＆UIから非表示
-            saveAndRenderUserNotes();
-            const notesStep = document.querySelector("#user-notes")?.closest(".question-step");
-            if (notesStep) {
-                notesStep.style.display = "none";
-                console.log("✅ notesのstepを直接 display:none で非表示にしました");
-            }
+        try {
+            // 🔑 毎回ユニークなuidで送信（Firestore保存 + PDF生成）
+            const { uid } = await sendAdviceToServer({
+                email: auth.currentUser.email,
+                uid: `log_${Date.now()}`,
+                isTest: true,
+            });
 
-            // ✅ 送信処理の実行
-            try {
-                document.getElementById("sendingStatus").style.display = "block";
-                await sendAdviceToServer({ isTest: true });
-                showToast("✅ テスト送信が完了しました（メールをご確認ください）");
-            } catch (err) {
-                console.error("❌ テスト送信エラー:", err);
-                showToast("❌ テスト送信に失敗しました。もう一度お試しください。");
-            } finally {
-                document.getElementById("sendingStatus").style.display = "none";
-            }
-        });
-    }
+            showToast("✅ テスト送信が完了しました（メールをご確認ください）");
+        } catch (err) {
+            console.error("❌ テスト送信エラー:", err);
+            showToast("❌ テスト送信に失敗しました。もう一度お試しください。");
+        } finally {
+            document.getElementById("sendingStatus").style.display = "none";
+        }
+    });
 
     // ✅ 決済送信ボタン
-    if (paymentButton) {
-        paymentButton.addEventListener("click", async () => {
-            saveAndRenderUserNotes();
+    paymentButton.addEventListener("click", async () => {
+        saveAndRenderUserNotes();
 
-            if (!isFormComplete()) {
-                if (formWarning) formWarning.style.display = "block";
-                return;
-            }
-            // ✅ ボタン表示を送信中に更新（チェック後）
-            paymentButton.textContent = "✔ 送信済";
-            paymentButton.disabled = true;
-            paymentButton.classList.add("sent");
+        if (!isFormComplete()) {
+            if (formWarning) formWarning.style.display = "block";
+            return;
+        }
 
-            const uid = crypto.randomUUID();
-            try {
-                await sendAdviceToServer({ isTest: false, uid });
-            } catch (err) {
-                showToast("保存に失敗しました");
-                return;
-            }
+        // ✅ UIを送信中に変更
+        paymentButton.textContent = "✔ 送信済";
+        paymentButton.disabled = true;
+        paymentButton.classList.add("sent");
 
-            try {
-                const stripeRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/stripe", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ uid })
-                });
+        // ✅ 統一形式でuid生成（例: log_1751789401234）
+        const uid = `log_${Date.now()}`;
 
-                if (!stripeRes.ok) throw new Error("Stripeセッション生成失敗");
+        // ✅ Firestoreに保存（有料扱い）
+        try {
+            await sendAdviceToServer({ isTest: false, uid });
+        } catch (err) {
+            showToast("保存に失敗しました");
+            return;
+        }
 
-                const { url } = await stripeRes.json();
-                window.location.href = url;
-            } catch (err) {
-                console.error("❌ Stripe遷移失敗:", err);
-                showToast("決済ページへの遷移に失敗しました");
-            } finally {
-                paymentButton.disabled = false;
-                paymentButton.textContent = "100円で助言を受ける";
-            }
-        });
-    }
-})    
+        // ✅ Stripe決済セッション作成
+        try {
+            const stripeRes = await fetch("https://us-central1-yichingapp-a5f90.cloudfunctions.net/stripe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid })
+            });
+
+            if (!stripeRes.ok) throw new Error("Stripeセッション生成失敗");
+
+            const { url } = await stripeRes.json();
+
+            // ✅ ページ遷移直前：UI変更せずそのまま
+            window.location.href = url;
+
+            // ✅ ここに何も書かない（ページが遷移するので）
+        } catch (err) {
+            console.error("❌ Stripe遷移失敗:", err);
+            showToast("決済ページへの遷移に失敗しました");
+
+            // ❌ 失敗したときだけUIを元に戻す（ここだけ）
+            paymentButton.disabled = false;
+            paymentButton.textContent = "100円で助言を受ける";
+            paymentButton.classList.remove("sent");
+        }
+    });
+})

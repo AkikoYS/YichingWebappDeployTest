@@ -8,15 +8,19 @@
 </head>
 
 <body>
-    <h1>🧾 助言送信ログ</h1>
-    <button id="deleteAllBtn">🧹 全データ削除</button>
+    <h1>送信ログ</h1>
+    <button id="deleteAllBtn">全データ削除</button>
+    <button id="deleteSelectedBtn">🗑 選択データ削除</button>
     <table>
         <thead>
-            <tr><th>送信日時</th>
+            <tr>
+                <th>生成開始日時</th>
+                <th>送信日時</th>
                 <th>UID</th>
                 <th>送信先メール</th>
-                <th>ステータス</th> 
-                <th>操作</th>
+                <th>ステータス</th>
+                <th>PDFリンク</th>
+                <th>削除</th> <!-- チェックボックス -->
             </tr>
         </thead>
         <tbody id="requestsTableBody"></tbody>

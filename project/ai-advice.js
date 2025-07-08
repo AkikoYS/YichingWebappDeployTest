@@ -2,10 +2,11 @@
 import { db } from "./firebase/firebase.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ✅ テスト送信用メイン関数（決済でも使い回せる）
+// ✅ テスト送信用メイン関数
 export async function sendAdviceToServer({ isTest = false, email = "", uid = null } = {}) {
-    uid = uid || `log_${Date.now()}`; // ✅ 助言IDとしてのuidを生成
+    uid = uid || `log_${Date.now()}`; // ✅ 助言IDとしてのuidを生成、なければ日付時刻で自動生成
 
+    //セッションやローカルストレージから情報収集
     const userName = sessionStorage.getItem("userName") || "匿名";
     const userEmail = email || sessionStorage.getItem("userEmail") || "";
     const userBackground = sessionStorage.getItem("userBackground") || "";
@@ -13,38 +14,23 @@ export async function sendAdviceToServer({ isTest = false, email = "", uid = nul
     const userNotes = sessionStorage.getItem("userNotes") || "";
     const userQuestion = localStorage.getItem("userQuestion") || "";
     const fortunesSummary = localStorage.getItem("fortunesSummary") || "";//"summaryText"から変更
-    const changedLineIndex = sessionStorage.getItem("changedLineIndex") || "0";
 
-    const parseHex = (key) => {
-        const raw = sessionStorage.getItem(key);
-        if (!raw) return {};
-        try {
-            return JSON.parse(raw);
-        } catch (e) {
-            console.error(`❌ ${key} のパースに失敗:`, e);
-            return {};
-        }
-    };
-
-    const firestoreData = {
-        userName,
+    const data = {
+        uid,
+        createdAt: serverTimestamp(),
+        status: "waiting",
+        emailSent: false,
+        emailLock: false,
         userEmail,
+        userName,
         userQuestion,
         topic: userBackground,
         situation: userSituation,
         notes: userNotes,
         fortunesSummary,
-        originalHexagram: parseHex("originalHexagram"),
-        changedHexagram: parseHex("changedHexagram"),
-        reverseHexagram: parseHex("reverseHexagram"),
-        souHexagram: parseHex("souHexagram"),
-        goHexagram: parseHex("goHexagram"),
-        changedLineIndex,
-        createdAt: serverTimestamp(),
     };
-
     try {
-        await setDoc(doc(db, "adviceRequests", uid), firestoreData);
+        await setDoc(doc(db, "adviceRequests", uid), data);
         console.log("✅ Firestore に保存成功:", uid);
     } catch (err) {
         console.error("❌ Firestore 保存エラー:", err);

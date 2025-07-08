@@ -3,7 +3,6 @@ import { auth, db, firebaseReady, onAuthStateChanged, provider } from "./firebas
 import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-
 // ============1 初期設定 ===========
 //状況管理用関数
 let result;
@@ -1065,7 +1064,7 @@ function displayFinalFortune() {
         setTimeout(() => {
             const fortunesSummaryHTML = document.querySelector(".fortune-summary");
             const fortunesSummaryText = fortunesSummaryHTML?.innerText || "";
-            sessionStorage.setItem("fortunesSummary", fortunesSummaryText);
+            localStorage.setItem("fortunesSummary", fortunesSummaryText);
             console.log("🌟 fortunesSummary 保存:", fortunesSummaryText);
         }, 100); // 少し遅らせてDOM反映を確実に
 
@@ -1098,24 +1097,24 @@ function displayFinalFortune() {
         }
 
         // 🌟 占い情報を保存
-        const reverseHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
-        const souHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
-        const goHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.go);
+        const reverseHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
+        const souHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
+        const goHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.go);
 
         localStorage.setItem("userQuestion", userQuestion);
         localStorage.setItem("originalHexagram", JSON.stringify(originalHexagram));
         localStorage.setItem("changedHexagram", JSON.stringify(cachedChangedHexagram));
-        localStorage.setItem("reverseHexagram", JSON.stringify(reverseHex));
-        localStorage.setItem("souHexagram", JSON.stringify(souHex));
-        localStorage.setItem("goHexagram", JSON.stringify(goHex));
+        localStorage.setItem("reverseHexagram", JSON.stringify(reverseHexagram));
+        localStorage.setItem("souHexagram", JSON.stringify(souHexagram));
+        localStorage.setItem("goHexagram", JSON.stringify(goHexagram));
         localStorage.setItem("changedLineIndex", cachedChangedLineIndex);
         console.log("保存内容確認:", {
             userQuestion,
             originalHexagram,
             cachedChangedHexagram,
-            reverseHex,
-            souHex,
-            goHex,
+            reverseHexagram,
+            souHexagram,
+            goHexagram,
             cachedChangedLineIndex
         });
 
@@ -1163,18 +1162,18 @@ function displayFinalFortune() {
 }
 //総合的な易断の内容
 function generateFortunesSummaryHTML() {
-    const reverseHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
-    const souHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
-    const goHex = sixtyFourHexagrams.find(h => h.number === originalHexagram.go);
+    const reverseHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
+    const souHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
+    const goHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.go);
 
     const yaoText = originalHexagram.yao_descriptions?.[(cachedChangedLineIndex + 1).toString()] || "該当する爻辞が見つかりません";
     const yaoName = ["初", "二", "三", "四", "五", "上"][cachedChangedLineIndex];
 
     const originalName = `<ruby>${originalHexagram.name}<rt>${originalHexagram.reading}</rt></ruby>`;
     const changedName = `<ruby>${cachedChangedHexagram.name}<rt>${cachedChangedHexagram.reading}</rt></ruby>`;
-    const reverseName = reverseHex ? `<ruby>${reverseHex.name}<rt>${reverseHex.reading}</rt></ruby>` : "不明";
-    const souName = souHex ? `<ruby>${souHex.name}<rt>${souHex.reading}</rt></ruby>` : "不明";
-    const goName = goHex ? `<ruby>${goHex.name}<rt>${goHex.reading}</rt></ruby>` : "不明";
+    const reverseName = reverseHexagram ? `<ruby>${reverseHexagram.name}<rt>${reverseHexagram.reading}</rt></ruby>` : "不明";
+    const souName = souHexagram ? `<ruby>${souHexagram.name}<rt>${souHexagram.reading}</rt></ruby>` : "不明";
+    const goName = goHexagram ? `<ruby>${goHexagram.name}<rt>${goHexagram.reading}</rt></ruby>` : "不明";
 
     return `
     <div id="final-fortune-wrapper" class="final-fortune hidden">
@@ -1186,9 +1185,9 @@ function generateFortunesSummaryHTML() {
             <p>この爻辞である「<strong>${yaoText}</strong>」があなたの今後の行動の鍵です。</p>
             <p>この変化により、中長期的に状況は「<strong>${changedName}</strong> (${cachedChangedHexagram.summary})」へと展開していきます。</p>
             <hr>
-            <p>この本卦に隠されている裏の意味は「<strong>${reverseName || "不明"}</strong> (${reverseHex?.summary || "不明"})」です。</p>
-            <p>状況を俯瞰すると「<strong>${souName || "不明"}</strong> (${souHex?.summary || "不明"})」となります。</p>
-            <p>そもそも本質は「<strong>${goName || "不明"}</strong> (${goHex?.summary || "不明"})」です。</p>
+            <p>この本卦に隠されている裏の意味は「<strong>${reverseName || "不明"}</strong> (${reverseHexagram?.summary || "不明"})」です。</p>
+            <p>状況を俯瞰すると「<strong>${souName || "不明"}</strong> (${souHexagram?.summary || "不明"})」となります。</p>
+            <p>そもそも本質は「<strong>${goName || "不明"}</strong> (${goHexagram?.summary || "不明"})」です。</p>
         </div></div>
     `;
 }
@@ -1233,8 +1232,8 @@ function saveCurrentFortuneToLog(pdfUri) {
     cachedChangedLineIndex ??= parseInt(localStorage.getItem("changedLineIndex"), 10);
     userQuestion ??= localStorage.getItem("userQuestion") || "";
     fortunesSummary ??= document.querySelector(".fortune-summary")?.innerText || "";
-    userQuestion ??= localStorage.getItem("userQuestion") || "";
-    fortunesSummary ??= document.querySelector(".fortune-summary")?.innerText || "";
+
+
 
     console.log("🟢 saveToFirestore() 実行");
 
@@ -1249,7 +1248,7 @@ function saveCurrentFortuneToLog(pdfUri) {
         });
         return;
     }
-    
+
     const timestamp = new Date().toLocaleString("ja-JP", {
         year: "2-digit",
         month: "2-digit",
@@ -1355,7 +1354,7 @@ function generatePdfFromSummary(callback) {
                 callback(pdfUri); // ✅ pdfUri をログや保存に使える
             }
         });
-  }
+}
 
 //firebaseの呼び込み
 firebaseReady.then(() => {

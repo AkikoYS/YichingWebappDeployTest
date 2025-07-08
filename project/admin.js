@@ -46,15 +46,14 @@ async function loadAdviceRequests() {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-         <td>${data.pdfSentAt ? new Date(data.pdfSentAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
-      <td>${docSnap.id}</td>
-      <td>${data.userEmail || "-"}</td>
-      <td>${data.status || "-"}</td>
-      <td>${data.pdfSentAt ? new Date(data.pdfSentAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
-      <td>
-        ${data.pdfURL ? `<a href="${data.pdfURL}" target="_blank">📥</a>` : "-"}
-        <button data-uid="${docSnap.id}" class="delete-btn">🗑</button>
-      </td>
+        
+        <td>${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
+        <td>${data.pdfSentAt ? new Date(data.pdfSentAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
+        <td>${docSnap.id}</td>
+        <td>${data.userEmail || "-"}</td>
+        <td>${data.status || "-"}</td>
+        <td>${data.pdfURL ? `<a href="${data.pdfURL}" target="_blank">📥 PDF</a>` : "-"}</td>
+        <td><input type="checkbox" class="row-check" data-uid="${docSnap.id}"></td>
     `;
 
         tableBody.appendChild(row);
@@ -71,7 +70,7 @@ async function loadAdviceRequests() {
         });
     });
 }
-
+//全削除ボタン
 document.getElementById("deleteAllBtn")?.addEventListener("click", async () => {
     if (!confirm("⚠️ 本当に全データを削除しますか？")) return;
     const snapshot = await getDocs(collection(db, "adviceRequests"));
@@ -79,5 +78,23 @@ document.getElementById("deleteAllBtn")?.addEventListener("click", async () => {
         await deleteDoc(doc(db, "adviceRequests", docSnap.id));
     }
     alert("✅ 全データを削除しました");
+    loadAdviceRequests();
+});
+//選択削除ボタン
+document.getElementById("deleteSelectedBtn")?.addEventListener("click", async () => {
+    const checkedBoxes = document.querySelectorAll(".row-check:checked");
+    if (checkedBoxes.length === 0) {
+        alert("⚠️ 削除する行が選択されていません");
+        return;
+    }
+
+    if (!confirm(`⚠️ ${checkedBoxes.length} 件のデータを削除しますか？`)) return;
+
+    for (const box of checkedBoxes) {
+        const uid = box.dataset.uid;
+        await deleteDoc(doc(db, "adviceRequests", uid));
+    }
+
+    alert("✅ 選択されたデータを削除しました");
     loadAdviceRequests();
 });
