@@ -12,7 +12,22 @@
     <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
     <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
 
-
+    <script>
+        // クエリに ?mobile=1 がついていたら sessionStorage に記録
+        if (location.search.includes("mobile=1")) {
+          sessionStorage.setItem("fromMobile", "true");
+        }
+      
+        // 易経くじに戻るリンクをスマホ向けに変更（存在する場合のみ）
+        document.addEventListener("DOMContentLoaded", () => {
+          if (sessionStorage.getItem("fromMobile") === "true") {
+            const backLink = document.querySelector('a[href="index.html"]');
+            if (backLink) {
+              backLink.setAttribute("href", "index-mobile.html");
+            }
+          }
+        });
+      </script>
 </head>
 
 <body>

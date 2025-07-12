@@ -47,8 +47,12 @@ async function loadAdviceRequests() {
 
         row.innerHTML = `
         
-        <td>${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
-        <td>${data.pdfSentAt ? new Date(data.pdfSentAt.seconds * 1000).toLocaleString("ja-JP") : "-"}</td>
+        <td>${data.createdAt?.toDate
+                ? data.createdAt.toDate().toLocaleString("ja-JP")
+                : "-"}</td>
+        <td>${data.emailSentAt?.toDate
+                ? data.emailSentAt.toDate().toLocaleString("ja-JP")
+                : "-"}</td>
         <td>${docSnap.id}</td>
         <td>${data.userEmail || "-"}</td>
         <td>${data.status || "-"}</td>

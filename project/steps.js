@@ -8,7 +8,6 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-
 document.addEventListener("DOMContentLoaded", () => {
     // ✅ 要素取得
     const introBox = document.getElementById("intro-text");
@@ -161,11 +160,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             // 🔑 毎回ユニークなuidで送信（Firestore保存 + PDF生成）
             const { uid } = await sendAdviceToServer({
-                email: auth.currentUser.email,
                 uid: `log_${Date.now()}`,
                 isTest: true,
             });
-
             showToast("✅ テスト送信が完了しました（メールをご確認ください）");
         } catch (err) {
             console.error("❌ テスト送信エラー:", err);

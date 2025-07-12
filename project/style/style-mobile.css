@@ -1,0 +1,346 @@
+/* style-mobile.css */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: sans-serif;
+    background-color: #ffffff;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    position: relative;
+    background-color: rgba(249, 248, 246, 1);
+    display: flex;
+    justify-content: center;
+    /* ← 横中央揃え */
+    align-items: center;
+    /* ← 縦中央揃え */
+    padding: 0;
+    /* ← 余白を無効化 */
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.screen {
+    width: 100%;
+    height: 100%;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ヘッダーを固定 */
+.mobile-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background-color: white;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #ddd;
+}
+
+/* ロゴ画像 */
+.mobile-header .logo {
+    max-width: 150px;
+    height: auto;
+}
+
+/* スタート画面のマージン調整 */
+#screen-start {
+    margin-top: 60px;
+    /* ヘッダー分のスペース */
+    padding: 1em;
+    text-align: center;
+}
+
+/* ハンバーガーUI調整 */
+.auth-hamburger-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+
+
+/*--------------
+メイン
+-----------------*/
+#startBtn {
+    font-size: 18px;
+    padding: 12px 24px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    /* ← 元に近い自然な色に戻す */
+    color: #333;
+    cursor: pointer;
+    margin-top: 80px;
+    box-shadow: none;
+    transition: background-color 0.2s ease;
+}
+
+#startBtn:hover {
+    background-color: #eaeaea;
+    /* 軽く反応 */
+}
+
+.start-content {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    /* ボタンとテキストの共通高さ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 16px;
+    /* 左右に余白を確保 */
+    box-sizing: border-box;
+}
+
+/* ボタンとテキストの共通配置と中央揃え */
+#startBtn,
+#instructionText {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+    white-space: nowrap;
+    /* ✅ 1行に固定 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* ✅ はみ出たら…に */
+    padding: 0 16px;
+    /* ✅ テキストが左右切れないように余白 */
+    box-sizing: border-box;
+}
+
+/* 非表示用 */
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 表示用 */
+.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#spinner,
+#spinnerContainer {
+    width: 270px;
+    height: 270px;
+    margin: 0 auto;
+    margin-top: -20px;
+    /* ← 上にずらす（数値は調整可能） */
+}
+
+h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+}
+
+/* フッター */
+.mobile-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 56px;
+    background-color: #ffffff;
+    /* ← 白 */
+    border-top: 1px solid #ccc;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* フッターボタン共通 */
+.footer-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* フッターが被らないように余白追加 */
+body {
+    padding-bottom: 56px;
+    /* フッターの高さに合わせて調整 */
+}
+
+/* スマホハンバーガー */
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 1000;
+    overflow: hidden;
+    /* ← 重要: はみ出し防止 */
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform-origin: left center;
+    /* ← これがポイント！ */
+}
+
+.hamburger span:nth-child(1) {
+    top: 0px;
+}
+
+.hamburger span:nth-child(2) {
+    top: 10px;
+}
+
+.hamburger span:nth-child(3) {
+    top: 20px;
+}
+
+.hamburger.open span:nth-child(1) {
+    transform: rotate(40deg) translate(0, 0);
+}
+
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+    transform: rotate(-40deg) translate(0, 0);
+}
+
+/* ナビゲーションメニュー非表示 */
+.nav-menu {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    /* 少し上にズラす */
+    transition: max-height 0.4s ease, opacity 0.3s ease, transform 0.4s ease;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 0;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 開いた状態 */
+.nav-menu.show {
+    max-height: 500px;
+    /* 十分に大きく */
+    opacity: 1;
+    transform: translateY(0);
+    padding: 1em 0;
+}
+
+.nav-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-menu li {
+    margin: 16px 0;
+}
+
+/* ✅ スタイリッシュなリンク */
+.nav-link {
+    font-size: 16px;
+    text-decoration: none;
+    /* ← underlineを削除 */
+    color: #333;
+    padding: 10px 20px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 6px;
+}
+
+/* ✅ hoverで背景色 or 色が変化 */
+.nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #000;
+}
+
+/* 非表示用 */
+.nav-link.active {
+    display: none;
+}

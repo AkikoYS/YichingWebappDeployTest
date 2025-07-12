@@ -43,7 +43,7 @@ export const sendSavedPDF = onDocumentUpdated(
             }
 
             // ✅ すでに送信完了していたら処理スキップ（再送防止）
-            if (after.emailSent === true || after.status === "completed") {
+            if (after.emailSent === true) {
                 console.log(`⏩ uid: ${uid} — すでに送信済み、処理スキップ`);
                 return;
             }
@@ -123,7 +123,7 @@ export const sendSavedPDF = onDocumentUpdated(
                 await db.doc(`adviceRequests/${uid}`).update({
                     status: "completed",
                     pdfURL: signedUrl,
-                    pdfSentAt: Timestamp.now(),
+                    emailSentAt: Timestamp.now(),
                     emailSent: true,
                 });
 

@@ -13,8 +13,11 @@
     <link rel="manifest" href="manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
     <meta name="theme-color" content="#310066" />
-    <!-- <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.ico"> -->
-
+    <script>
+        if (window.innerWidth < 768) {
+            window.location.href = "/index-mobile.html";
+        }
+    </script>
 </head>
 
 <body>

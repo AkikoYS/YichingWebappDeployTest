@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>易経くじ（スマホ版）</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style/style-mobile.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
+</head>
+
+<body>
+    <header class="mobile-header">
+        <img src="assets/images/title.svg" alt="易経くじロゴ" class="logo" />
+
+        <div class="auth-hamburger-wrapper">
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <!-- メニュー -->
+        <nav class="nav-menu" id="nav-menu">
+            <ul>
+                <li><span class="nav-link active">易経くじ</span></li>
+                <li><a href="about-iching.html?mobile=1" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html?mobile=1" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html?mobile=1" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html?mobile=1" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read.html?mobile=1" class="nav-link">卦の見方</a></li>
+                <!-- <li><a href="log.html" class="nav-link">ログ一覧</a></li> -->
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <!-- スタート画面（最初に表示される画面） -->
+        <section id="screen-start" class="screen active">
+            <div id="spinnerContainer"></div>
+            <div class="start-content">
+                <button id="startBtn" class="visible">占いを始める</button>
+                <p id="instructionText" class="instruction hidden">こころに念じながら6回クリックしてください</p>
+            </div>
+
+        </section>
+
+        <!-- 6回クリックスピナー画面 -->
+        <section id="screen-spinner" class="screen hidden">
+
+            <div id="spinner"></div>
+        </section>
+
+        <!-- 本卦結果表示画面 -->
+        <section id="screen-result" class="screen hidden">
+            <h2 id="hexagramNumber">第XX卦</h2>
+            <h3 id="hexagramName">天地否（てんちひ）</h3>
+            <p id="hexagramSummary">今は通じない時。動かず耐えるとき。</p>
+            <button id="showReverseBtn">裏卦を見る</button>
+        </section>
+    </main>
+
+    <!-- 画面下部に常に表示されるフッター -->
+    <footer class="mobile-footer">
+        <button id="btn-back" class="footer-btn" aria-label="前に戻る">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M15 18l-6-6 6-6" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
+        <button id="btn-next" class="footer-btn" aria-label="先に進む">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M9 18l6-6-6-6" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
+        <button id="btn-home" class="footer-btn" aria-label="最初に戻る">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M3 12l9-9 9 9M4 10v10h5v-6h6v6h5V10" stroke="#333" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+        <button id="btn-contact" class="footer-btn" aria-label="問い合わせ">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M4 4h16v12H5.17L4 17.17V4zm4 4h8m-8 4h4" stroke="#333" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+    </footer>
+    <div id="nav-overlay" class="nav-overlay hidden">
+    </div>
+    <script src="script-mobile.js" defer></script>
+    <script src="ui.js" defer></script>
+
+</body>
+
+</html>
