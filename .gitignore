@@ -78,3 +78,16 @@ project/firebase/env.js
 google-cloud-sdk/
 *.tar.gz
 *.bin
+
+# macOS Finder ファイル
+.DS_Store
+
+# Firebase キャッシュディレクトリ
+.firebase/
+.firebase/**/*
+
+# Google Cloud SDK（ローカル専用ツール）
+google-cloud-sdk/
+
+# Optional: チームで共有しないなら .firebaserc も除外
+# .firebaserc
