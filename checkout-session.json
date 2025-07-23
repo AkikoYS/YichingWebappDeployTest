@@ -1,0 +1,24 @@
+{
+    "checkout_sessions": {
+        "create": {
+            "metadata": {
+                "uid": "test_uid_12345"
+            },
+            "mode": "payment",
+            "line_items": [
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Test Product"
+                        },
+                        "unit_amount": 3000
+                    },
+                    "quantity": 1
+                }
+            ],
+            "success_url": "https://example.com/success",
+            "cancel_url": "https://example.com/cancel"
+        }
+    }
+}

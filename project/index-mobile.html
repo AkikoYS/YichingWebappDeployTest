@@ -43,66 +43,45 @@
         <!-- スピナー（背景） -->
         <div id="mainSpinner" class="spinner scale-visible">
             <div id="spinner-anim-wrapper">
-            <div id="lottie-spinner"></div></div>
+                <div id="lottie-spinner"></div>
+            </div>
         </div>
 
-        <!-- スタート画面（ボタン） -->
-        <section id="screen-start" class="screen active">
+        <!-- screen1:スタート画面（ボタン） -->
+        <section id="screen-start" class="screen centered active">
             <div class="section-body">
                 <button id="startBtn" class="visible">占いを始める</button>
             </div>
         </section>
 
-            <!-- 本番スピナー画面 -->
-            <section id="screen-spinner" class="screen hidden">
-                <div class="section-body">
-                    <p id="instructionText" class="instruction visible">こころに念じながら6回クリックしてください</p>
-                </div>
-            </section>
+        <!-- screen2: 本番スピナー画面 -->
+        <section id="screen-spinner" class="screen centered hidden">
+            <div class="section-body">
+                <p id="instructionText" class="instruction visible">こころに念じながら6回クリックしてください</p>
+            </div>
+        </section>
 
-            <!-- 結果画面 -->
-            <section id="screen-result" class="screen hidden">
-                <div class="result">
-                    <div id="variantButtons" class="variant-buttons">
-                        <button class="variant-btn" data-key="future-expansion">今後の展開</button>
-                        <button class="variant-btn" data-key="reverse">裏の意味</button>
-                        <button class="variant-btn" data-key="sou">客観的に運命を見ると</button>
-                        <button class="variant-btn" data-key="go">卦の本質は</button>
-                    </div>
-                    <div class="hexagram-title">第11卦：<ruby>地天泰<rt>ちてんたい</rt></ruby><span
-                            style="font-size: 0.8em;">—☷☰</span></div>
-                    <div class="hexagram-reading" style="text-align: center;">物事が順調に進む時期</div>
-                    <div class="hexagram-svg">
-                        <object data="assets/images/hexagrams/hexagram_11.svg" type="image/svg+xml"></object>
-                    </div>
-                    <div class="description-text">これはテストの説明です。<br>改行も反映されます。</div>
-                    <div class="description-image">⚪︎イメージ：春の野を歩く</div>
-                    <button id="futureBtn" class="main-btn">今後の展開</button>
-                </div>
-            </section>
+        <!-- screen3: 卦の結果表示（本卦） -->
+        <section id="screen-result" class="screen hidden">
+            <div id="result"></div>
+        </section>
 
-            <!-- 今後の展開ボタン -->
-            <section id="screen-future" class="screen hidden">
-                <div class="section-body">
-                    <p id="instructionText" class="instruction visible">最後に１回クリックしてください</p>
-                </div>
-            </section>
+        <!-- screen4: 今後の展開 - 最後の1回クリック -->
+        <section id="screen-future" class="screen hidden">
+            <div class="section-body">
+                <p id="futureInstruction" class="instruction visible">今度は１回だけクリック！</p>
+            </div>
+        </section>
 
+        <!-- screen5: 変卦の結果表示 -->
+        <section id="screen-changed" class="screen hidden">
+            <div id="changedResult"></div>
+        </section>
 
-            <!-- 変爻 -->
-            <section id="screen-future" class="screen hidden">
-                <div class="section-body">
-                    <div class="hexagram-title">変卦結果表示（仮）</div>
-                </div>
-            </section>
-
-
-            <!-- 易断 -->
-            <section id="screen-final" class="screen hidden">
-                <div class="section-body">
-                    <div class="hexagram-title">総合的な易断（仮）</div>
-                </div>
-            </section>
+        <!-- screen6: 総合的な易断 -->
+        <section id="screen-final" class="screen hidden">
+            <div id="finalFortune"></div>
+        </section>
     </main>
 
     <!-- 画面下部に常に表示されるフッター -->

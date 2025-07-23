@@ -1,7 +1,8 @@
 {
   "projects": {
     "default": "yichingapp-a5f90",
-    "staging": "yichingapp-a5f90"
+    "staging": "yichingapp-a5f90",
+    "dev": "yichingapp-test"
   },
   "targets": {},
   "etags": {}

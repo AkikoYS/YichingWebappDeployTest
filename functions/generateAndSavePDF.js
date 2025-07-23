@@ -12,7 +12,9 @@ import { stripHtml } from "string-strip-html";
 import { renderAdvicePDF } from "./pdfLayout.js";
 
 
-// 🔐 OpenAI APIキーの定義
+
+// 🔐 内部認証トークンの定義
+// const INTERNAL_SECRET_TOKEN = defineSecret("INTERNAL_SECRET_TOKEN");
 const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 
 // 🔧 Firebase 初期化
@@ -32,12 +34,22 @@ export const generateAndSavePDF = onRequest({
     timeoutSeconds: 120,
     memory: "512MiB",
 }, async (req, res) => {
+    console.log("called generateAndSavePDF", req.body);
     res.set("Access-Control-Allow-Origin", "*");
     if (req.method === "OPTIONS") {
         res.set("Access-Control-Allow-Methods", "POST");
         res.set("Access-Control-Allow-Headers", "Content-Type");
         return res.status(204).send("");
     }
+
+    // 🔐 内部トークンの検証（Bearerトークン）
+    // const authHeader = req.headers.authorization || "";
+    // const token = authHeader.replace("Bearer ", "").trim();
+
+    // if (token !== INTERNAL_SECRET_TOKEN.value()) {
+    //     logger.error("❌ 不正なトークンによるアクセス試行");
+    //     return res.status(403).send("Forbidden");
+    // }
 
     const { uid } = req.body || {};
     if (!uid) {

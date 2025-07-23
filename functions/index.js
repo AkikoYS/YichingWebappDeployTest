@@ -3,8 +3,6 @@ import { webhook } from "./webhook.js";
 import { stripe } from "./stripe.js";
 import { generateAndSavePDF } from "./generateAndSavePDF.js";
 import { sendSavedPDF } from "./sendSavedPDF.js";
-// import { deletePdfSentAt } from "./deletePdfSentAt.js";
-// import { sendAdviceEmail } from "./sendAdviceEmail.js"; // 必要であれば追加
 
 export {
     webhook,

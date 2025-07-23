@@ -85,7 +85,7 @@
                 <!-- ステップ5: その他 -->
                 <div class="question-step hidden">
                     <label for="user-notes">助言を受けるにあたり、それ以外にも伝えておいた方がいいことがあればご自由にどうぞ：</label>
-                    <textarea id="user-notes" name="notes" maxlength="200" placeholder="任意：背景や気になる点など"></textarea>
+                    <textarea id="user-notes" name="notes" maxlength="200" placeholder="とくにない場合、「ない」と書いてください"></textarea>
                 </div>
                 <!-- 決済前の情報記入用の抑止 -->
                 <div id="formWarning">
@@ -93,8 +93,8 @@
 
 
                 <div class="button-group">
-                    <button type="button" id="paymentButton" class="send-button">100円で助言を受ける</button>
-                    <button type="button" id="testSendButton" class="send-button">無料で受け取る</button>
+                    <button type="button" id="paymentButton" class="send-button" disabled>100円で助言を受ける</button>
+                    <button type="button" id="testSendButton" class="send-button" disabled>無料で受け取る</button>
 
                     <div id="sendingStatus" style="display:none; text-align:center; margin-top:10px;">
                         <span style="color: red">助言を生成しています。PDFがメールに届くのをお待ちください。</span>
