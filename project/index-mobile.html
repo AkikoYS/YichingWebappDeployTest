@@ -61,26 +61,29 @@
             </div>
         </section>
 
-        <!-- screen3: 卦の結果表示（本卦） -->
+        <!-- screen3: 卦の結果表示（本卦、変卦、裏卦、総卦、互卦） -->
         <section id="screen-result" class="screen hidden">
             <div id="result"></div>
         </section>
 
         <!-- screen4: 今後の展開 - 最後の1回クリック -->
-        <section id="screen-future" class="screen hidden">
+        <section id="screen-future" class="screen centered hidden">
             <div class="section-body">
-                <p id="futureInstruction" class="instruction visible">今度は１回だけクリック！</p>
+                <p id="futureInstruction" class="instruction visible">最後に１回だけクリック！</p>
             </div>
         </section>
 
-        <!-- screen5: 変卦の結果表示 -->
-        <section id="screen-changed" class="screen hidden">
-            <div id="changedResult"></div>
-        </section>
+        <!-- screen5: 変爻の結果表示 -->
+            <section id="screen-henko" class="screen hidden">
+                <div id="changedLine" class="result"></div>
+            </section>
+
 
         <!-- screen6: 総合的な易断 -->
         <section id="screen-final" class="screen hidden">
-            <div id="finalFortune"></div>
+            <div id="finalFortune">
+          
+            </div>
         </section>
     </main>
 
