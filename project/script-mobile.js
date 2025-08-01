@@ -1,3 +1,4 @@
+// ❖ グローバル変数と初期設定
 let currentScreen = "screen-start";
 let startAnimation = null;
 let animation = null;
@@ -7,12 +8,13 @@ let isSpinning = false;
 let alreadyClicked = false;
 let selectedHexagram = null;
 let changedHexagram = null;
-let cachedChangedLineIndex = null;
+let cachedChangedLineIndex = null;//今後の展開ボタンで得た変卦表示
 let spinnerClickBound = false;
 let spinner = null;
 let originalHexagram = null;
+let cachedHenkoHexagram = null;//長い目で見るとボタンで得た変卦表示
 
-
+//スピナークリックのラッパー
 function handleSpinnerClickWrapper(e) {
     handleSpinnerClick(e);
 }
@@ -218,65 +220,13 @@ function waitForHexagramsAndRender() {
 //❼ボタン押下時のクリックしたときの処理
 function handleVariantClick(key) {
     playSoundEffect("assets/sounds/click_button.mp3");
+    console.log("🔁 handleVariantClick 実行", key);
 
     // ボタン群を削除
     const buttonContainer = document.getElementById("variant-buttons");
     if (buttonContainer) buttonContainer.remove();
 
     const resultContainer = document.getElementById("result");
-
-    //「長い目で見ると」ボタンを押して変卦を出すための処理
-    if (key === "henko") {
-        const index = cachedChangedLineIndex ?? 5; // デフォルトで下爻
-
-        const changedArray = resultArray.split("").map((bit, i) =>
-            i === index ? (bit === "0" ? "1" : "0") : bit
-        );
-        const changedHexagram = getHexagramByArray(changedArray.join(""));
-
-        // ✅ ここで定義
-        const resultContainer = document.getElementById("result");
-
-        if (!changedHexagram || !resultContainer) {
-            console.error("❌ 変卦が見つかりませんでした。");
-            return;
-        }
-
-        resultContainer.innerHTML = `<div class="waiting-message">占い結果を読み取っています...</div>`;
-        updateResultLayout(); // waiting-messageの表示直後にレイアウト調整
-        resultContainer.classList.remove("result-zoom-out");
-        resultContainer.classList.add("result-zoom-in");
-
-        setTimeout(() => {
-            resultContainer.innerHTML = createHexagramHTML(changedHexagram) + `
-        <div class="final-buttons-wrapper">
-            <button id="final-fortune-button">総合的な易断を見る</button>
-            <button id="return-button" class="main-btn">本卦に戻る</button>
-        </div>
-    `;
-            shownVariantKeys.add("henko");
-            showScreen("screen-result"); // ✅ これが必要！！
-            updateResultLayout(); // 卦表示後にも調整
-
-            // ✅ 各ボタンにイベントを割り当て
-            const finalFortuneBtn = document.getElementById("final-fortune-button");
-            const returnBtn = document.getElementById("return-button");
-
-            //総合的な易断ボタンを押すと、showFinalFortunesScreenMobile()が発火
-            if (finalFortuneBtn) {
-                finalFortuneBtn.addEventListener("click", () => {
-                    showFinalFortuneScreenMobile();
-                });
-            }
-            if (returnBtn) {
-                returnBtn.addEventListener("click", () => {
-                    renderHexagramResult();
-                });
-            }
-
-        }, 1000);
-        return;
-    }
 
     //「今後の展開」ボタンを押したとき
     if (key === "future-expansion") {
@@ -288,7 +238,6 @@ function handleVariantClick(key) {
     }
 
     const variantHex = sixtyFourHexagrams.find(h => h.number === selectedHexagram[key]);
-
 
     if (!variantHex) {
         resultContainer.innerHTML = `<div class="error-message">該当する卦が見つかりません</div>`;
@@ -357,63 +306,58 @@ function updateResultLayout() {
 
 //🕚「今後の展開」ボタン→再スピナー表示(screen4)
 function handleFutureExpansion(hexagram) {
+    // ✅ 2回目以降ならスピナーを表示せず、変卦を即表示
+    if (cachedHenkoHexagram) {
+        console.log("🔁 2回目の今後の展開：変卦キャッシュを直接表示");
+        showCachedChangedHexagram(originalHexagram);
+        return;
+    }
+
+    // ✅ 以下は1回目のみ（スピナーを挟む）
     const result = document.getElementById("result");
     const screenResult = document.getElementById("screen-result");
     const screenFuture = document.getElementById("screen-future");
     const spinnerWrapper = document.getElementById("spinner-anim-wrapper");
     const instruction = document.getElementById("futureInstruction");
 
-    // 1. 結果をズームアウト（.result-zoom-out を付与）
     result.classList.add("result-zoom-out");
 
     setTimeout(() => {
-        // 2. screen3 を非表示
-        console.log("→ screen3 hidden");
         screenResult.classList.add("hidden");
         screenResult.style.position = "absolute";
         screenResult.style.top = "-10000px";
 
-        // 3. screen4 を表示（ズームなし）
-        console.log("→ screen4 show");
         screenFuture.classList.remove("hidden");
         screenFuture.classList.add("active");
 
-        // 4. スピナーをズームイン（.spinner-zoom-in をトリガー）
-        console.log("→ spinner zoom in");
-        spinnerWrapper.classList.remove("spinner-zoom-in"); // 再トリガーのためリセット
-        void spinnerWrapper.offsetWidth;                    // 再トリガー強制
-        spinnerWrapper.classList.add("spinner-zoom-in");    // アニメ再適用
+        spinnerWrapper.classList.remove("spinner-zoom-in");
+        void spinnerWrapper.offsetWidth;
+        spinnerWrapper.classList.add("spinner-zoom-in");
 
-        // 5. テキストをふわっと表示
-        console.log("→ instruction visible OFF");
         instruction.style.display = "block";
-        console.log(instruction);
         instruction.style.opacity = "";
-        instruction.classList.remove("visible"); // 一度外す
-
-        // 2. 強制的にリフローを起こす
+        instruction.classList.remove("visible");
         void instruction.offsetWidth;
 
         setTimeout(() => {
-            console.log("→ instruction visible ON");
-            instruction.classList.add("visible"); // 再付与でフェードイン
-        }, 50); // 少し遅らせると確実に動く
+            instruction.classList.add("visible");
+        }, 50);
 
-        // 6. 状態リセット
         clickCount = 0;
         alreadyClicked = false;
         initSpinnerScreen();
 
         startChangedHexagramSpin(hexagram);
-
-    }, 300); // result-zoom-out 
+    }, 300);
 }
+
 
 //12 変爻決定＆変卦へ遷移（スマホ：1クリックで完結）
 function startChangedHexagramSpin(originalHexagram) {
+    console.log("🌀 startChangedHexagramSpin 開始");
+
     const spinnerContainer = document.getElementById("mainSpinner");
     const spinnerWrapper = document.getElementById("spinner-anim-wrapper"); // ← 追加
-
 
     spinnerContainer.onclick = () => {
         // 1. スピナー停止
@@ -441,12 +385,11 @@ function startChangedHexagramSpin(originalHexagram) {
                 console.error("変卦が見つかりません: ", changedArrayString);
                 return;
             }
-
             cachedChangedHexagram = changedHexagram;
-            // finalFortuneReady = true;
+            cachedHenkoHexagram = changedHexagram;        // ✅ モバイル用変数にもキャッシュ！
 
             showScreen("screen-henko");
-            displayChangedLine(cachedChangedLineIndex, changedHexagram);
+            displayChangedLine(cachedChangedLineIndex, selectedHexagram);
         }, 1000); // ← アニメが0.6sならこれぐらいでOK
 
         spinnerContainer.onclick = null;
@@ -478,68 +421,112 @@ function displayChangedLine(index, hexagram) {
 
 //15 「長い目で見るとどうなるか？」ボタン（createFutureButton）の生成、押下と変卦の生成
 function createFutureButton(index, container) {
-    console.log("🧪 createFutureButton called with index:", index, "container:", container);
-    if (!container) {
-        console.error("❌ containerが見つかりません。ボタンを追加できません。");
-        return;
-    }
+    if (!container) return;
 
     const button = document.createElement("button");
     button.textContent = "長い目で見るとどうなる？";
-    button.classList.add("main-btn");
+    button.classList.add("main-btn", "future-button");
     button.style.display = "block";
     button.style.margin = "20px auto";
 
     button.onclick = () => {
-        playSoundEffect("assets/sounds/click_button.mp3");
-        const resultContainer = document.getElementById("result"); // ✅ ここで明示的に定義
-        if (!resultContainer) {
-            console.error("❌ resultContainerが見つかりません。");
-            return;
-        }
-        resultContainer.innerHTML = `<div class="waiting-message">占い結果を読み取っています...</div>`;
+        const resultContainer = document.getElementById("result");
+        if (!resultContainer) return;
 
-        updateResultLayout(); // ← waiting-message表示直後に追加
-        cachedChangedLineIndex = index; // ✅ グローバル変数に格納
+        // ✅ 常にキャッシュされた変卦を表示（分岐しない）
+        console.log("📌 長い目ボタン：変卦キャッシュを表示します");
+        showCachedChangedHexagram(originalHexagram);
+    };
 
-        setTimeout(() => {
-            handleVariantClick("henko");    // ✅ henko 用の分岐処理に進む
-        }, 1000);
-    }
-    button.classList.add("main-btn", "future-button");
     if (!container.querySelector(".future-button")) {
         container.appendChild(button);
     }
 }
-//16 最終的な易断の内容表示
-function showFinalFortuneScreenMobile() {
-    // 1. 最終的な易断コンテンツを生成し、画面に挿入
-    const html = generateFortunesSummaryHTML();
-    console.log("🧾 Final Fortune HTML:", html); // ← ここで中身を確認
-    const target = document.getElementById("finalFortune");
-    target.innerHTML = html;
 
-    // ✅ hidden を確実に除去！
-    const wrapper = document.getElementById("final-fortune-wrapper");
-    if (wrapper) {
-        wrapper.classList.remove("hidden");
-    } else {
-        console.warn("⚠️ #final-fortune-wrapper が見つかりませんでした");
-    }
-
-    // 2. スクリーン切り替え（描画の直後に）
-    requestAnimationFrame(() => {
-        showScreen("screen-final");
-
-        // 3. confetti や CTA は slight delay を入れることで視認性向上
-        setTimeout(() => {
-            playConfettiAnimation();
-            insertMobileFinalCTAs();
-        }, 300); // 0.3秒後にアニメとボタン
+// 🔗 共通：総合運と本卦に戻るボタンのイベントバインド
+function bindFinalButtons() {
+    document.getElementById("final-fortune-button")?.addEventListener("click", () => {
+        showFinalFortuneScreenMobile();
+    });
+    document.getElementById("return-button")?.addEventListener("click", () => {
+        renderHexagramResult();
     });
 }
 
-//最終的な易断のコンテンツ
+// ✅ 今後の展開ボタンの2回目以降クリック処理
+function showCachedChangedHexagram(originalHex) {
+    console.log("📦 showCachedChangedHexagram: 呼び出されました");
+    const resultContainer = document.getElementById("result");
+
+    if (cachedHenkoHexagram && resultContainer) {
+        resultContainer.innerHTML = createHexagramHTML(cachedHenkoHexagram) + `
+            <div class="final-buttons-wrapper">
+                <button id="final-fortune-button">総合的な易断を見る</button>
+                <button id="return-button" class="main-btn">本卦に戻る</button>
+            </div>`;
+
+        resultContainer.classList.remove("result-zoom-out");
+        resultContainer.classList.add("result-zoom-in");
+        showScreen("screen-result");
+        updateResultLayout();
+
+        const finalFortuneBtn = document.getElementById("final-fortune-button");
+        const returnBtn = document.getElementById("return-button");
+
+        if (finalFortuneBtn) {
+            finalFortuneBtn.addEventListener("click", () => {
+                showFinalFortuneScreenMobile();
+            });
+        }
+        if (returnBtn) {
+            returnBtn.addEventListener("click", () => {
+                renderHexagramResult();
+            });
+        }
+    } else {
+        console.warn("cachedHenkoHexagram is null または resultContainer が null");
+
+        if (resultContainer) {
+            resultContainer.innerHTML = `<div class="error-message">変卦データが存在しません。最初からやり直してください。</div>`;
+        }
+    }
+}
+
+//16 最終的な易断の内容表示
+function showFinalFortuneScreenMobile() {
+    // 1. HTMLを生成して挿入
+    const html = generateFortunesSummaryHTML();
+    const target = document.getElementById("finalFortune");
+    target.innerHTML = html;
+
+    const wrapper = document.getElementById("final-fortune-wrapper");
+    if (!wrapper) {
+        console.warn("⚠️ #final-fortune-wrapper が見つかりませんでした");
+        return;
+    }
+
+    // 2. スクリーン切り替え
+    showScreen("screen-final");
+    document.body.style.overflow = 'hidden'; // confetti中はスクロール抑制
+
+    // 3. confetti を先に再生
+    playConfettiAnimation();
+
+    // 4. 少し遅れて易断内容をズーム表示
+    setTimeout(() => {
+        wrapper.classList.remove("hidden");
+        wrapper.classList.add("show"); // ←アニメーション発火
+    }, 500);
+
+    // 5. CTA（ボタン）はさらに遅れて表示
+    setTimeout(() => {
+        insertMobileFinalCTAs();
+        document.body.style.overflow = 'auto'; // スクロール復活
+    }, 1200);
+}
+
+
+//総合的な易断のコンテンツ
 function generateFortunesSummaryHTML() {
     const reverseHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
     const souHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
@@ -575,8 +562,6 @@ function generateFortunesSummaryHTML() {
                 </div>
     `;
 }
-
-
 
 //ctaボタン表示関数（有料版へ、新しい占いへ）
 function insertMobileFinalCTAs() {
@@ -617,7 +602,6 @@ function playConfettiAnimation() {
         path: "assets/animations/confetti.json"
     });
 }
-
 
 // フッター
 const btnBack = document.getElementById("btn-back");

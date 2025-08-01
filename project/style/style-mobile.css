@@ -526,8 +526,7 @@ main {
     color: #333;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
-
+/*総合的な易断ボタンのラッパー*/
 .final-buttons-wrapper {
     display: flex;
     flex-direction: column;
@@ -538,15 +537,24 @@ main {
     margin-top: 20px;
 }
 
-/*易断の下のボタン*/
+/*易断表示画面（screen-final）の下のボタン*/
 .cta-buttons {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 5px;
     padding: 0 20px;
 }
 
+/*有料版ボタン*/
+#purchase-button.final-fortune-button {
+    margin-top: 0;
+}
+
+/*新しく占うボタン*/
+#reset-button.main-btn {
+    margin-top: 5px;
+}
 
 /* -------------
 スクリーンの遷移
@@ -602,6 +610,32 @@ main {
 }
 
 /*総合的な易断*/
+
+#final-fortune-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    /* 初期状態は縮小 */
+    opacity: 0;
+    transition: all 0.6s ease;
+    z-index: 1000;
+    /* confetti（9999）より下でOK */
+}
+
+/* 表示時にクラス付与で拡大＆表示 */
+#final-fortune-wrapper.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+
+#screen-final {
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+}
+
 .fortune-summary {
     background-color: white;
     border-radius: 12px;
@@ -620,11 +654,24 @@ main {
 .final-fortune-note {
     text-align: center;
     color: #666;
-    font-size: 0.8em;
-    margin: 20px 40px 0;
-    line-height: 1.8;
+    font-size: 0.7em;
+    margin: 10px 40px 0;
+    line-height: 1.5;
     padding: 10px 0;
 }
+
+/*紙吹雪のカンバス*/
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    /* 必ず final-fortune-wrapper より上に */
+}
+
 
 /*-----------
  フッター 
