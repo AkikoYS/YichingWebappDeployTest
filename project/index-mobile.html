@@ -39,6 +39,7 @@
             </ul>
         </nav>
     </header>
+    <div id="confetti-lottie" class="confetti-animation"></div>
     <main>
         <!-- スピナー（背景） -->
         <div id="mainSpinner" class="spinner scale-visible">
@@ -74,17 +75,27 @@
         </section>
 
         <!-- screen5: 変爻の結果表示 -->
-            <section id="screen-henko" class="screen hidden">
-                <div id="changedLine" class="result"></div>
-            </section>
+        <section id="screen-henko" class="screen hidden">
+            <div id="changedLine" class="result"></div>
+        </section>
 
 
         <!-- screen6: 総合的な易断 -->
         <section id="screen-final" class="screen hidden">
-            <canvas id="confetti-canvas"></canvas>
-            <div id="final-fortune-wrapper">
+
+            <!-- ✅ 本文 -->
+            <div id="final-fortune-wrapper" class="invisible">
                 <div id="finalFortune"></div>
+            
+            <!-- ✅ 補足文 -->
+            <div class="final-fortune-note invisible">
+                個別の占いたい内容についてAI易経助言（300円）もご提供しています。
             </div>
+            <!-- ✅ ctaボタン -->
+            <div class="cta-buttons invisible" id="final-cta">
+                <button id="purchase-button" class="cta-btn">有料版の占いへ</button>
+                <button id="reset-button" class="cta-btn">新しく占う</button>
+            </div></div>
         </section>
     </main>
 
