@@ -2,7 +2,7 @@
     "name": "易経六十四卦",
     "short_name": "易経くじ",
     "description": "易経をもとにした本格占いアプリ",
-    "start_url": "./index.html",
+    "start_url": "./index-mobile.html",
     "display": "standalone",
     "background_color": "#f9f8f6",
     "theme_color": "#310066",

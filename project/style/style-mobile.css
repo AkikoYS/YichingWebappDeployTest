@@ -7,10 +7,17 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: auto;
+    overflow: hidden;
     font-family: sans-serif;
     background-color: #ffffff;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+}
+
+/* フッターが被らないように余白追加 */
+body {
+    padding-bottom: 56px;
+    /* フッターの高さに合わせて調整 */
 }
 
 /* ------------
@@ -73,9 +80,14 @@ main {
     flex: 1;
     height: calc(100vh - 56px);
     padding-top: 70px;
+    min-height: 100vh;
+    padding-bottom: 56px;
     background-color: #f9f8f6;
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow-y: hidden;
+    /* ✅ mainがscroll対象なのでここには必要 */
 }
 
 /* -------------
@@ -144,14 +156,18 @@ main {
 }
 
 #screen-final {
-    flex: 1;
-    min-height: 100%;
-    padding: 16px;
+    position: relative;
+    min-height: 100vh;
+    padding: 100px 16px 80px;
+    /* ← ヘッダー・フッターの高さ分余白 */
     /* ✅ 上にヘッダー相当の余白 */
     box-sizing: border-box;
     background-color: #f9f8f6;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* ← iOS専用で慣性スクロールを有効にする */
 }
 
 /*------------
@@ -212,7 +228,7 @@ main {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;
-    margin-top: 200px;
+    margin-top: 300px;
 }
 
 .instruction.visible {
@@ -601,10 +617,9 @@ resultの内部
     align-items: stretch;
     /* ✅ 高さを揃える鍵！ */
     gap: 12px;
-    padding: 10px 16px 20px;
+    padding: 10px 16px 40px;
     flex-shrink: 0;
     margin-top: auto;
-    padding-bottom: 20px;
 }
 
 .cta-btn {
@@ -642,7 +657,7 @@ resultの内部
 /* loading中に高さを100vhにする */
 #result.fullscreen {
     /* ヘッダー＋フッター分を引いてフル表示にする */
-    height: calc(100vh - 100px);
+    height: calc(100vh - 300px);
     max-height: none;
     justify-content: center;
     /* ← 上詰めから中央寄せに */
@@ -725,24 +740,33 @@ resultの内部
 /*-----------
  フッター 
  ------------*/
-
-
 .mobile-footer {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 56px;
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.5);
+    /* ✅ 半透明 */
+    backdrop-filter: blur(10px);
+    /* ✅ 背景をぼかす（透け効果） */
+    -webkit-backdrop-filter: blur(10px);
+    /* ✅ iOS Safari用 */
     border-top: 1px solid #ccc;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 1000;
+    z-index: 999;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-footer button:disabled {
-    opacity: 0.3;
+/* 隠すときの状態 */
+.mobile-footer.hide-footer {
+    transform: translateY(100%);
+}
+
+footer button[disabled] {
+    opacity: 0.3 !important;
     pointer-events: none;
 }
 
@@ -757,11 +781,7 @@ footer button:disabled {
     justify-content: center;
 }
 
-/* フッターが被らないように余白追加 */
-body {
-    padding-bottom: 56px;
-    /* フッターの高さに合わせて調整 */
-}
+
 
 /* スマホハンバーガー */
 .hamburger {
