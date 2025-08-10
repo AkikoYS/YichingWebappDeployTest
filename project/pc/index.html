@@ -2,40 +2,15 @@
 <html lang="jp">
 
 <head>
-<script>
-    (() => {
-        // 一度だけ実行（戻るで白紙を防ぐ）
-        if (sessionStorage.getItem('routed') === '1') return;
-
-        // ルート(index.html)のときだけ実行
-        const p = location.pathname.replace(/\/+$/, '');
-        if (!(p === '' || p === '/index.html')) return;
-
-        // UA or 画面幅でモバイル判定（PC強制/モバイル強制はクエリで上書き可）
-        const q = new URLSearchParams(location.search);
-        if (q.get('pc') === '1') localStorage.setItem('forcePC', 'true');
-        if (q.get('mobile') === '1') localStorage.setItem('forceMobile', 'true');
-        const forcePC = localStorage.getItem('forcePC') === 'true';
-        const forceMobile = localStorage.getItem('forceMobile') === 'true';
-
-        const ua = navigator.userAgent.toLowerCase();
-        const isMobileUA = /iphone|ipod|android.*mobile/.test(ua);
-        const isNarrow = window.matchMedia?.('(max-width: 820px)').matches;
-        const preferMobile = forceMobile || (!forcePC && (isMobileUA || isNarrow));
-
-        sessionStorage.setItem('routed', '1');
-        location.replace(preferMobile ? '/index-mobile.html' : '/pc/index.html');
-    })();
-</script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>易経くじ</title>
-    <link rel="stylesheet" href="style/style.css">
-    <link rel="stylesheet" href="style/base.css">
-    <link rel="stylesheet" href="style/spinner.css">
-    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
+    <link rel="stylesheet" href="/style/style.css">
+    <link rel="stylesheet" href="/style/base.css">
+    <link rel="stylesheet" href="/style/spinner.css">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
 </head>
 
@@ -43,17 +18,17 @@
     <div class="background-image"></div>
     <header class="main-header">
         <div class="title-container">
-            <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+            <h1><a href="/index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
         </div>
         <nav class="nav-menu" id="nav-menu">
             <ul>
                 <li><span class="nav-link active">易経くじ</span></li>
-                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
-                <li><a href="how-to.html" class="nav-link">占い方</a></li>
-                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
-                <li><a href="bagua.html" class="nav-link">八卦</a></li>
-                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
-                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+                <li><a href="/about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="/how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="/hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="/bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="/how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a href="/log.html" class="nav-link">ログ一覧</a></li>
             </ul>
         </nav>
         <!-- PC用のgoogleログイン -->
@@ -71,7 +46,7 @@
             </div>
             <!-- スマホ用 Google アイコン -->
             <div class="auth-icon-container">
-                <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                <img id="auth-icon" src="/assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
                     title="ログイン中 - タップでログアウト" />
             </div>
         </div>
@@ -118,21 +93,15 @@
     </footer>
 
     <!-- JavaScriptを読み込む -->
-    <script src="firebase/env.js"></script>
+    <script src="/firebase/env.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.11/lottie.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
 
-    <script src="logic.js"></script>
-    <script src="ui.js" defer></script>
-    <script type="module" src="script.js"></script>
-    <script type="module" src="firebase/auth.js"></script>
-    <!-- <script>
-        if (/iPhone|Android.*Mobile/.test(navigator.userAgent)) {
-            window.location.href = 'index-mobile.html';
-        }
-    </script> -->
-
+    <script src="/logic.js"></script>
+    <script src="/ui.js" defer></script>
+    <script type="module" src="/script.js"></script>
+    <script type="module" src="/firebase/auth.js"></script>
 
 </body>
 

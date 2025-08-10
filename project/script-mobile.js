@@ -17,6 +17,7 @@ let suppressLottiePlay = false; // グローバルに宣言
 let snapshotArrayForHenko = "";
 let lastScrollTop = 0;
 let isFooterScrollListenerSet = false;
+let appPhase = 'casting'; // 'casting' | 'result' | 'expansion'
 
 //スピナークリックのラッパー
 function handleSpinnerClickWrapper(e) {
@@ -99,7 +100,7 @@ function resetSpinnerState() {
 
     const instructionText = document.getElementById("instructionText");
     if (instructionText) {
-        instructionText.textContent = "こころに念じながら6回クリックしてください";
+        instructionText.textContent = "こころに念じながら上爻が出るまでクリックしてください";
         instructionText.classList.remove("hidden");
         instructionText.classList.add("visible");
 
@@ -724,12 +725,19 @@ function setupMobileFinalCTAEvents() {
 
     resetBtn.addEventListener("click", () => {
         playSoundEffect("assets/sounds/click_reset.mp3");
-        window.location.href = "index-mobile.html";
+        try {
+            localStorage.removeItem("forcePC");
+            sessionStorage.setItem("fromMobile", "true");
+        } catch (e) { }
+        window.location.replace("/index-mobile.html");
     });
 
     purchaseBtn.addEventListener("click", () => {
         playSoundEffect("assets/sounds/click_button.mp3");
-        window.location.href = "index.html";
+        try {
+            localStorage.setItem("forcePC", "true"); // 次回以降もPC版固定
+        } catch (e) { }
+        window.location.replace("/pc/index.html");
     });
 }
 
@@ -746,7 +754,6 @@ function playConfettiAnimation() {
         path: "assets/animations/confetti.json"
     });
 }
-
 
 // フッター
 // 🔽 フッターボタン取得
@@ -957,14 +964,19 @@ btnBack.addEventListener("click", () => {
     // screen-final から screen-henko に戻った場合
     if (currentScreenIndex === 9 && shownVariantKeys.has("result-henko")) {
         showScreenByIndex(8); // 変卦へ戻る
-
         return;
     }
 
     // 通常の戻る処理
     if (currentScreenIndex > 0) {
-        showScreenByIndex(currentScreenIndex - 1);
-        updateFooterButtons(); // ✅ 必ず必要
+        const prev = currentScreenIndex - 1;
+
+        if (prev === 1) { // スピナー画面
+            resetCastingState(); // 先に初期化
+        }
+
+        showScreenByIndex(prev); // そのあと画面遷移
+        updateFooterButtons();
     }
 });
 
@@ -1071,6 +1083,26 @@ btnContact?.addEventListener("click", () => {
     window.location.href = "feedback.html";
 });
 
+//本卦からスピナーに戻るときのスピナーのリセット
+function resetCastingState() {
+    appPhase = 'casting';
+    clickCount = 0;
+    resultArray = '';
+    cachedHenkoHexagram = null;
+    cachedChangedLineIndex = null;
+    shownVariantKeys?.clear?.();
+
+    // 既知のワークアラウンド：スピナーは cloneNode でリセット
+    const old = document.getElementById('mainSpinner');
+    const fresh = old.cloneNode(true);
+    old.parentNode.replaceChild(fresh, old);
+
+    // キャスティング用のクリックハンドラだけを付け直す
+    fresh.addEventListener('click', () => {
+        if (appPhase !== 'casting') return;
+        handleSpinnerClickCasting(); // ←従来の「6回カウントして本卦を出す」処理
+    });
+}
 
 
 //スクロールに伴うフッターの表示、非表示

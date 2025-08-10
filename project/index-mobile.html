@@ -13,6 +13,21 @@
     <link rel="manifest" href="manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
+    <script>
+        // モバイル版から来たことを示す“発信元マーカー”
+        sessionStorage.setItem('fromMobileApp', '1');
+
+        // 以後の遷移にも印を引き継ぐ（?mctx=1 を付与）
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a[href]').forEach(a => {
+                const href = a.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('http') || /\.(png|jpg|jpeg|gif|webp|svg|pdf|zip|mp3|mp4|css|js)$/i.test(href)) return;
+                const url = new URL(href, location.origin);
+                url.searchParams.set('mctx', '1');       // ★ index-mobile だけが付ける
+                a.setAttribute('href', url.pathname + url.search + url.hash);
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -31,11 +46,11 @@
         <nav class="nav-menu" id="nav-menu">
             <ul>
                 <li><span class="nav-link active">易経くじ</span></li>
-                <li><a href="about-iching.html?mobile=1" class="nav-link">易経とは</a></li>
-                <li><a href="how-to.html?mobile=1" class="nav-link">占い方</a></li>
-                <li><a href="hexagrams.html?mobile=1" class="nav-link">六十四卦</a></li>
-                <li><a href="bagua.html?mobile=1" class="nav-link">八卦</a></li>
-                <li><a href="how-to-read.html?mobile=1" class="nav-link">卦の見方</a></li>
+                <li><a href="/about-iching.html?mobile=1" class="nav-link">易経とは</a></li>
+                <li><a href="/how-to.html?mobile=1" class="nav-link">占い方</a></li>
+                <li><a href="/hexagrams.html?mobile=1" class="nav-link">六十四卦</a></li>
+                <li><a href="/bagua.html?mobile=1" class="nav-link">八卦</a></li>
+                <li><a href="/how-to-read.html?mobile=1" class="nav-link">卦の見方</a></li>
                 <!-- <li><a href="log.html" class="nav-link">ログ一覧</a></li> -->
             </ul>
         </nav>
@@ -59,7 +74,7 @@
         <!-- screen2: 本番スピナー画面 -->
         <section id="screen-spinner" class="screen centered hidden">
             <div class="section-body">
-                <p id="instructionText" class="instruction visible">こころに念じながら6回クリックしてください</p>
+                <p id="instructionText" class="instruction visible">こころに念じながら上爻が表示されるまでクリックしてください</p>
             </div>
         </section>
 

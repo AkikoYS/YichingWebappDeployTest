@@ -1,78 +1,87 @@
+// auth.js (整理版)
 import { auth, provider } from "./firebase.js";
 import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const loginBtn = document.getElementById("login-button");
-const logoutBtn = document.getElementById("logout-button");
-const authIcon = document.getElementById("auth-icon");// ✅ SVG表示用アイコン
-const authIconContainer = document.querySelector(".auth-icon-container");
-
-// ログイン処理
-loginBtn.addEventListener("click", () => {
-    signInWithPopup(auth, provider)
-        .then(() => {
-            console.log("✅ ログイン成功");
-        })
-        .catch((error) => {
-            console.error("❌ ログイン失敗:", error);
-        });
-});
-
-// ログアウト処理
-logoutBtn.addEventListener("click", () => {
-    signOut(auth).then(() => {
-        console.log("✅ ログアウト成功");
+// ===== 事前ガード：index-mobile から来たときは認証UI/初期化を止める =====
+if (window.__DISABLE_AUTH__) {
+    console.debug("Auth disabled (came from index-mobile). Skip auth init.");
+    // 必要ならUIを隠す（該当クラスがある場合のみ）
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".login-ui, .logout-ui, .account-ui, .requires-auth").forEach(el => el.remove());
+        // スマホ用のアイコン容器ごと非表示にしたい場合は以下を有効化
+        // document.querySelector(".auth-icon-container")?.remove();
     });
-});
+} else {
+    // ====== 通常初期化 ======
+    const loginBtn = document.getElementById("login-button");
+    const logoutBtn = document.getElementById("logout-button");
+    const authIcon = document.getElementById("auth-icon");                    // SVG アイコン
+    const authIconContainer = document.querySelector(".auth-icon-container"); // スマホ用トグル
 
-// スマホ用アイコンの処理
-authIconContainer?.addEventListener("click", () => {
-    const user = auth.currentUser;
+    // ---- イベント登録（要素があるときだけ） ----
+    loginBtn?.addEventListener("click", async () => {
+        try {
+            await signInWithPopup(auth, provider);
+            console.log("✅ ログイン成功");
+        } catch (error) {
+            console.error("❌ ログイン失敗:", error);
+        }
+    });
 
-    if (user) {
-        // ログイン中 → ログアウト
-        signOut(auth)
-            .then(() => console.log("📤 ログアウトしました"))
-            .catch((error) => console.error("❌ ログアウト失敗:", error));
-    } else {
-        // ログアウト中 → ログイン
-        signInWithPopup(auth, provider)
-            .then(() => console.log("📥 ログイン成功"))
-            .catch((error) => console.error("❌ ログイン失敗:", error));
-    }
-});
+    logoutBtn?.addEventListener("click", async () => {
+        try {
+            await signOut(auth);
+            console.log("✅ ログアウト成功");
+        } catch (e) {
+            console.error("❌ ログアウト失敗:", e);
+        }
+    });
 
-// 状態に応じてボタン切り替え
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // ✅ ログイン中：PC用ボタン切替
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
+    // スマホ用アイコンのトグル（ログイン/ログアウトを切替）
+    authIconContainer?.addEventListener("click", async () => {
+        try {
+            if (auth.currentUser) {
+                await signOut(auth);
+                console.log("📤 ログアウトしました");
+            } else {
+                await signInWithPopup(auth, provider);
+                console.log("📥 ログイン成功");
+            }
+        } catch (e) {
+            console.error("❌ 認証操作失敗:", e);
+        }
+    });
 
-        // ✅ スマホ：アイコン表示、Sign in非表示
-        authIconContainer.classList.remove("signin-text");
-        authIcon.style.display = "inline-block";
-        authIcon.src = "assets/icons/google-icon-1.svg"; // ✅ ログイン中用アイコンに変更
-    } else {
-        // ✅ ログアウト中：PC用ボタン切替
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
+    // ---- onAuthStateChanged は 1 回だけ ----
+    onAuthStateChanged(auth, (user) => {
+        // PC 用ボタン表示切替
+        if (loginBtn) loginBtn.style.display = user ? "none" : "inline-block";
+        if (logoutBtn) logoutBtn.style.display = user ? "inline-block" : "none";
 
-        // ✅ スマホ：Sign in表示、アイコン非表示
-        authIconContainer.classList.add("signin-text");
-        authIcon.style.display = "none"; // 念のため明示
-    }
-});
+        // スマホ用表示切替
+        if (authIconContainer) {
+            if (user) {
+                authIconContainer.classList.remove("signin-text");
+                if (authIcon) {
+                    authIcon.style.display = "inline-block";
+                    authIcon.src = "assets/icons/google-icon-1.svg"; // ログイン中アイコン
+                }
+            } else {
+                authIconContainer.classList.add("signin-text");
+                if (authIcon) authIcon.style.display = "none";
+            }
+        }
 
-//UID取得
-
-onAuthStateChanged(auth, user => {
-    if (user) {
-        console.log("✅ あなたのUID:", user.uid);
+        // デバッグ表示（任意）
         const debug = document.getElementById("debug");
         if (debug) {
-            debug.textContent = "あなたのUID: " + user.uid;
+            if (user) {
+                console.log("✅ あなたのUID:", user.uid);
+                debug.textContent = "あなたのUID: " + user.uid;
+            } else {
+                console.log("❌ 未ログイン");
+                debug.textContent = "";
+            }
         }
-    } else {
-        console.log("❌ 未ログイン");
-    }
-});
+    });
+}

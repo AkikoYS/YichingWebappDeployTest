@@ -2,28 +2,13 @@
 <html lang="ja">
 
 <head>
+    <base href="/" />
     <meta charset="UTF-8">
     <title>ご意見・ご要望フォーム | 易経くじ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/note-style.css">
     <link rel="stylesheet" href="style/base.css">
-    <script>
-        // クエリに ?mobile=1 がついていたら sessionStorage に記録
-        if (location.search.includes("mobile=1")) {
-            sessionStorage.setItem("fromMobile", "true");
-        }
-
-        // 易経くじに戻るリンクをスマホ向けに変更（存在する場合のみ）
-        document.addEventListener("DOMContentLoaded", () => {
-            if (sessionStorage.getItem("fromMobile") === "true") {
-                const backLink = document.querySelector('a[href="index.html"]');
-                if (backLink) {
-                    backLink.setAttribute("href", "index-mobile.html");
-                }
-            }
-        });
-    </script>
 </head>
 
 <body>
