@@ -59,7 +59,7 @@ const spinnerAnimation = lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: false,
-    path: 'assets/animations/spinner-animation.json',
+    path: '/assets/animations/spinner-animation.json',
     rendererSettings: {
         preserveAspectRatio: 'none' // ← これがポイント！
     }
@@ -209,7 +209,7 @@ function maybeShowFinalFortuneButton() {
         finalButton.textContent = "総合的な易断を見る";
         finalButton.className = "variant-button";
         finalButton.onclick = () => {
-            playSoundEffect("assets/sounds/click_final.mp3");
+            playSoundEffect("/assets/sounds/click_final.mp3");
             displayFinalFortune();
         }
 
@@ -451,7 +451,7 @@ function createHexagramHTML(hexagram) {
       <div class="hexagram-title">第${hexagram.number}卦：${nameWithRuby}<span style="font-size: 0.8em;">—${hexagram.composition}</span></div>
       <div class="hexagram-reading" style="text-align: center;">${hexagram.summary}</div>
       <div class="hexagram-svg">
-        <object data="assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
+        <object data="/assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
       </div>
       <div class="description-text">${formattedDescription}</div>
       <div class="description-image">⚪︎イメージ：${hexagram.desimage}</div>
@@ -464,7 +464,7 @@ function createBackToOriginalButton() {
     button.className = "variant-button";
     button.id = "back-to-original-button";
     button.onclick = () => {
-        playSoundEffect("assets/sounds/click_button.mp3");
+        playSoundEffect("/assets/sounds/click_button.mp3");
         const existingBackButton = document.getElementById("back-to-original-button");
         if (existingBackButton) existingBackButton.remove();
 
@@ -522,7 +522,7 @@ function showVariantButtons(originalHexagram) {
         button.classList.add("variant-button");
 
         button.onclick = () => {
-            playSoundEffect("assets/sounds/click_button.mp3")// ボタン音
+            playSoundEffect("/assets/sounds/click_button.mp3")// ボタン音
             const buttonContainer = document.getElementById("variant-buttons");
             if (buttonContainer) buttonContainer.remove();
 
@@ -555,7 +555,7 @@ function showVariantButtons(originalHexagram) {
     finalBtn.classList.add("variant-button");
     finalBtn.style.display = "none"; // ← 初期は非表示
     finalBtn.onclick = () => {
-        playSoundEffect("assets/sounds/click_final.mp3");
+        playSoundEffect("/assets/sounds/click_final.mp3");
         displayFinalFortune();
     }
 
@@ -680,7 +680,7 @@ function startChangedHexagramSpin(originalHex) {
         }
         spinnerAnimation.goToAndStop(spinnerAnimation.currentFrame, true);
         isSpinning = false;
-        playSoundEffect("assets/sounds/click.mp3");
+        playSoundEffect("/assets/sounds/click.mp3");
 
         //ランダムな位置で爻を反転させ、変卦を生成
         cachedChangedLineIndex = Math.floor(Math.random() * 6);
@@ -763,7 +763,7 @@ function displayChangedLine(index, hexagram) {
         const nameWithRuby = `<ruby>${hexagram.name}<rt>${hexagram.reading}</rt></ruby>`;
         const yaoName = yaoNames[index];
         const title = `第${hexagram.number}卦：${nameWithRuby} の ${yaoName}`;
-        const svgPath = `assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
+        const svgPath = `/assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
         // ✅ ここで画像の読み込み確認
         const img = new Image();
         img.src = svgPath;
@@ -789,7 +789,7 @@ function createFutureButton(originalHexagram, index) {
     button.style.display = "block";
     button.style.margin = "20px auto";
     button.onclick = () => {
-        playSoundEffect("assets/sounds/click_button.mp3");
+        playSoundEffect("/assets/sounds/click_button.mp3");
         toggleYinYangAtIndex(index);
         const changedArray = resultArray.split("").map((bit, i) =>
             i === index ? (bit === "0" ? "1" : "0") : bit
@@ -848,7 +848,7 @@ function toggleYinYangAtIndex(index) {
 // ===== 7. イベントハンドラ =====
 //占い開始ボタン
 document.getElementById("start-button").addEventListener("click", async () => {
-    playSoundEffect("assets/sounds/click_button.mp3")
+    playSoundEffect("/assets/sounds/click_button.mp3")
     const input = document.getElementById("question-input");
     userQuestion = input.value.trim();
 
@@ -857,26 +857,6 @@ document.getElementById("start-button").addEventListener("click", async () => {
         document.getElementById("question-warning").style.display = "block";
         return;
     }
-
-    // // ✅ sessionStorage に保存（ai-advice.html 用）
-    // sessionStorage.setItem("userQuestion", userQuestion);
-
-    // // ✅ Firestore に保存（ログイン済み想定）
-    // try {
-    //     const user = auth.currentUser;
-    //     const userId = user ? user.uid : "anonymous";
-
-    //     await addDoc(collection(db, "ai_requests"), {
-    //         userId: userId,
-    //         question: userQuestion,
-    //         createdAt: new Date()
-    //     });
-
-    //     console.log("✅ Firestore に保存されました");
-
-    // } catch (error) {
-    //     console.error("❌ Firestore 保存エラー:", error);
-    // }
 
     // ➡️ 既存のフェードイン・アウト処理
     const questionSection = document.getElementById("question-section");
@@ -902,7 +882,9 @@ questionInput.addEventListener("input", () => {
     }
 });
 //スピナー処理
-spinnerContainer.addEventListener("click", () => {
+spinnerContainer.addEventListener("click", async () => {
+    await window.hexagramsReady; // ← これで読み込み前に進むのを防止
+    // あとは既存処理そのまま
     if (alreadyClicked) return;
 
     if (!isSpinning) {
@@ -914,7 +896,7 @@ spinnerContainer.addEventListener("click", () => {
         }
 
     } else {
-        playSoundEffect("assets/sounds/click.mp3")// 停止処理（beep付き）
+        playSoundEffect("/assets/sounds/click.mp3")// 停止処理（beep付き）
         isSpinning = false;
         const currentFrame = spinnerAnimation.currentFrame;
         spinnerAnimation.goToAndStop(currentFrame, true);
@@ -963,7 +945,7 @@ spinnerContainer.addEventListener("click", () => {
 //リセットボタンによる初期化（もう一度占う）
 resetButton.style.display = "none";
 resetButton.addEventListener("click", () => {
-    playSoundEffect("assets/sounds/click_button.mp3");
+    playSoundEffect("/assets/sounds/click_button.mp3");
     // 🔁 保存ボタン初期化・非表示
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
@@ -1084,7 +1066,7 @@ function displayFinalFortune() {
                 renderer: "svg",
                 loop: false,
                 autoplay: true,
-                path: "assets/animations/confetti.json" // 実パスに合わせて変更
+                path: "/assets/animations/confetti.json" // 実パスに合わせて変更
             });
             overlay.classList.remove("visible");
             overlay.classList.add("hidden");
@@ -1134,9 +1116,9 @@ function displayFinalFortune() {
                 saveButton.parentNode.insertBefore(ctaBox, saveButton);
 
                 document.getElementById("purchase-button").addEventListener("click", () => {
-                    playSoundEffect("assets/sounds/click_button.mp3")// ボタン音
+                    playSoundEffect("/assets/sounds/click_button.mp3")// ボタン音
                     handleLoginRequiredAction(() => {
-                        window.location.href = "ai-advice.html";
+                        window.location.href = "/ai-advice.html";
                     });
                 });
             } else {
@@ -1209,7 +1191,7 @@ function renderSaveButton(pdfUri) {
 
     //googleにログイン
     saveButton.onclick = () => {
-        playSoundEffect("assets/sounds/click_button.mp3");
+        playSoundEffect("/assets/sounds/click_button.mp3");
         handleLoginRequiredAction(() => {
             saveCurrentFortuneToLog(currentPdfUri);
         });
@@ -1363,7 +1345,7 @@ firebaseReady.then(() => {
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", () => {
-            playSoundEffect("assets/sounds/click_button.mp3")// ボタン音
+            playSoundEffect("/assets/sounds/click_button.mp3")// ボタン音
             generatePdfFromSummary((pdfUri) => {
                 saveCurrentFortuneToLog(pdfUri);
             });

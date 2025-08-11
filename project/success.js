@@ -8,7 +8,7 @@ const animation = lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: true,
-    path: 'assets/animations/loader.json' // ファイルパスに合わせて変更
+    path: '/assets/animations/loader.json' // ファイルパスに合わせて変更
 });
 
 // スピードを50%に設定

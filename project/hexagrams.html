@@ -10,10 +10,9 @@
     <link rel="stylesheet" href="style/note-style.css">
     <link rel="stylesheet" href="style/base.css">
     <link rel="stylesheet" href="style/modal.css">
-    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
-
-
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
+    <script src="mobile-view.js"></script>
 </head>
 
 <body>
@@ -21,18 +20,18 @@
     <header class="main-header">
         <div class="title-container">
             <div class="title-container">
-                <h1><a href="index.html"><img src="assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+                <h1><a href="index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
             </div>
         </div>
         <nav class="nav-menu" id="nav-menu">
             <ul>
-                <li><a href="index.html" class="nav-link">易経くじ</a></li>
-                <li><a href="about-Iching.html" class="nav-link">易経とは</a></li>
-                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="/index.html" class="nav-link">易経くじ</a></li>
+                <li><a href="/about-Iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="/how-to.html" class="nav-link">占い方</a></li>
                 <li><span class="nav-link active">六十四卦</span></li>
-                <li><a href="bagua.html" class="nav-link">八卦</a></li>
-                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
-                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+                <li><a href="/bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="/how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a href="/log.html" class="nav-link">ログ一覧</a></li>
             </ul>
         </nav>
         <!-- PC用のgoogleログイン -->
@@ -49,13 +48,13 @@
             </div>
             <!-- スマホ用 Google アイコン -->
             <div class="auth-icon-container">
-                <img id="auth-icon" src="assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                <img id="auth-icon" src="/assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
                     title="ログイン中 - タップでログアウト" />
             </div>
         </div>
     </header>
 
-    <main class="main-container"><img src="assets/images/book.jpg" class="hero-page" alt="六十四卦について">
+    <main class="main-container"><img src="/assets/images/book.jpg" class="hero-page" alt="六十四卦について">
         <h2 class="h2-mobile">六十四卦とはなにか</h2>
 
         <p>六十四卦と卦辞を考案したのは周王朝を創始した武王の父である<strong>文王</strong>といわれています。八卦（乾・兌・離・震・巽・坎・艮・坤）はいずれも三本の爻（こう）で構成され、陰陽の組み合わせによって自然界の基本的な現象や性質を象徴します。これを上下に組み合わせることで、64通りの卦が生まれ、より複雑で具体的な自然現象や人間社会の事象を象徴的に表現できるようになりました。
@@ -114,7 +113,7 @@
     <script src="toggle-table.js"></script>
     <script src="ui.js"></script>
     <script type="module" src="/firebase/auth.js"></script>
-    <script src="/script/mobile-view.js" defer></script>
+
 </body>
 
 </html>

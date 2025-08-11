@@ -141,6 +141,30 @@ main,
     display: none;
 }
 
+/* モバイル文脈ではログイン関連やログ一覧を隠す（必要なものだけ残してOK） */
+html.from-mobile .login-ui,
+html.from-mobile .logout-ui,
+html.from-mobile .account-ui,
+html.from-mobile .requires-auth,
+html.from-mobile .g_id_signin,
+html.from-mobile #g_id_onload,
+html.from-mobile .gsi-material-button,
+html.from-mobile .firebaseui-idp-list,
+html.from-mobile a[href*="/log.html"] {
+    display: none !important;
+}
+
+/* モバイル時は基本非表示。ただし pc/index.html かつ 認証済みのときは非表示にしない */
+html.from-mobile:not(.is-pc-home.is-authenticated) .auth-icon-container {
+    display: none !important;
+}
+
+html.from-mobile:not(.is-pc-home.is-authenticated) .auth-icon {
+    display: none !important;
+}
+
+
+
 /* テキストとして見せる「Sign in」状態 */
 .auth-icon-container.signin-text::before {
     content: "Sign in";

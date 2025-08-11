@@ -1,75 +1,61 @@
-// mobile-view.js
-// 目的：index-mobile.html から来た場合のみ、ログインUI/ログ系メニューを非表示、
-// 戻るリンクを index-mobile.html に差し替え、遷移先にもフラグを継承する
-
+// mobile-view.js（UI制御だけ・簡潔版）
 (function () {
+    // ---- 0) モバイル文脈の判定 ----
     const url = new URL(location.href);
+    const qMobile = url.searchParams.get("mobile") === "1" || url.searchParams.get("mctx") === "1";
+    const onIndexMobile = /\/index-mobile\.html$/i.test(location.pathname);
 
-    // クエリパラメータ判定
-    const fromQuery = url.searchParams.get("mobile") === "1" || url.searchParams.get("mctx") === "1";
+    // index-mobile直アクセス or ?mobile=1 でフラグ保持
+    if (onIndexMobile || qMobile) {
+        try { sessionStorage.setItem("fromMobileApp", "1"); } catch { }
+    }
+    const fromMobile = qMobile || sessionStorage.getItem("fromMobileApp") === "1";
 
-    // index-mobile.html 自身を開いた場合、またはクエリで判定できた場合はマーカーを保存
-    const isIndexMobile = /\/index-mobile\.html$/i.test(location.pathname);
-    if (isIndexMobile || fromQuery) {
-        try { sessionStorage.setItem("fromMobileApp", "1"); } catch (e) { }
+    // ---- 1) HTMLにフラグ用クラス付与（CSSで出し分け）----
+    if (fromMobile) document.documentElement.classList.add("from-mobile");
+    if (/\/pc\/index\.html$/i.test(location.pathname)) {
+        document.documentElement.classList.add("is-pc-home");
     }
 
-    // 最終的な判定
-    const fromMobileApp = sessionStorage.getItem("fromMobileApp") === "1" || fromQuery;
+    // ---- 2) DOM準備後にリンク調整 ----
+    const ready = (fn) => (document.readyState === "loading")
+        ? document.addEventListener("DOMContentLoaded", fn, { once: true })
+        : fn();
 
-    // index-mobile.html の場合、全リンクに ?mobile=1 を付与
-    document.addEventListener("DOMContentLoaded", () => {
-        if (isIndexMobile) {
-            document.querySelectorAll("a[href]").forEach(a => {
-                const href = a.getAttribute("href");
-                if (!href || href.startsWith("#") || href.startsWith("http") ||
-                    /\.(png|jpg|jpeg|gif|webp|svg|pdf|zip|mp3|mp4|css|js)$/i.test(href)) return;
-                const t = new URL(href, location.origin);
-                t.searchParams.set("mobile", "1");
-                // ✅ 常に絶対パスにする
-                a.setAttribute("href", "/" + t.pathname.replace(/^\/+/, "") + t.search + t.hash);
-            });
-        }
-    });
+    ready(() => {
+        if (!fromMobile) return;
 
-    // モバイル版経由でなければ終了（PC版をスマホで表示している場合などは処理しない）
-    if (!fromMobileApp) return;
-
-    // 認証を無効化（auth.js 側で利用）
-    window.__DISABLE_AUTH__ = true;
-    document.documentElement.classList.add("mobile-view");
-
-    // DOM 読み込み後のUI調整
-    document.addEventListener("DOMContentLoaded", () => {
-        // 「index.html」への戻りリンクを「index-mobile.html」に差し替え
-        document.querySelectorAll('a[href="index.html"], a[href="/index.html"]').forEach(a => {
+        // 2-1) ロゴ/ホームの戻り先を index-mobile.html に統一
+        document.querySelectorAll('a[href$="index.html"], a[href="/index.html"]').forEach(a => {
             a.setAttribute("href", "/index-mobile.html");
         });
 
-        // ログ関連メニュー・ログインUIを非表示
-        const hideSelectors = [
-            ".menu-logs",
-            'a[href*="log.html"]',
-            ".login-ui",
-            ".logout-ui",
-            ".account-ui",
-            ".requires-auth"
-        ];
-        hideSelectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => el.remove());
-        });
+        // 2-2) 内部リンクを絶対化しつつ ?mobile=1 を統一付与（重複回避）
+        const stampLinks = (root = document) => {
+            root.querySelectorAll('a[href]').forEach(a => {
+                const raw = a.getAttribute('href');
+                if (!raw || raw.startsWith('#')) return;
 
-        // 他ページリンクにも ?mobile=1 を引き継ぎ
-        document.querySelectorAll("a[href]").forEach(a => {
-            const href = a.getAttribute("href");
-            if (!href || href.startsWith("#") || href.startsWith("http") ||
-                /\.(png|jpg|jpeg|gif|webp|svg|pdf|zip|mp3|mp4|css|js)$/i.test(href)) return;
-            const t = new URL(href, location.origin);
-            if (!t.searchParams.has("mobile")) {
-                t.searchParams.set("mobile", "1");
-            }
-            // ✅ 常に絶対パスにする
-            a.setAttribute("href", "/" + t.pathname.replace(/^\/+/, "") + t.search + t.hash);
+                // 外部/ファイルは対象外
+                const isExternal = /^https?:\/\//i.test(raw);
+                const isFile = /\.(png|jpe?g|gif|webp|svg|pdf|zip|mp3|mp4|css|js)$/i.test(raw);
+                if (isExternal || isFile) return;
+
+                const t = new URL(raw, location.href);
+                if (!(t.searchParams.has("mobile") || t.searchParams.has("mctx"))) {
+                    t.searchParams.set("mobile", "1");
+                }
+                a.setAttribute('href', t.pathname + t.search + t.hash);
+            });
+        };
+        stampLinks();
+
+        // 2-3) 動的に追加されるリンクにも付与（UIフレームワーク対策）
+        const mo = new MutationObserver(muts => {
+            muts.forEach(m => m.addedNodes.forEach(n => {
+                if (n.nodeType === 1) stampLinks(n);
+            }));
         });
+        mo.observe(document.documentElement, { childList: true, subtree: true });
     });
 })();

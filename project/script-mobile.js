@@ -79,7 +79,7 @@ function initSpinnerScreen() {
         renderer: "svg",
         loop: true,
         autoplay: false,
-        path: "assets/animations/spinner-animation.json"
+        path: "/assets/animations/spinner-animation.json"
     });
 
     animation.addEventListener("DOMLoaded", () => {
@@ -199,7 +199,7 @@ function handleSpinnerClick() {
         }
 
         navigator.vibrate?.(100);
-        playSoundEffect("assets/sounds/click.mp3");
+        playSoundEffect("/assets/sounds/click.mp3");
 
         const yinYang = Math.random() < 0.5 ? "0" : "1";
         resultArray += yinYang;
@@ -264,7 +264,7 @@ function createHexagramHTML(hexagram) {
       <div class="hexagram-title">第${hexagram.number}卦：${nameWithRuby}<span style="font-size: 0.8em;">—${hexagram.composition}</span></div>
       <div class="hexagram-reading" style="text-align: center;">${hexagram.summary}</div>
       <div class="hexagram-svg">
-        <object data="assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
+        <object data="/assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
       </div>
       <div class="description-text">${formattedDescription}</div>
       <div class="description-image">⚪︎イメージ：${hexagram.desimage}</div>
@@ -284,7 +284,7 @@ function waitForHexagramsAndRender() {
 
 //❼「今後の展開」などvariantボタン押下時のクリックしたときの処理
 function handleVariantClick(key) {
-    playSoundEffect("assets/sounds/click_button.mp3");
+    playSoundEffect("/assets/sounds/click_button.mp3");
     console.log("🔁 handleVariantClick 実行", key);
 
     // ボタン群を削除
@@ -472,7 +472,7 @@ function startChangedHexagramSpin(originalHexagram, array) {
         isSpinning = true;
 
         animation.goToAndStop(animation.currentFrame, true);
-        playSoundEffect("assets/sounds/click.mp3");
+        playSoundEffect("/assets/sounds/click.mp3");
 
         // ✅ クリックのフィードバックアニメーション
         spinnerWrapper.classList.remove("spinner-feedback");
@@ -545,7 +545,7 @@ function displayChangedLine(index, hexagram) {
     const yaoName = yaoNames[index];
     const yaoText = hexagram.yao_descriptions?.[(index + 1).toString()] || "該当する爻辞が見つかりません。";
     const nameWithRuby = `<ruby>${hexagram.name}<rt>${hexagram.reading}</rt></ruby>`;
-    const svgPath = `assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
+    const svgPath = `/assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
 
     // HTML生成（事前に全て構成）
     const html = `
@@ -724,7 +724,7 @@ function setupMobileFinalCTAEvents() {
     }
 
     resetBtn.addEventListener("click", () => {
-        playSoundEffect("assets/sounds/click_reset.mp3");
+        playSoundEffect("/assets/sounds/click_reset.mp3");
         try {
             localStorage.removeItem("forcePC");
             sessionStorage.setItem("fromMobile", "true");
@@ -733,7 +733,7 @@ function setupMobileFinalCTAEvents() {
     });
 
     purchaseBtn.addEventListener("click", () => {
-        playSoundEffect("assets/sounds/click_button.mp3");
+        playSoundEffect("/assets/sounds/click_button.mp3");
         try {
             localStorage.setItem("forcePC", "true"); // 次回以降もPC版固定
         } catch (e) { }
@@ -751,7 +751,7 @@ function playConfettiAnimation() {
         renderer: "svg",
         loop: false,
         autoplay: true,
-        path: "assets/animations/confetti.json"
+        path: "/assets/animations/confetti.json"
     });
 }
 

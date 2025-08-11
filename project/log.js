@@ -38,12 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 })) || "(日時なし)"
                     }</td>
                 <td>${entry.question || '(質問なし)'}</td>
-                <td>${entry.original.name || '不明'}<br><img src="assets/images/hexagrams/${entry.original.image || ''}" alt=""></td>
+                <td>${entry.original.name || '不明'}<br><img src="/assets/images/hexagrams/${entry.original.image || ''}" alt=""></td>
                 <td>${entry.changedLine.label || '不明'}<br>${entry.changedLine.yaoText}</td>
-                <td>${entry.changed.name || '不明'}<br><img src="assets/images/hexagrams/${entry.changed.image || ''}" alt=""></td>
-                <td>${entry.reverse?.name || "不明"}<br><img src="assets/images/hexagrams/${entry.reverse?.image || ""}" alt=""></td>
-                <td>${entry.sou?.name || "不明"}<br><img src="assets/images/hexagrams/${entry.sou?.image || ""}" alt=""></td>
-                <td>${entry.go?.name || "不明"}<br><img src="assets/images/hexagrams/${entry.go?.image || ""}" alt=""></td>
+                <td>${entry.changed.name || '不明'}<br><img src="/assets/images/hexagrams/${entry.changed.image || ''}" alt=""></td>
+                <td>${entry.reverse?.name || "不明"}<br><img src="/assets/images/hexagrams/${entry.reverse?.image || ""}" alt=""></td>
+                <td>${entry.sou?.name || "不明"}<br><img src="/assets/images/hexagrams/${entry.sou?.image || ""}" alt=""></td>
+                <td>${entry.go?.name || "不明"}<br><img src="/assets/images/hexagrams/${entry.go?.image || ""}" alt=""></td>
                 <td class="delete-cell"><span class="delete-button">✖</span></td>
             `;
                 tbody.appendChild(tr);

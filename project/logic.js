@@ -1,5 +1,27 @@
 console.log("✅ logic.js 読み込み完了");
 
+// ✅ hexagram.json を読み込み、使う前に必ず待てるようにする
+window.hexagramsReady = fetch("/hexagram.json", { cache: "no-store" })
+    .then((res) => {
+        if (!res.ok) throw new Error(`JSON読み込み失敗: HTTP ${res.status}`);
+        return res.json();
+    })
+    .then((data) => {
+        window.HEXAGRAMS = data; // 既存ロジック互換のためグローバルに置く
+        return data;
+    })
+    .catch((err) => {
+        console.error(err);
+        window.HEXAGRAMS = [];   // フォールバック
+        return [];
+    });
+
+// ✅ 卦検索（防御的）
+function getHexagramByArray(bin) {
+    const list = window.HEXAGRAMS || [];
+    return list.find((h) => h.array === bin) || null;
+}
+
 // 全64卦データを格納する変数
 let sixtyFourHexagrams = [];
 
@@ -14,7 +36,7 @@ function getHexagramByArray(arrayString) {
 }
 
 // JSONを読み込む（どちらの画面でも必要なのでここに入れてOK）
-fetch("hexagram.json")
+fetch("/hexagram.json")
     .then(res => res.ok ? res.json() : Promise.reject("JSON読み込み失敗"))
     .then(data => {
         sixtyFourHexagrams = data;

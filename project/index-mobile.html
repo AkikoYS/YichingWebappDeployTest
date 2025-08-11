@@ -8,31 +8,18 @@
     <title>易経くじ（スマホ版）</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style/style-mobile.css" />
-    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
     <link rel="manifest" href="manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
-    <script>
-        // モバイル版から来たことを示す“発信元マーカー”
-        sessionStorage.setItem('fromMobileApp', '1');
-
-        // 以後の遷移にも印を引き継ぐ（?mctx=1 を付与）
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('a[href]').forEach(a => {
-                const href = a.getAttribute('href');
-                if (!href || href.startsWith('#') || href.startsWith('http') || /\.(png|jpg|jpeg|gif|webp|svg|pdf|zip|mp3|mp4|css|js)$/i.test(href)) return;
-                const url = new URL(href, location.origin);
-                url.searchParams.set('mctx', '1');       // ★ index-mobile だけが付ける
-                a.setAttribute('href', url.pathname + url.search + url.hash);
-            });
-        });
-    </script>
+    <script src="mobile-view.js"></script>
+ 
 </head>
 
 <body>
     <header class="mobile-header">
-        <img src="assets/images/title.svg" alt="易経くじロゴ" class="logo" />
+        <img src="/assets/images/title.svg" alt="易経くじロゴ" class="logo" />
 
         <div class="auth-hamburger-wrapper">
             <div class="hamburger" id="hamburger">
@@ -145,9 +132,11 @@
     </footer>
     <div id="nav-overlay" class="nav-overlay hidden">
     </div>
+    
     <script src="script-mobile.js" defer></script>
     <script src="logic.js" defer></script>
     <script src="ui.js" defer></script>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
