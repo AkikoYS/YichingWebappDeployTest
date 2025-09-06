@@ -7,17 +7,11 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
     font-family: sans-serif;
     background-color: #ffffff;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-}
-
-/* フッターが被らないように余白追加 */
-body {
-    padding-bottom: 56px;
-    /* フッターの高さに合わせて調整 */
 }
 
 /* ------------
@@ -37,7 +31,6 @@ body {
     padding: 0 16px;
     box-sizing: border-box;
     border-bottom: 1px solid #ddd;
-
 }
 
 /* ロゴ画像 */
@@ -221,6 +214,7 @@ main {
     justify-content: center;
     width: 100%;
     height: 100%;
+    position: relative;
 }
 
 /*instructionメッセージ*/
@@ -229,6 +223,7 @@ main {
     pointer-events: none;
     transition: opacity 0.5s ease;
     margin-top: 300px;
+    text-align: center;
 }
 
 .instruction.visible {
@@ -241,6 +236,50 @@ main {
     display: none;
     opacity: 0;
     pointer-events: none;
+}
+
+/* 🟣 爻メッセージ専用：スライドアニメ */
+.instruction.line {
+    font-family: "Noto Sans JP", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 300px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(100%);
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    z-index:5;
+}
+
+/* 「陰」「陽」だけ強調 */
+.instruction.line .yy {
+    font-size: 1.2em;
+    line-height: 1;
+    display: inline-block;
+    transform: translateY(1px);
+}
+
+.instruction.line .yin {
+    color: #1a73e8;
+}
+
+.instruction.line .yang {
+    color: #e53935;
+}
+
+.instruction.line.show {
+    opacity: 1;
+    pointer-events: none;
+    transform: translateX(0);
+}
+
+.instruction.line.hide {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-100%);
 }
 
 /* スピナー反応アニメーション */

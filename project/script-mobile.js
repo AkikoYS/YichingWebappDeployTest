@@ -100,7 +100,7 @@ function resetSpinnerState() {
 
     const instructionText = document.getElementById("instructionText");
     if (instructionText) {
-        instructionText.textContent = "こころに念じながら上爻が出るまでクリックしてください";
+        instructionText.textContent = "こころに念じながら上爻が出るまでクリックするよ";
         instructionText.classList.remove("hidden");
         instructionText.classList.add("visible");
 
@@ -169,45 +169,55 @@ function init() {
 }
 
 //❹screen2: スピナーを６回クリックして本卦を出す
+
 function handleSpinnerClick() {
     const currentScreen = document.querySelector(".screen.active")?.id;
     if (currentScreen !== "screen-spinner") return; // ✅ スピナー画面以外は無視
-
     if (alreadyClicked || !animation) return;
 
     const instructionText = document.getElementById("instructionText");
     const spinnerEl = document.getElementById("mainSpinner");
-    const overlay = document.getElementById("spinner-overlay");
 
     if (!isSpinning) {
         animation.play();
         isSpinning = true;
-    } else {
-        isSpinning = false;
-        const currentFrame = animation.currentFrame;
-        animation.goToAndStop(currentFrame, true);
+        return;
+    }
+    // === スピン停止（結果確定） ===
+    isSpinning = false;
+    const currentFrame = animation.currentFrame;
+    animation.goToAndStop(currentFrame, true);
 
-        // scale up/downのアニメーション
-        const spinnerFeedbackWrapper = document.getElementById("spinner-anim-wrapper");
+    // scale up/downのアニメーション
+    const spinnerFeedbackWrapper = document.getElementById("spinner-anim-wrapper");
+    if (spinnerFeedbackWrapper) {
+        spinnerFeedbackWrapper.classList.add("spinner-feedback");
 
-        if (spinnerFeedbackWrapper) {
-            spinnerFeedbackWrapper.classList.add("spinner-feedback");
-
-            spinnerFeedbackWrapper.addEventListener("animationend", () => {
-                spinnerFeedbackWrapper.classList.remove("spinner-feedback");
-            }, { once: true });
-        }
+        spinnerFeedbackWrapper.addEventListener("animationend", () => {
+            spinnerFeedbackWrapper.classList.remove("spinner-feedback");
+        }, { once: true });
 
         navigator.vibrate?.(100);
         playSoundEffect("/assets/sounds/click.mp3");
 
+        // 陰陽決定
         const yinYang = Math.random() < 0.5 ? "0" : "1";
         resultArray += yinYang;
         clickCount++;
 
-        const lineNames = ["初", "二", "三", "四", "五", "上"];
-        instructionText.textContent = `${lineNames[clickCount - 1]}爻は${yinYang === "0" ? "陰" : "陽"}です`;
+        // 🟣 ガイド要素は重なり防止のため一旦フェードアウト（従来通りのクラス運用）
+        if (instructionText) {
+            instructionText.classList.remove("visible");
+            instructionText.classList.add("hidden");
+        }
+        // 🟣 爻メッセージはスライド演出で差し替え
+        const label = ["初", "二", "三", "四", "五", "上"][clickCount - 1] || `${clickCount}`;
+        const yy = (yinYang === "0")
+            ? '<span class="yy yin">陰</span>'
+            : '<span class="yy yang">陽</span>';
+        updateInstruction(`${label}爻は${yy}です`);
 
+        // 6本そろったら遷移
         if (clickCount >= 6) {
             alreadyClicked = true;
 
@@ -216,13 +226,37 @@ function handleSpinnerClick() {
             spinnerEl.style.transition = "transform 1s ease";
             spinnerEl.style.transform = "scale(0)";
 
-            // ✅ 本卵をセット
+            // ✅ 本卦をセット
             originalHexagram = getHexagramByArray(resultArray);
 
             setTimeout(() => {
                 showResultScreenWithTransition(); // アニメで切り替え
             }, 800);
         }
+    }
+}
+
+// --- 爻のtextInstructionのスライド演出
+function updateInstruction(text) {
+    const container = document.querySelector("#screen-spinner .section-body");
+    if (!container) return;
+
+    const oldEl = container.querySelector(".instruction.line.show");
+
+    const newEl = document.createElement("p");
+    newEl.className = "instruction line";
+    newEl.innerHTML = text;
+    container.appendChild(newEl);
+
+    // 右からイン
+    void newEl.offsetWidth;
+    newEl.classList.add("show");
+
+    // 古いのは左へアウト
+    if (oldEl) {
+        oldEl.classList.remove("show");
+        oldEl.classList.add("hide");
+        oldEl.addEventListener("transitionend", () => oldEl.remove(), { once: true });
     }
 }
 

@@ -1203,26 +1203,33 @@ function renderSaveButton(pdfUri) {
         resetButton.style.display = "inline-block";
     }
 }
-//結果保存ログ（Firebase）
+
+// 結果保存ログ（Firebase）
 function saveCurrentFortuneToLog(pdfUri) {
-    // 🔄 localStorage から復元（もしグローバル変数が未定義なら）
-    originalHexagram ??= JSON.parse(localStorage.getItem("originalHexagram") || "{}");
-    cachedChangedHexagram ??= JSON.parse(localStorage.getItem("changedHexagram") || "{}");
-    reverseHexagram ??= JSON.parse(localStorage.getItem("reverseHexagram") || "{}");
-    souHexagram ??= JSON.parse(localStorage.getItem("souHexagram") || "{}");
-    goHexagram ??= JSON.parse(localStorage.getItem("goHexagram") || "{}");
-    cachedChangedLineIndex ??= parseInt(localStorage.getItem("changedLineIndex"), 10);
-    userQuestion ??= localStorage.getItem("userQuestion") || "";
-    fortunesSummary ??= document.querySelector(".fortune-summary")?.innerText || "";
+    // 🔄 localStorage から復元（未宣言でも落ちないよう globalThis 経由で初期化）
+    globalThis.originalHexagram ??= JSON.parse(localStorage.getItem("originalHexagram") || "{}");
+    globalThis.cachedChangedHexagram ??= JSON.parse(localStorage.getItem("changedHexagram") || "{}");
+    globalThis.reverseHexagram ??= JSON.parse(localStorage.getItem("reverseHexagram") || "{}");
+    globalThis.souHexagram ??= JSON.parse(localStorage.getItem("souHexagram") || "{}");
+    globalThis.goHexagram ??= JSON.parse(localStorage.getItem("goHexagram") || "{}");
 
+    // 変爻インデックス
+    globalThis.cachedChangedLineIndex ??= parseInt(localStorage.getItem("changedLineIndex"), 10);
+    if (Number.isNaN(globalThis.cachedChangedLineIndex)) {
+        globalThis.cachedChangedLineIndex = null;
+    }
 
+    // 質問は空文字で初期化
+    globalThis.userQuestion ??= (localStorage.getItem("userQuestion") || "");
+
+    // 要約は DOM から毎回取り直し（空白除去）
+    const fortunesSummary = (document.querySelector(".fortune-summary")?.innerText || "").trim();
 
     console.log("🟢 saveToFirestore() 実行");
-
-    console.log("📌 userQuestion:", userQuestion);
+    console.log("📌 userQuestion:", globalThis.userQuestion);
     console.log("📌 fortunesSummary:", fortunesSummary);
 
-    if (!fortunesSummary.trim()) {
+    if (!fortunesSummary) {
         showToast("保存に必要な情報がそろっていません。", {
             id: "incomplete-toast",
             isWarning: true,
@@ -1241,14 +1248,14 @@ function saveCurrentFortuneToLog(pdfUri) {
 
     const logEntry = {
         timestamp,
-        question: userQuestion || "(未記入)",
+        question: globalThis.userQuestion || "(未記入)",
         fortunesSummary,
-        originalHexagram,
-        cachedChangedHexagram,
-        reverseHexagram,
-        souHexagram,
-        goHexagram,
-        cachedChangedLineIndex,
+        originalHexagram: globalThis.originalHexagram,
+        cachedChangedHexagram: globalThis.cachedChangedHexagram,
+        reverseHexagram: globalThis.reverseHexagram,
+        souHexagram: globalThis.souHexagram,
+        goHexagram: globalThis.goHexagram,
+        cachedChangedLineIndex: globalThis.cachedChangedLineIndex,
         pdfStatus: pdfUri ? "✅ PDFダウンロード済み" : "未ダウンロード"
     };
 
@@ -1256,24 +1263,46 @@ function saveCurrentFortuneToLog(pdfUri) {
         const firestoreEntry = {
             ...logEntry,
             uid: auth.currentUser.uid,
+            // Firestore 側はサーバ時刻優先
             timestamp: serverTimestamp()
         };
 
         addDoc(collection(db, "logs"), firestoreEntry)
             .then((docRef) => {
                 console.log("✅ Firestore に保存成功:", docRef.id);
-                // 🔽 ここで占い状態をローカルストレージにも一時保存
+                // 一時保存（既存の処理を踏襲）
                 saveFortuneToTemp();
                 showToast("✅ ログが保存されました", { duration: 4000 });
+
+                // ✅ ボタンの状態を「保存済み」に変更
+                const saveButton = document.getElementById("save-button");
+                if (saveButton) {
+                    saveButton.disabled = true;
+                    saveButton.style.opacity = 0.6;
+                    saveButton.style.backgroundColor = "#000000";
+                    saveButton.textContent = ""; // クリア
+
+                    const staticText = document.createTextNode("✅ ");
+                    const link = document.createElement("a");
+                    link.href = "log.html";
+                    link.textContent = "ログ一覧ページ";
+                    link.className = "save-link";
+                    const suffix = document.createTextNode(" に保存しました");
+
+                    saveButton.appendChild(staticText);
+                    saveButton.appendChild(link);
+                    saveButton.appendChild(suffix);
+                }
+
+                const instr = document.getElementById("instructionText");
+                if (instr) instr.textContent = "";
             })
             .catch((error) => {
                 console.error("❌ Firestore 保存エラー:", error);
-                showToast(`❌ Firestore 保存に失敗しました", ${error.message}`, {
+                showToast(`❌ Firestore 保存に失敗しました: ${error.message}`, {
                     isWarning: true,
                     duration: 6000
-                }
-
-                );
+                });
             });
     } else {
         showToast("⚠️ Googleにログインしてください", {
@@ -1283,30 +1312,9 @@ function saveCurrentFortuneToLog(pdfUri) {
         });
         return;
     }
-    // ✅ ボタンを無効化・状態表示変更
-    const saveButton = document.getElementById("save-button");
-    if (saveButton) {
-        saveButton.disabled = true;
-        saveButton.style.opacity = 0.6;
-        saveButton.style.backgroundColor = "#000000";
-
-        // 中身を空にしてからリンク付きのテキストを挿入
-        saveButton.textContent = ""; // 初期化
-
-        const staticText = document.createTextNode("✅ ");
-        const link = document.createElement("a");
-        link.href = "log.html";
-        link.textContent = "ログ一覧ページ";
-        link.className = "save-link";
-        const suffix = document.createTextNode(" に保存しました");
-
-        saveButton.appendChild(staticText);
-        saveButton.appendChild(link);
-        saveButton.appendChild(suffix);
-    }
-
-    document.getElementById("instructionText").textContent = "";
 }
+
+
 //PDFを保存しますか？というトースト表示
 function showPdfDownloadToast(pdfUri) {
     showToast("易断結果をPDFにできます", {
