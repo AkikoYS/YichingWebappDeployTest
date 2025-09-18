@@ -8,10 +8,21 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    font-family: sans-serif;
+    font-family: "uddigikyokasho-pro", sans-serif;
+    font-weight: 400;
+    font-style: normal;
     background-color: #ffffff;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: "uddigikyokasho-pro", sans-serif;
+    font-weight: 400;
+    /* 太字化を防ぐ */
 }
 
 /* ------------
@@ -31,6 +42,16 @@ body {
     padding: 0 16px;
     box-sizing: border-box;
     border-bottom: 1px solid #ddd;
+}
+
+/* ロゴを包む <a> 自体に高さを与える＆インラインフレックスで安定表示 */
+.mobile-header a[data-home-link] {
+    display: inline-flex;
+    /* ← 高さ・整列が効く */
+    align-items: center;
+    height: 100%;
+    /* ← ヘッダーと同じ高さを持たせる */
+    text-decoration: none;
 }
 
 /* ロゴ画像 */
@@ -109,6 +130,7 @@ main {
     flex-direction: column;
     padding: 0 16px;
     height: 100%;
+    position: relative;
 }
 
 /* 一般的な結果画面 */
@@ -126,6 +148,25 @@ main {
     opacity: 0;
     pointer-events: none;
 }
+
+/* フィンガー表示 */
+#tap-helper {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    /* 中央配置 */
+    pointer-events: none;
+    /* 下のスピナーを押せる */
+    z-index: 9999;
+}
+
+.finger-lottie {
+    width: 100px;
+    height: 100px;
+    transform: translate(100px, -30px);
+}
+
 
 /* 結果表示（卦、爻） */
 #screen-result {
@@ -168,9 +209,9 @@ main {
 --------------*/
 #mainSpinner {
     position: absolute;
-    top: 50%;
+    top: calc(50% - 135px);
+    /* 270px / 2 */
     left: 50%;
-    transform: translate(-50%, -55%);
     width: 270px;
     height: 270px;
     z-index: 5;
@@ -185,7 +226,6 @@ main {
     pointer-events: none;
     /* ← ✅ 見えなくなったら完全に無効に */
 }
-
 
 #spinner-anim-wrapper {
     width: 100%;
@@ -207,6 +247,69 @@ main {
 }
 
 /* スピナー画面、今後の展開、最後の１回クリック：コンテンツ縦並び＆中央 */
+
+/* instructionText */
+.instruction-wrap {
+    position: absolute;
+    top: 16px;
+    left: 0;
+    transform: none;
+    width: 100%;
+    padding: 0 16px;
+    z-index: 6;
+    pointer-events: none;
+}
+
+#startInstruction {
+    opacity: 1;
+    text-align: center;
+    margin: 50px 20px;
+    font-size: 0.8em;
+}
+
+/* 爻ごとのメッセージはアニメ制御 */
+
+.instruction {
+    font-size: 0.8em;
+}
+
+/* ガイドの通常アニメ */
+.instruction.tip.line {
+    display: block;
+    opacity: 0;
+    transform: translateX(150%);
+    transition: transform .25s ease, opacity .25s ease;
+    will-change: transform, opacity;
+}
+
+/* 入退場 */
+.instruction.tip.line.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.instruction.tip.line.hide {
+    transform: translateX(-150%);
+    opacity: 0;
+}
+
+/* ← 最優先：固定表示（やった！） */
+.instruction.tip.line.locked {
+    transition: none !important;
+    /* 以後アニメしない */
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+    visibility: visible !important;
+}
+
+/* 汎用 .hidden/.visible を使っているなら、ガイドだけは無効化 */
+.instruction.tip.line.locked.hidden {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+/*爻の結果*/
 .section-body {
     display: flex;
     flex-direction: column;
@@ -217,69 +320,45 @@ main {
     position: relative;
 }
 
-/*instructionメッセージ*/
-.instruction {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-    margin-top: 300px;
-    text-align: center;
-}
-
-.instruction.visible {
-    opacity: 1;
-    pointer-events: auto;
-    display: block;
-}
-
-.instruction.hidden {
-    display: none;
-    opacity: 0;
-    pointer-events: none;
-}
 
 /* 🟣 爻メッセージ専用：スライドアニメ */
-.instruction.line {
-    font-family: "Noto Sans JP", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+.ko-result.line {
     position: absolute;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 300px;
+    left: 50%;
+    top: 400px;
+    transform: translateX(-150%);
+    /* 初期位置＝画面外右 */
     opacity: 0;
-    pointer-events: none;
-    transform: translateX(100%);
-    transition: transform 0.5s ease, opacity 0.5s ease;
-    z-index:5;
+    white-space: nowrap;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 5;
 }
 
 /* 「陰」「陽」だけ強調 */
-.instruction.line .yy {
+.ko-result.line .yy {
     font-size: 1.2em;
     line-height: 1;
     display: inline-block;
     transform: translateY(1px);
 }
 
-.instruction.line .yin {
+.ko-result.line .yin {
     color: #1a73e8;
 }
 
-.instruction.line .yang {
+.ko-result.line .yang {
     color: #e53935;
 }
 
-.instruction.line.show {
+.ko-result.line.show {
     opacity: 1;
-    pointer-events: none;
-    transform: translateX(0);
+    transform: translateX(-50%);
 }
 
-.instruction.line.hide {
-    opacity: 0;
+.ko-result.line.hide {
     pointer-events: none;
-    transform: translateX(-100%);
+    transform: translateX(50%);
+    opacity: 0;
 }
 
 /* スピナー反応アニメーション */
@@ -401,7 +480,7 @@ main {
 
 #screen-result h2 {
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 400;
     color: #444;
 }
 
@@ -442,7 +521,7 @@ resultの内部
 /* 卦タイトル */
 .hexagram-title {
     font-size: 1.2rem;
-    font-weight: bold;
+    font-weight: 400;
     text-align: center;
     line-height: 1;
     margin-bottom: 2px;
@@ -450,7 +529,7 @@ resultの内部
 
 .hexagram-title-henko {
     font-size: 1.2rem;
-    font-weight: bold;
+    font-weight: 400;
     text-align: center;
     line-height: 1;
     margin-bottom: 10px;
@@ -525,7 +604,7 @@ resultの内部
 /*スタートボタン*/
 #startBtn {
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 400;
     padding: 12px 100px;
     border-radius: 8px;
     background-color: #f5f5f5;
@@ -533,7 +612,7 @@ resultの内部
     border: 1px solid #ccc;
     text-align: center;
     margin-top: auto;
-    margin-bottom: 200px;
+    margin-bottom: 300px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;

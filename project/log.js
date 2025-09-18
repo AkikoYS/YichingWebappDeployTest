@@ -1,3 +1,4 @@
+
 console.log("✅ log.js 読み込み完了");
 
 import { auth, db } from './firebase/firebase.js';
@@ -5,6 +6,25 @@ import { collection, query, where, getDocs, deleteDoc, doc, orderBy } from "http
 
 document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.querySelector("#log-table tbody");
+
+    // ★ 行内の個別 addEventListener をやめ、tbody 1本の委譲に統一
+    tbody.addEventListener("click", async (e) => {
+        const del = e.target.closest(".delete-button");
+        if (!del) return;
+
+        const tr = del.closest("tr");
+        const id = tr?.dataset?.id;
+        if (!id) return;
+
+        if (confirm("このログを削除してもよろしいですか？")) {
+            try {
+                await deleteDoc(doc(db, "logs", id));
+                tr.remove();
+            } catch (error) {
+                console.error("削除失敗:", error);
+            }
+        }
+    });
 
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -19,51 +39,80 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         const querySnapshot = await getDocs(q);
-
         console.log("📦 ログ件数:", querySnapshot.size);
 
-        querySnapshot.forEach((docSnap) => {
-            const entry = docSnap.data();
-            const tr = document.createElement("tr"); // ✅ これが必要！
+        // まとめて描画（1件ずつでもOKだけど、このままでも十分速い）
+        const frag = document.createDocumentFragment();
 
-            try {
-                tr.innerHTML = `
-                <td>${(entry.timestamp?.toDate?.()?.toLocaleString("ja-JP", {
+        querySnapshot.forEach((docSnap) => {
+            const entry = docSnap.data() ?? {};
+            // ★ 防御的に展開（無ければ空オブジェクト）
+            const orig = entry.original ?? {};
+            const changed = entry.changed ?? {};
+            const reverse = entry.reverse ?? {};
+            const sou = entry.sou ?? {};
+            const go = entry.go ?? {};
+            const changedLine = entry.changedLine ?? {};
+
+            const ts = entry.timestamp?.toDate?.() ?? null;
+            const tsText = ts
+                ? ts.toLocaleString("ja-JP", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
                     hour: "numeric",
                     minute: "2-digit",
                     hour12: true
-                })) || "(日時なし)"
-                    }</td>
-                <td>${entry.question || '(質問なし)'}</td>
-                <td>${entry.original.name || '不明'}<br><img src="/assets/images/hexagrams/${entry.original.image || ''}" alt=""></td>
-                <td>${entry.changedLine.label || '不明'}<br>${entry.changedLine.yaoText}</td>
-                <td>${entry.changed.name || '不明'}<br><img src="/assets/images/hexagrams/${entry.changed.image || ''}" alt=""></td>
-                <td>${entry.reverse?.name || "不明"}<br><img src="/assets/images/hexagrams/${entry.reverse?.image || ""}" alt=""></td>
-                <td>${entry.sou?.name || "不明"}<br><img src="/assets/images/hexagrams/${entry.sou?.image || ""}" alt=""></td>
-                <td>${entry.go?.name || "不明"}<br><img src="/assets/images/hexagrams/${entry.go?.image || ""}" alt=""></td>
-                <td class="delete-cell"><span class="delete-button">✖</span></td>
-            `;
-                tbody.appendChild(tr);
-            } catch (e) {
-                console.error("描画エラー:", e, entry);
-            }
+                })
+                : "(日時なし)";
 
-            // 🔴 Firestore削除処理（doc.id を使う）
-            tr.querySelector(".delete-button").addEventListener("click", async () => {
-                if (confirm("このログを削除してもよろしいですか？")) {
-                    try {
-                        await deleteDoc(doc(db, "logs", docSnap.id)); // ✅ 正しいコレクションパス
-                        tr.remove(); // 表からも削除
-                    } catch (error) {
-                        console.error("削除失敗:", error);
-                    }
-                }
-            });
+            const tr = document.createElement("tr");
+            tr.dataset.id = docSnap.id; // ★ 削除に使う
 
-            tbody.appendChild(tr);
+            tr.innerHTML = `
+        <td>${tsText}</td>
+        <td>${entry.question || "(質問なし)"}</td>
+
+        <td>
+          ${orig.name ?? "不明"}<br>
+          ${orig.image ? `<img src="./assets/images/hexagrams/${orig.image}" alt="">` : ""}
+        </td>
+
+        <td>
+          ${(changedLine.label ?? "不明")}<br>
+          ${(changedLine.yaoText ?? "")}
+        </td>
+
+        <td>
+          ${changed.name ?? "不明"}<br>
+          ${changed.image ? `<img src="./assets/images/hexagrams/${changed.image}" alt="">` : ""}
+        </td>
+
+        <td>
+          ${reverse.name ?? "不明"}<br>
+          ${reverse.image ? `<img src="./assets/images/hexagrams/${reverse.image}" alt="">` : ""}
+        </td>
+
+        <td>
+          ${sou.name ?? "不明"}<br>
+          ${sou.image ? `<img src="./assets/images/hexagrams/${sou.image}" alt="">` : ""}
+        </td>
+
+        <td>
+          ${go.name ?? "不明"}<br>
+          ${go.image ? `<img src="./assets/images/hexagrams/${go.image}" alt="">` : ""}
+        </td>
+
+        <td class="delete-cell">
+          <span class="delete-button" role="button" tabindex="0" aria-label="このログを削除">✖</span>
+        </td>
+      `;
+
+            frag.appendChild(tr);
         });
+
+        // ★ 一括で差し替え（重複appendをやめる）
+        tbody.innerHTML = "";
+        tbody.appendChild(frag);
     });
 });

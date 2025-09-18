@@ -9,8 +9,21 @@
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/note-style.css">
     <link rel="stylesheet" href="style/base.css">
-    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="./assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="./assets/icons/favicon-16x16_v2.ico">
+    <script src="https://use.typekit.net/mer0dxj.js"></script>
+        <script>
+            try {
+                Typekit.load({
+                    async: true,
+                    families: ['uddigikyokasho-pro'],   // ← 明示指定
+                    loading() { console.log('[Typekit] loading'); },
+                    active() { console.log('[Typekit] active'); },
+                    inactive() { console.warn('[Typekit] inactive'); }
+                });<!-- 例：ロゴ or 「易経くじ」など、ホームに戻すリンク -->
+           
+            } catch (e) { console.error(e); }
+        </script>
     <script src="mobile-view.js"></script>
 </head>
 
@@ -18,17 +31,22 @@
     <div class="background-image"></div>
     <header class="main-header">
         <div class="title-container">
-            <h1><a href="index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+            <h1><a data-home-link aria-label="易経くじに戻る">
+                <img src="./assets/images/title.svg" alt="易経くじロゴ" class="title-svg" />
+            </a></h1>
         </div>
         <nav class="nav-menu" id="nav-menu">
             <ul>
-                <li><a href="/index.html" class="nav-link">易経くじ</a></li>
-                <li><a href="/about-iching.html" class="nav-link">易経とは</a></li>
-                <li><span class="nav-link active">占い方</span></li>
-                <li><a href="/hexagrams.html" class="nav-link">六十四卦</a></li>
-                <li><a href="/bagua.html" class="nav-link">八卦</a></li>
-                <li><a href="/how-to-read" class="nav-link">卦の見方</a></li>
-                <li><a href="/log.html" class="nav-link">ログ一覧</a></li>
+                <li><a class="nav-link" data-home-link>易経くじ</a></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link active" aria-current="page">占い方</a></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read" class="nav-link">卦の見方</a></li>
+                <li><a href="logs.html" class="nav-link" aria-current="page">ログ一覧</a></li>
+        <li><a class="nav-link" data-switch="to-pc" href="index.html?pc=1">PC版 易経くじ</a></li>
+        <li><a class="nav-link" data-switch="to-mobile" href="index-mobile.html?mobile=1">スマホ版 易経くじ</a></li>
+
             </ul>
         </nav>
         <!-- PC用のgoogleログイン -->
@@ -45,14 +63,14 @@
             </div>
             <!-- スマホ用 Google アイコン -->
             <div class="auth-icon-container">
-                <img id="auth-icon" src="/assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                <img id="auth-icon" src="./assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
                     title="ログイン中 - タップでログアウト" />
             </div>
         </div>
     </header>
 
     <main class="main-container">
-        <img src="/assets/images/picture_howto.jpg" alt="くじの引き方" class="hero-page">
+        <img src="./assets/images/picture_howto.jpg" alt="くじの引き方" class="hero-page">
         <h2 class="h2-mobile">易経くじの引き方</h2>
 
         <ol>
@@ -83,6 +101,7 @@
     <script src="log.js"></script>
     <script src="ui.js"></script>
     <script type="module" src="/firebase/auth.js"></script>
+    <script src="mobile-view.js" defer></script>
    
 </body>
 

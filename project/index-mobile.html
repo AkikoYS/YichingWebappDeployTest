@@ -2,25 +2,59 @@
 <html lang="ja">
 
 <head>
+    <script>
+        /* tiny-ctx-boot: CSSより前に文脈フラグを立てる */
+        (function () {
+            const u = new URL(location.href), q = u.searchParams;
+            const wantsPC = q.get('pc') === '1', wantsMobile = q.get('mobile') === '1';
+            const onPCHome = /\/index\.html$/i.test(location.pathname);
+            const onMobileHome = /index-mobile\.html$/i.test(location.pathname);
+            const isSmall = matchMedia('(max-width:768px)').matches;
+            const ctx = wantsPC ? 'pc' : wantsMobile ? 'mobile' : onPCHome ? 'pc' : onMobileHome ? 'mobile' : (isSmall ? 'mobile' : 'pc');
+
+            // CSSがすぐ使えるよう <html> に即付与（フォールバック用）
+            document.documentElement.setAttribute('data-context', ctx);
+
+            // DOM構築後に <body> にも従来クラスを付与
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add(ctx === 'pc' ? 'ctx-pc' : 'ctx-mobile');
+            });
+        })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#310066">
     <title>易経くじ（スマホ版）</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style/style-mobile.css" />
-    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="./assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="./assets/icons/favicon-16x16_v2.ico">
     <link rel="manifest" href="manifest.json" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet"> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
     <script src="mobile-view.js"></script>
-
+    <script src="https://use.typekit.net/mer0dxj.js"></script>
+    <script>
+        try {
+            Typekit.load({
+                async: true,
+                families: ['uddigikyokasho-pro'],   // ← 明示指定
+                loading() { console.log('[Typekit] loading'); },
+                active() { console.log('[Typekit] active'); },
+                inactive() { console.warn('[Typekit] inactive'); }
+            });
+        } catch (e) { console.error(e); }
+    </script>
 </head>
 
 <body>
+    <!-- 強制トリガー用（画面外に隠す） -->
+    <span class="tk-uddigikyokasho-pro" style="position:absolute;left:-9999px">あいうえおABC123</span>
     <header class="mobile-header">
-        <img src="/assets/images/title.svg" alt="易経くじロゴ" class="logo" />
+
+        <img src="./assets/images/title.svg" alt="易経くじロゴ" class="logo" />
+
 
         <div class="auth-hamburger-wrapper">
             <div class="hamburger" id="hamburger">
@@ -33,15 +67,21 @@
         <!-- メニュー -->
         <nav class="nav-menu" id="nav-menu">
             <ul>
-                <li><span class="nav-link active">易経くじ</span></li>
-                <li><a href="/about-iching.html?mobile=1" class="nav-link">易経とは</a></li>
-                <li><a href="/how-to.html?mobile=1" class="nav-link">占い方</a></li>
-                <li><a href="/hexagrams.html?mobile=1" class="nav-link">六十四卦</a></li>
-                <li><a href="/bagua.html?mobile=1" class="nav-link">八卦</a></li>
-                <li><a href="/how-to-read.html?mobile=1" class="nav-link">卦の見方</a></li>
-                <!-- <li><a href="log.html" class="nav-link">ログ一覧</a></li> -->
+                <!-- ホーム：今いる“版”に戻る -->
+                <li><a class="nav-link active" data-home-link aria-current="page">易経くじ</a></li>
+
+                <!-- 他ページ：モバイル文脈をキープしたいので ?mobile=1 を付ける方針でOK -->
+                <li><a href="about-iching.html?mobile=1" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html?mobile=1" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html?mobile=1" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html?mobile=1" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read.html?mobile=1" class="nav-link">卦の見方</a></li>
+
+                <!-- 相互リンク：どの端末からでも反対側を開ける（CSSで片側だけ表示） -->
+                <li><a class="nav-link" data-switch="to-pc" href="index.html?pc=1">PC版 易経くじ</a></li>
+                <li><a class="nav-link" data-switch="to-mobile" href="index-mobile.html?mobile=1">スマホ版 易経くじ</a></li>
             </ul>
-        </nav>
+
     </header>
     <div id="confetti-lottie" class="confetti-animation"></div>
     <main>
@@ -61,8 +101,24 @@
 
         <!-- screen2: 本番スピナー画面 -->
         <section id="screen-spinner" class="screen centered hidden">
+            <!-- 指タップ誘導（オーバーレイ） -->
+            <div id="tap-helper" aria-hidden="true">
+                <div id="finger-lottie" class="finger-lottie"></div>
+            </div>
+
+    <div class="instruction-wrap">
+        <!-- 最初だけ出すガイド -->
+        <p id="startInstruction" class="instruction visible">
+            こころに念じながら上爻が出るまでクリックを続けるよ。まず、一回クリックすると初爻が出るよ
+        </p>
+    
+        <!-- 爻ごとに出るメッセージ用（空で開始） -->
+        <p id="instructionText" class="instruction tip line"></p>
+    </div>
+
+            <!-- 結果表示：従来の“その場”に出す（画面下部中央） -->
             <div class="section-body">
-                <p id="instructionText" class="instruction visible">こころに念じながら上爻が出るまでクリックするよ</p>
+                <p id="koResult" class="ko-result line" aria-live="polite"></p>
             </div>
         </section>
 
@@ -137,6 +193,7 @@
     <script src="script-mobile.js" defer></script>
     <script src="logic.js" defer></script>
     <script src="ui.js" defer></script>
+    <script src="mobile-view.js" defer></script>
 
     <script>
         if ('serviceWorker' in navigator) {

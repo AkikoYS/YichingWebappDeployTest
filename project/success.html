@@ -7,6 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style/base.css" />
     <link rel="stylesheet" href="style/success.css" />
+    <script src="https://use.typekit.net/mer0dxj.js" async></script>
+        <script>
+            try {
+                Typekit.load({
+                    async: true,
+                    families: ['uddigikyokasho-pro'],   // ← 明示指定
+                    loading() { console.log('[Typekit] loading'); },
+                    active() { console.log('[Typekit] active'); },
+                    inactive() { console.warn('[Typekit] inactive'); }
+                });
+            } catch (e) { console.error(e); }
+        </script>
 </head>
 
 <body>
@@ -15,17 +27,22 @@
     <div class="layout">
         <header class="main-header" style="margin-bottom:0;">
             <div class="title-container">
-                <h1><a href="index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+                <h1><!-- 例：ロゴ or 「易経くじ」など、ホームに戻すリンク -->
+                <a data-home-link aria-label="易経くじに戻る">
+                    <img src="/assets/images/title.svg" alt="易経くじロゴ" class="title-svg" />
+                </a></h1>
             </div>
             <nav class="nav-menu" id="nav-menu">
                 <ul>
-                    <li><a href="/index.html" class="nav-link">易経くじ</a></li>
-                    <li><a href="/about-iching.html" class="nav-link">易経とは</a></li>
-                    <li><a href="/how-to.html" class="nav-link">占い方</a></li>
-                    <li><a href="/hexagrams.html" class="nav-link">六十四卦</a></li>
-                    <li><a href="/bagua.html" class="nav-link">八卦</a></li>
-                    <li><a href="/how-to-read.html" class="nav-link">卦の見方</a></li>
-                    <li><a href="/log.html" class="nav-link">ログ一覧</a></li>
+                    <li><a class="nav-link" data-home-link>易経くじ</a></li>
+                    <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                    <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                    <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                    <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                    <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                    <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+                    <li><a class="nav-link" data-switch="to-pc">PC版 易経くじ</a></li>
+                    <li><a class="nav-link" data-switch="to-mobile">スマホ版 易経くじ</a></li>
                 </ul>
             </nav>
             <!-- PC用のgoogleログイン -->
@@ -69,6 +86,7 @@
     <script type="module" src="firebase/auth.js"></script>
     <script type="module" src="success.js"></script>
 <script type="module" src="./ui.js"></script>
+<script src="mobile-view.js" defer></script>
 
     
 </body>

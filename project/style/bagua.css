@@ -1,158 +1,82 @@
-/* ------------------------------
-   アニメーション（八卦画像）
------------------------------- */
-.rotate-on-load {
-    animation: spin 4s ease-out forwards;
+.bagua-wrap {
+    display: grid;
+    place-items: center;
+    margin: 16px 0;
+}
+
+.bagua-svg {
+    width: min(92vw, 520px);
+    aspect-ratio: 1/1;
+    height: auto;
     display: block;
-    margin: 0 auto;
-}
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-@media (max-width: 768px) {
-    .rotate-on-load {
-        display: none;
-    }
 }
 
-/*---------------
-八卦カード／リストのcss
--------------------*/
-
-/* 八卦シンボルの文字サイズ拡大 */
-.hexagram-symbol {
-    font-size: 1.5em;
+.bagua-svg image {
+    pointer-events: none;
 }
 
-main table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 auto 1.5em;
-    /* ✅ テーブルを中央に */
+.bagua-svg path {
+    fill: transparent;
+    cursor: pointer;
+    pointer-events: all;
 }
 
-/* PCの通常表示 */
-@media (min-width: 769px) {
-    .mobile-card {
-        display: none;
-    }
-
-    main th,
-    main td {
-        border: 1px solid #ddd;
-        text-align: center;
-        padding: 5px 10px;
-        line-height: 1.2;
-    }
-
-    main th {
-        background-color: #f2f2f2;
-        font-size: 0.8em;
-        color: #666;
-        font-weight: bold;
-    }
-
-    main td {
-        font-size: 0.9em;
-        font-weight: bold;
-    }
-
-    .bigger-symbol {
-        font-size: 3em;
-    }
-
-    .name {
-        font-weight: bold;
-        font-size: 1.2em;
-    }
-
-    .furigana {
-        font-size: 0.7em;
-    }
-
-    main td:first-child main td:nth-child(4) {
-        min-width: 6em;
-        /* ✅ 横幅を確保 */
-        white-space: nowrap;
-        /* ✅ 折り返さない */
-    }
+.bagua-svg path:active {
+    fill: rgba(0, 0, 0, .25);
 }
 
-/* モバイル対応 */
-@media (max-width: 768px) {
-    .desktop-row {
-        display: none;
-    }
+.bagua-svg path:is(:hover, :focus-visible) {
+    fill: rgba(0, 0, 0, .2);
+}
 
-    main table {
-        border: none;
-    }
+/* 画面に重ねる */
+.toast {
+    position: fixed;
+    /* ←重ねる/空白を作らない */
+    left: 50%;
+    top: calc(18px + env(safe-area-inset-top, 0px));
+    transform: translateX(-50%) translateY(20px);
+    max-width: min(92vw, 480px);
+    width: auto;
+    background: rgba(0, 0, 0, .88);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: pre-line;
+    z-index: 3000;
+    /* 充分高く */
+    box-sizing: border-box;
 
-    main thead {
-        display: none;
-    }
+    opacity: 0;
+    pointer-events: none;
+    /* 非表示時は無効 */
+    transition: opacity .2s ease, transform .2s ease;
+}
 
-    main tbody {
-        display: block;
-    }
 
-    .mobile-card {
-        display: block;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        margin: 1em 0;
-        padding: 1em;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
 
-    .bagua-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        min-height: 90px;
-        padding-right: 220px;
-    }
 
-    .bagua-info {
-        margin-top: 1em;
-        padding-left: 30px;
-        font-size: 0.9em;
-        line-height: 1.5;
-        color: #444;
-    }
+/* モバイル専用ヒント（スマホ幅のみ表示） */
+.bagua-hint {
+    display: none;
+    margin: -30px 0 0;
+    font-size: 13px;
+    color: #666;
+}
 
-    .bagua-info .label {
-        font-weight: bold;
-        font-size: 0.8em;
-        color: #222;
-    }
+.u-strong {
+    font-weight: 600;
+}
 
-    .bagua-name img {
-        padding-left: 10px;
-        width: 90px;
-        height: auto;
-        display: block;
-    }
-
-    .bagua-symbol {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 90px;
-        height: auto;
-        display: block;
-    }
-
-    .bagua-symbol img {
-        width: 100%;
-        height: auto;
+@media (max-width: 640px) {
+    .bagua-hint {
         display: block;
     }
 }

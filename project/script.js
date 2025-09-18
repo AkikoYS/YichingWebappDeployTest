@@ -59,7 +59,7 @@ const spinnerAnimation = lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: false,
-    path: '/assets/animations/spinner-animation.json',
+    path: './assets/animations/spinner.json',
     rendererSettings: {
         preserveAspectRatio: 'none' // ← これがポイント！
     }
@@ -209,7 +209,7 @@ function maybeShowFinalFortuneButton() {
         finalButton.textContent = "総合的な易断を見る";
         finalButton.className = "variant-button";
         finalButton.onclick = () => {
-            playSoundEffect("/assets/sounds/click_final.mp3");
+            playSoundEffect("./assets/sounds/click_final.mp3");
             displayFinalFortune();
         }
 
@@ -451,7 +451,7 @@ function createHexagramHTML(hexagram) {
       <div class="hexagram-title">第${hexagram.number}卦：${nameWithRuby}<span style="font-size: 0.8em;">—${hexagram.composition}</span></div>
       <div class="hexagram-reading" style="text-align: center;">${hexagram.summary}</div>
       <div class="hexagram-svg">
-        <object data="/assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
+        <object data="./assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
       </div>
       <div class="description-text">${formattedDescription}</div>
       <div class="description-image">⚪︎イメージ：${hexagram.desimage}</div>
@@ -464,7 +464,7 @@ function createBackToOriginalButton() {
     button.className = "variant-button";
     button.id = "back-to-original-button";
     button.onclick = () => {
-        playSoundEffect("/assets/sounds/click_button.mp3");
+        playSoundEffect("./assets/sounds/click_button.mp3");
         const existingBackButton = document.getElementById("back-to-original-button");
         if (existingBackButton) existingBackButton.remove();
 
@@ -522,7 +522,7 @@ function showVariantButtons(originalHexagram) {
         button.classList.add("variant-button");
 
         button.onclick = () => {
-            playSoundEffect("/assets/sounds/click_button.mp3")// ボタン音
+            playSoundEffect("./assets/sounds/click_button.mp3")// ボタン音
             const buttonContainer = document.getElementById("variant-buttons");
             if (buttonContainer) buttonContainer.remove();
 
@@ -555,7 +555,7 @@ function showVariantButtons(originalHexagram) {
     finalBtn.classList.add("variant-button");
     finalBtn.style.display = "none"; // ← 初期は非表示
     finalBtn.onclick = () => {
-        playSoundEffect("/assets/sounds/click_final.mp3");
+        playSoundEffect("/sounds/click_final.mp3");
         displayFinalFortune();
     }
 
@@ -680,7 +680,7 @@ function startChangedHexagramSpin(originalHex) {
         }
         spinnerAnimation.goToAndStop(spinnerAnimation.currentFrame, true);
         isSpinning = false;
-        playSoundEffect("/assets/sounds/click.mp3");
+        playSoundEffect("./assets/sounds/click.mp3");
 
         //ランダムな位置で爻を反転させ、変卦を生成
         cachedChangedLineIndex = Math.floor(Math.random() * 6);
@@ -763,7 +763,7 @@ function displayChangedLine(index, hexagram) {
         const nameWithRuby = `<ruby>${hexagram.name}<rt>${hexagram.reading}</rt></ruby>`;
         const yaoName = yaoNames[index];
         const title = `第${hexagram.number}卦：${nameWithRuby} の ${yaoName}`;
-        const svgPath = `/assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
+        const svgPath = `./assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
         // ✅ ここで画像の読み込み確認
         const img = new Image();
         img.src = svgPath;
@@ -1116,7 +1116,7 @@ function displayFinalFortune() {
                 saveButton.parentNode.insertBefore(ctaBox, saveButton);
 
                 document.getElementById("purchase-button").addEventListener("click", () => {
-                    playSoundEffect("/assets/sounds/click_button.mp3")// ボタン音
+                    playSoundEffect("./assets/sounds/click_button.mp3")// ボタン音
                     handleLoginRequiredAction(() => {
                         window.location.href = "/ai-advice.html";
                     });
@@ -1191,7 +1191,7 @@ function renderSaveButton(pdfUri) {
 
     //googleにログイン
     saveButton.onclick = () => {
-        playSoundEffect("/assets/sounds/click_button.mp3");
+        playSoundEffect("./assets/sounds/click_button.mp3");
         handleLoginRequiredAction(() => {
             saveCurrentFortuneToLog(currentPdfUri);
         });
@@ -1353,7 +1353,7 @@ firebaseReady.then(() => {
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", () => {
-            playSoundEffect("/assets/sounds/click_button.mp3")// ボタン音
+            playSoundEffect("./assets/sounds/click_button.mp3")// ボタン音
             generatePdfFromSummary((pdfUri) => {
                 saveCurrentFortuneToLog(pdfUri);
             });

@@ -10,26 +10,44 @@
     <link rel="stylesheet" href="style/base.css">
     <link rel="stylesheet" href="style/log.css">
 
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
-
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/favicon-16x16_v2.ico">
+    <script src="https://use.typekit.net/mer0dxj.js"></script>
+    <script>
+        try {
+            Typekit.load({
+                async: true,
+                families: ['uddigikyokasho-pro'],   // ← 明示指定
+                loading() { console.log('[Typekit] loading'); },
+                active() { console.log('[Typekit] active'); },
+                inactive() { console.warn('[Typekit] inactive'); }
+            });
+        } catch (e) { console.error(e); }
+    </script>
 </head>
 
 <body>
     <header class="main-header">
         <div class="title-container">
-            <h1><a href="index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg"></a></h1>
+            <h1>
+                <a data-home-link aria-label="易経くじに戻る">
+                    <img src="/assets/images/title.svg" alt="易経くじロゴ" class="title-svg" />
+                </a>
+            </h1>
         </div>
 
         <nav class="nav-menu" id="nav-menu">
             <ul>
-                <li><a href="/index.html" class="nav-link">易経くじ</a></li>
-                <li><a href="/about-iching.html" class="nav-link">易経とは</a></li>
-                <li><a href="/how-to.html" class="nav-link">占い方</a></li>
-                <li><a href="/hexagrams.html" class="nav-link">六十四卦</a></li>
-                <li><a href="/bagua.html" class="nav-link">八卦</a></li>
-                <li><a href="/how-to-read.html" class="nav-link">卦の見方</a></li>
-                <li><span class="nav-link active">ログ一覧</span></li>
+                <li><a class="nav-link" data-home-link>易経くじ</a></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a hfef="log.html" class="nav-link active">ログ一覧</a></li>
+                <li><a class="nav-link" data-switch="to-pc" href="index.html?pc=1">PC版 易経くじ</a></li>
+                <li><a class="nav-link" data-switch="to-mobile" href="index-mobile.html?mobile=1">スマホ版 易経くじ</a></li>
+
             </ul>
         </nav>
         <!-- PC用のgoogleログイン -->
@@ -43,17 +61,14 @@
             <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
             <!-- スマホ用 Google アイコン -->
             <div class="auth-icon-container">
-                <img id="auth-icon" src="/assets/images/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
+                <img id="auth-icon" src="./assets/images/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
                     title="ログイン中 - タップでログアウト" />
             </div>
         </div>
     </header>
 
     <main>
-        <!-- <h2 style>あなたの占いログ</h2> -->
-        <!-- <div style="text-align: center; margin-top: 1em;">
-            <a href="index.html" class="variant-button" style="text-decoration: none;">易経くじに戻る</a>
-        </div> -->
+
         <div class="log-table-container" style="max-width: 1000px; margin: auto;">
             <table id="log-table">
                 <thead>
@@ -78,16 +93,17 @@
         <p><a href="feedback.html">📝 ご意見・ご要望はこちら</a></p>
     </footer>
 
-<!-- Javascript読み込み -->
+    <!-- Javascript読み込み -->
     <script src="firebase/env.js"></script>
     <script type="module" src="firebase/firebase.js"></script>
     <script type="module" src="/firebase/auth.js"></script>
     <script type="module" src="log.js"></script>
+    <script src="/scripts/context.js" defer></script>
     <script src="logic.js"></script>
     <script src="ui.js"></script>
     <!-- pdf生成 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <script src="mobile-view.js" defer></script>
 </body>
 
 </html>

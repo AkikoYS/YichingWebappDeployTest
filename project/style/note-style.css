@@ -73,7 +73,7 @@ main pre {
     background-color: #f9f8f6;
     padding: 1em;
     overflow-x: auto;
-    font-family: monospace;
+    /* font-family: monospace; */
     font-size: 0.9em;
     border-radius: 4px;
 }
@@ -111,7 +111,7 @@ main a:hover {
     border-collapse: collapse;
     width: 70%;
     table-layout: fixed;
-    font-family: 'serif';
+    /* font-family: 'serif'; */
     margin-left: auto;
     margin-right: auto;
     display: table;
@@ -141,7 +141,7 @@ main a:hover {
 }
 
 .hexagram {
-    font-family: monospace;
+    /* font-family: monospace; */
     font-size: 5em;
     line-height: 1;
     vertical-align: middle;

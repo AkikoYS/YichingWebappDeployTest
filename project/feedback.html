@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/note-style.css">
     <link rel="stylesheet" href="style/base.css">
+    <link rel="stylesheet" href="https://use.typekit.net/kcn8mrw.css">
+    <script src="https://use.typekit.net/mer0dxj.js"></script>
+    <script>
+        try {
+            Typekit.load({
+                async: true,
+                families: ['uddigikyokasho-pro'],   // ← 明示指定
+                loading() { console.log('[Typekit] loading'); },
+                active() { console.log('[Typekit] active'); },
+                inactive() { console.warn('[Typekit] inactive'); }
+            });
+        } catch (e) { console.error(e); }
+    </script>
 </head>
 
 <body>
@@ -28,7 +41,7 @@
         " allowfullscreen></iframe>
 
         <div class="back-link">
-            <a href="index.html" class="variant-button" style="color: white;">易経くじに戻る</a>
+            <a class="variant-button" data-home-link style="color: white;">易経くじに戻る</a>
         </div>
     </main>
 

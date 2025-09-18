@@ -18,6 +18,8 @@ let snapshotArrayForHenko = "";
 let lastScrollTop = 0;
 let isFooterScrollListenerSet = false;
 let appPhase = 'casting'; // 'casting' | 'result' | 'expansion'
+let fingerAnim = null;
+let didFirstTap = false;
 
 //スピナークリックのラッパー
 function handleSpinnerClickWrapper(e) {
@@ -79,7 +81,7 @@ function initSpinnerScreen() {
         renderer: "svg",
         loop: true,
         autoplay: false,
-        path: "/assets/animations/spinner-animation.json"
+        path: "./assets/animations/spinner.json"
     });
 
     animation.addEventListener("DOMLoaded", () => {
@@ -100,10 +102,10 @@ function resetSpinnerState() {
 
     const instructionText = document.getElementById("instructionText");
     if (instructionText) {
-        instructionText.textContent = "こころに念じながら上爻が出るまでクリックするよ";
-        instructionText.classList.remove("hidden");
-        instructionText.classList.add("visible");
+        instructionText.textContent = "こころに念じながら上爻が出るまでクリックを続けるよ。まず、一回クリックすると初爻が出るよ";
 
+        instructionText.classList.remove("show");
+        instructionText.classList.add("hide");
     }
 
     const spinnerEl = document.getElementById("mainSpinner");
@@ -168,14 +170,80 @@ function init() {
     });
 }
 
-//❹screen2: スピナーを６回クリックして本卦を出す
+//指操作
+function showTapHelper() {
+    const helper = document.getElementById('tap-helper');
+    if (!helper) return;
 
+    // Lottie 初期化（多重ロード防止）
+    const box = document.getElementById('finger-lottie');
+    if (box && window.lottie && !fingerAnim) {
+        fingerAnim = lottie.loadAnimation({
+            container: box,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'assets/animations/finger.json' // ← finger.json を置いたパス
+        });
+    } else if (fingerAnim) {
+        fingerAnim.play();
+    }
+    // 表示（もしCSSで初期opacity:0にしていたら外すなど）
+    helper.classList.remove('vanish');
+    helper.style.opacity = '1';
+    helper.style.transform = 'none';
+}
+
+function hideTapHelper() {
+    const helper = document.getElementById('tap-helper');
+    if (!helper) return;
+    helper.classList.add('vanish');
+    // 完了後に停止＆非表示化（任意）
+    helper.addEventListener('transitionend', () => {
+        if (fingerAnim) fingerAnim.pause();
+        // helper.style.display = 'none'; // 後続画面で完全に消したい場合
+    }, { once: true });
+}
+
+// ▼ あなたの開始ボタン → スピナー画面に遷移するところで呼ぶ
+document.getElementById('startBtn')?.addEventListener('click', () => {
+    document.getElementById('screen-start')?.classList.add('hidden');
+    document.getElementById('screen-spinner')?.classList.remove('hidden');
+
+    didFirstTap = false;
+    showTapHelper();
+});
+
+// ▼ スピナーの“最初の押下”でフェード＆ズームアウト
+
+['mainSpinner', 'lottie-spinner'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener('click', () => {
+        if (didFirstTap) return;
+        didFirstTap = true;
+        hideTapHelper();
+    }, { capture: true });
+});
+
+//❹screen2: スピナーを６回クリックして本卦を出す
 function handleSpinnerClick() {
+
+
     const currentScreen = document.querySelector(".screen.active")?.id;
     if (currentScreen !== "screen-spinner") return; // ✅ スピナー画面以外は無視
     if (alreadyClicked || !animation) return;
 
-    const instructionText = document.getElementById("instructionText");
+    const startInstruction = document.getElementById("startInstruction");
+    const guide = document.getElementById("instructionText");
+
+    // 初回クリックで最初の説明をフェードアウト
+    if (clickCount === 0 && startInstruction) {
+        startInstruction.classList.remove("visible");
+        startInstruction.classList.add("hidden"); // CSSで hidden={opacity:0;display:none;} など
+    }
+
     const spinnerEl = document.getElementById("mainSpinner");
 
     if (!isSpinning) {
@@ -198,7 +266,7 @@ function handleSpinnerClick() {
         }, { once: true });
 
         navigator.vibrate?.(100);
-        playSoundEffect("/assets/sounds/click.mp3");
+        playSoundEffect("./assets/sounds/click.mp3");
 
         // 陰陽決定
         const yinYang = Math.random() < 0.5 ? "0" : "1";
@@ -206,10 +274,9 @@ function handleSpinnerClick() {
         clickCount++;
 
         // 🟣 ガイド要素は重なり防止のため一旦フェードアウト（従来通りのクラス運用）
-        if (instructionText) {
-            instructionText.classList.remove("visible");
-            instructionText.classList.add("hidden");
-        }
+        console.log("showGuideForClick called with:", clickCount);
+        showGuideForClick(clickCount);
+
         // 🟣 爻メッセージはスライド演出で差し替え
         const label = ["初", "二", "三", "四", "五", "上"][clickCount - 1] || `${clickCount}`;
         const yy = (yinYang === "0")
@@ -236,32 +303,121 @@ function handleSpinnerClick() {
     }
 }
 
-// --- 爻のtextInstructionのスライド演出
-function updateInstruction(text) {
-    const container = document.querySelector("#screen-spinner .section-body");
-    if (!container) return;
+// --- 爻の結果のスライド演出
+function updateInstruction(html) {
+    const el = document.getElementById('koResult');
+    if (!el) return;
 
-    const oldEl = container.querySelector(".instruction.line.show");
+    // 必要クラスを常に維持（念のため）
+    el.classList.add('ko-result', 'line');
 
-    const newEl = document.createElement("p");
-    newEl.className = "instruction line";
-    newEl.innerHTML = text;
-    container.appendChild(newEl);
-
-    // 右からイン
-    void newEl.offsetWidth;
-    newEl.classList.add("show");
-
-    // 古いのは左へアウト
-    if (oldEl) {
-        oldEl.classList.remove("show");
-        oldEl.classList.add("hide");
-        oldEl.addEventListener("transitionend", () => oldEl.remove(), { once: true });
+    // すでに表示中なら一度「左へアウト」→ 終わったら入れ替え → 右からイン
+    if (el.classList.contains('show')) {
+        el.classList.add('hide');          // 左へ
+        el.addEventListener('transitionend', () => {
+            el.classList.remove('show', 'hide');
+            el.innerHTML = html;             // ★ HTML を入れる（色付きspanを有効に）
+            // Reflow でリセットしてから右からイン
+            void el.offsetWidth;
+            el.classList.add('show');
+        }, { once: true });
+    } else {
+        // 初回：そのまま右からイン
+        el.innerHTML = html;               // ★ HTML を入れる
+        el.classList.remove('hide');
+        void el.offsetWidth;               // Reflow
+        el.classList.add('show');
     }
 }
 
+//---ガイド文のスライド演出
+// --- ガイド文のスライド演出（競合対策版）
+function showGuideForClick(count) {
+    const el = document.getElementById("instructionText");
+    if (!el) return;
+
+    const messages = {
+        1: "その調子！またポツポツっとな",
+        2: "二爻まで出たね。あと４回",
+        3: "あと３回だよ",
+        4: "あと２回！",
+        5: "あと１回で卦が出るよ！",
+        6: "やった！"
+    };
+    const msg = messages[count];
+    if (!msg) return;
+
+    // 6回目を一度出したら以後は触らない
+    if (el._locked) return;
+
+    el.classList.add("instruction", "tip", "line");
+    clearTimeout(el._guideTimer);
+
+    // 退場中に来たら、メッセージだけ更新して終了（transitionendで表示）
+    if (el._exiting) {
+        el._pendingMsg = msg;
+        el._pendingCount = count;
+        return;
+    }
+
+    el._guideTimer = setTimeout(() => {
+        // すでに表示中なら一度退場 → 完了後に入場
+        if (el.classList.contains("show")) {
+            el._exiting = true;
+            el._pendingMsg = msg;
+            el._pendingCount = count;
+
+            // まず show を外し、退場へ
+            el.classList.remove("show");
+            // 強制リフローでトランジション確定
+            void el.offsetWidth;
+            el.classList.add("hide");
+
+            el.addEventListener("transitionend", () => {
+                // 退場完了：hide を外して次の文に差し替え → 再入場
+                el.classList.remove("hide");
+                const nextMsg = el._pendingMsg ?? msg;
+                const nextCount = el._pendingCount ?? count;
+
+                el.textContent = nextMsg;
+                void el.offsetWidth;
+                el.classList.add("show");
+
+                // 固定表示（以後変更禁止）
+                if (nextCount === 6) {
+                    el.classList.add("locked");
+                    el._locked = true;
+                }
+
+                el._exiting = false;
+                el._pendingMsg = undefined;
+                el._pendingCount = undefined;
+            }, { once: true });
+
+        } else {
+            // 非表示状態：クリーンにしてから入場
+            el.classList.remove("hide", "show", "locked");
+            el.textContent = msg;
+            void el.offsetWidth;
+            el.classList.add("show");
+
+            if (count === 6) {
+                el.classList.add("locked");
+                el._locked = true;
+            }
+        }
+    }, 300); // 爻の表示から少し遅らせる
+}
+
+
 //❺ screen3->4: 卦の結果表示に伴うスピナーズームアウト、結果のズームイン
 function showResultScreenWithTransition() {
+    const guide = document.getElementById("instructionText");
+    if (guide) {
+        guide._locked = false;          // ロック解除
+        // 必要なら消しておく
+        guide.classList.remove("show", "hide");
+    }
     const spinnerWrapper = document.getElementById("spinner-anim-wrapper");
     const resultScreen = document.getElementById("screen-result");
     const instructionText = document.getElementById("instructionText");
@@ -670,7 +826,6 @@ function showCachedChangedHexagram(originalHex) {
     bindFinalButtons(); // ボタン再バインド
 }
 
-//17 最終的な易断の内容表示
 // 17 最終的な易断の内容表示（confetti の有無を切り替え可能）
 function showFinalFortuneScreenMobile({ skipConfetti = false } = {}) {
     const html = generateFortunesSummaryHTML();
@@ -710,7 +865,6 @@ function showFinalFortuneScreenMobile({ skipConfetti = false } = {}) {
         setupMobileFinalCTAEvents();
     }, ctaDelay);
 }
-
 
 function resetOverflow() {
     document.body.style.overflow = "auto";
@@ -1137,7 +1291,6 @@ function resetCastingState() {
         handleSpinnerClickCasting(); // ←従来の「6回カウントして本卦を出す」処理
     });
 }
-
 
 //スクロールに伴うフッターの表示、非表示
 function enableFooterScrollControl() {

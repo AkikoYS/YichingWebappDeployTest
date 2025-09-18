@@ -64,7 +64,7 @@ onAuthStateChanged(auth, (user) => {
             if (authIcon) {
                 authIcon.style.display = "inline-block";
                 // ルート基準の絶対パスで固定（/pc 配下でも崩れない）
-                authIcon.src = "/assets/icons/google-icon-1.svg";
+                authIcon.src = "./assets/icons/google-icon-1.svg";
                 authIcon.alt = "Googleアカウント";
                 authIcon.title = "ログイン中 - タップでログアウト";
             }

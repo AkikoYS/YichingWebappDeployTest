@@ -2,32 +2,25 @@
 <html lang="jp">
 
 <head>
-<script>
-    (() => {
-        // 一度だけ実行（戻るで白紙を防ぐ）
-        if (sessionStorage.getItem('routed') === '1') return;
+    <script>
+        /* tiny-ctx-boot: CSSより前に文脈フラグを立てる */
+        (function () {
+            const u = new URL(location.href), q = u.searchParams;
+            const wantsPC = q.get('pc') === '1', wantsMobile = q.get('mobile') === '1';
+            const onPCHome = /\/index\.html$/i.test(location.pathname);
+            const onMobileHome = /index-mobile\.html$/i.test(location.pathname);
+            const isSmall = matchMedia('(max-width:768px)').matches;
+            const ctx = wantsPC ? 'pc' : wantsMobile ? 'mobile' : onPCHome ? 'pc' : onMobileHome ? 'mobile' : (isSmall ? 'mobile' : 'pc');
 
-        // ルート(index.html)のときだけ実行
-        const p = location.pathname.replace(/\/+$/, '');
-        if (!(p === '' || p === '/index.html')) return;
+            // CSSがすぐ使えるよう <html> に即付与（フォールバック用）
+            document.documentElement.setAttribute('data-context', ctx);
 
-        // UA or 画面幅でモバイル判定（PC強制/モバイル強制はクエリで上書き可）
-        const q = new URLSearchParams(location.search);
-        if (q.get('pc') === '1') localStorage.setItem('forcePC', 'true');
-        if (q.get('mobile') === '1') localStorage.setItem('forceMobile', 'true');
-        const forcePC = localStorage.getItem('forcePC') === 'true';
-        const forceMobile = localStorage.getItem('forceMobile') === 'true';
-
-        const ua = navigator.userAgent.toLowerCase();
-        const isMobileUA = /iphone|ipod|android.*mobile/.test(ua);
-        const isNarrow = window.matchMedia?.('(max-width: 820px)').matches;
-        const preferMobile = forceMobile || (!forcePC && (isMobileUA || isNarrow));
-
-        sessionStorage.setItem('routed', '1');
-        location.replace(preferMobile ? '/index-mobile.html' : '/pc/index.html');
-    })();
-</script>
-
+            // DOM構築後に <body> にも従来クラスを付与
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add(ctx === 'pc' ? 'ctx-pc' : 'ctx-mobile');
+            });
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>易経くじ</title>
@@ -36,25 +29,43 @@
     <link rel="stylesheet" href="style/spinner.css">
     <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
     <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet"> -->
+    <script src="https://use.typekit.net/mer0dxj.js"></script>
+    <script>
+        try {
+            Typekit.load({
+                async: true,
+                families: ['uddigikyokasho-pro'],   // ← 明示指定
+                loading() { console.log('[Typekit] loading'); },
+                active() { console.log('[Typekit] active'); },
+                inactive() { console.warn('[Typekit] inactive'); }
+            });
+        } catch (e) { console.error(e); }
+    </script>
+
 </head>
 
 <body>
+    <span class="tk-uddigikyokasho-pro" style="position:absolute;left:-9999px">あいうえおABC123</span>
     <div class="background-image"></div>
     <header class="main-header">
         <div class="title-container">
-            <h1><a href="index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
+            <h1>
+                <img src="./assets/images/title.svg" alt="易経くじ" class="title-svg" />
+            </h1>
         </div>
         <nav class="nav-menu" id="nav-menu">
             <ul>
-                <li><span class="nav-link active">易経くじ</span></li>
-                <li><a href="/about-iching.html" class="nav-link">易経とは</a></li>
-                <li><a href="/how-to.html" class="nav-link">占い方</a></li>
-                <li><a href="/hexagrams.html" class="nav-link">六十四卦</a></li>
-                <li><a href="/bagua.html" class="nav-link">八卦</a></li>
-                <li><a href="/how-to-read.html" class="nav-link">卦の見方</a></li>
-                <li><a href="/log.html" class="nav-link">ログ一覧</a></li>
-                <li><a href="/index-mobile.html?mobile=1" class="nav-link">モバイル版 易経くじ</a></li>
+                <li><a class="nav-link" data-home-link>易経くじ</a></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a href="bagua.html" class="nav-link">八卦</a></li>
+                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+                <li><a class="nav-link" data-switch="to-pc" href="index.html?pc=1">PC版 易経くじ</a></li>
+                <li><a class="nav-link" data-switch="to-mobile" href="index-mobile.html?mobile=1">スマホ版 易経くじ</a></li>
+
             </ul>
         </nav>
         <!-- PC用のgoogleログイン -->
@@ -80,7 +91,9 @@
 
     <main class="main-container">
         <div id="question-section" class="fade show">
-            <h2 style="text-align:center">天に問いたい内容を記してください（任意）</h2>
+            <h2 style="text-align:center">
+                天に問いたい内容を記してください（任意）
+            </h2>
             <textarea id="question-input" maxlength="50" placeholder="例：転職するべきでしょうか？"></textarea>
             <div id="question-warning" style="color: red; font-size: 0.9em; text-align: center; display: none;">
                 文字数は50字以内にしてください。
@@ -128,11 +141,7 @@
     <script src="ui.js" defer></script>
     <script type="module" src="script.js"></script>
     <script type="module" src="firebase/auth.js"></script>
-    <!-- <script>
-        if (/iPhone|Android.*Mobile/.test(navigator.userAgent)) {
-            window.location.href = 'index-mobile.html';
-        }
-    </script> -->
+    <script src="mobile-view.js" defer></script>
 
 
 </body>

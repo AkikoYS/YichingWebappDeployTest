@@ -9,6 +9,18 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/pc/index.html",
+        "destination": "/index.html?pc=1",
+        "type": 301
+      },
+      {
+        "source": "/pc",
+        "destination": "/index.html?pc=1",
+        "type": 301
+      }
     ]
   }
 }

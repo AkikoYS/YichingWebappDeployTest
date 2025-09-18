@@ -1,113 +1,70 @@
-// mobile-view.js（UI制御だけ・PC優先ロジックに修正）
+// mobile-view.js
 (function () {
-    // ---- A) 端末/強制フラグの判定 ----
-    const url = new URL(location.href);
-    const q = url.searchParams;
-    const onIndexMobile = /\/index-mobile\.html$/i.test(location.pathname);
-    const qMobile = q.get("mobile") === "1" || q.get("mctx") === "1";
-    const qPC = q.get("pc") === "1";
+  const q = new URL(location.href).searchParams;
 
-    // PC/モバイル強制（任意運用）
-    const forcePC = qPC || localStorage.getItem("forcePC") === "true";
-    const forceMobile = qMobile || localStorage.getItem("forceMobile") === "true";
+  // 現在のHTMLがあるディレクトリ（例: /project/）
+  const BASE = location.pathname.replace(/[^/]*$/, '');
 
-    // 端末判定（PC優先・UA非依存）
-    const isCoarse = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
-    const isNarrow = typeof matchMedia === "function" && matchMedia("(max-width: 820px)").matches;
-    const deviceLooksMobile = isCoarse || isNarrow;
+  // 現在地判定（末尾だけ見る）
+  const onPCHome = /\/index\.html$/i.test(location.pathname) || location.pathname.endsWith('/');
+  const onMobileHome = /\/index-mobile\.html$/i.test(location.pathname);
+  const currentCtx = onPCHome ? 'pc' : (onMobileHome ? 'mobile' : 'unknown');
 
-    // 優先ルール: forcePC > forceMobile > 端末見た目
-    const preferredMode = forcePC ? "pc" : (forceMobile ? "mobile" : (deviceLooksMobile ? "mobile" : "pc"));
+  // 明示オーバーライド > 画面幅
+  const wantsPC = q.get('pc') === '1';
+  const wantsMobile = q.get('mobile') === '1';
+  const mqMobile = matchMedia('(max-width: 768px)');
+  const desiredCtx = wantsPC ? 'pc' : wantsMobile ? 'mobile' : (mqMobile.matches ? 'mobile' : 'pc');
 
-    // ---- B) モバイル文脈フラグの維持（“本当にモバイルのときだけ”）----
-    if (onIndexMobile || qMobile) {
-        try { sessionStorage.setItem("fromMobileApp", "1"); } catch { }
-    }
-    const fromMobileStored = sessionStorage.getItem("fromMobileApp") === "1";
-    const fromMobileActive = (preferredMode !== "pc") && (qMobile || onIndexMobile || fromMobileStored);
+  // ここから作るURLはすべて相対（BASE起点）。ローカル/本番どちらもOK
+  const HOME = {
+    pc: `${BASE}index.html?pc=1`,
+    mobile: `${BASE}index-mobile.html?mobile=1`
+  };
 
-    // ---- C) HTMLにクラス付与（CSS出し分け用）----
-    if (fromMobileActive) document.documentElement.classList.add("from-mobile");
-    if (/\/pc\/index\.html$/i.test(location.pathname)) {
-        document.documentElement.classList.add("is-pc-home");
-    }
+  // ホーム上のみ自動切替（実ページ優先）
+  if (!(wantsPC || wantsMobile) && (onPCHome || onMobileHome) && desiredCtx !== currentCtx) {
+    location.replace(HOME[desiredCtx]);
+    return;
+  }
 
-    // ---- D) 汎用DOM Ready ----
-    const ready = (fn) =>
-        (document.readyState === "loading")
-            ? document.addEventListener("DOMContentLoaded", fn, { once: true })
-            : fn();
+  // 早期に html に文脈をセット（CSS保険）
+  const earlyCtx = (currentCtx === 'unknown') ? desiredCtx : currentCtx;
+  document.documentElement.setAttribute('data-context', earlyCtx);
 
-    // ---- E) 共通: HOMEリンクの正規化（PCは常に index.html / モバイルは index-mobile.html?mobile=1）----
-    function normalizeHomeLinks(mode) {
-        const toIndex = (mode === "pc") ? "index.html" : "index-mobile.html?mobile=1";
-        document.querySelectorAll('a[href$="index.html"], a[href="/index.html"], a[href$="index-mobile.html"], a[href="/index-mobile.html"], a[data-home-link], a.home-link')
-            .forEach(a => a.setAttribute("href", toIndex));
-    }
+  // DOM後にナビ正規化
+  const ready = (fn) => (document.readyState !== 'loading') ? fn() : document.addEventListener('DOMContentLoaded', fn);
+  ready(() => {
+    const ctx = (currentCtx === 'unknown') ? desiredCtx : currentCtx;
 
-    // ---- F) ?mobile=1 の付与/除去（内部リンクのみ対象）----
-    function stampLinksForMobile(root = document) {
-        root.querySelectorAll("a[href]").forEach(a => {
-            const raw = a.getAttribute("href");
-            if (!raw || raw.startsWith("#")) return;
-            const isExternal = /^https?:\/\//i.test(raw);
-            const isFile = /\.(png|jpe?g|gif|webp|svg|pdf|zip|mp3|mp4|css|js)$/i.test(raw);
-            if (isExternal || isFile) return;
+    // bodyクラス（CSSで使う場合用）
+    document.body.classList.remove('ctx-pc', 'ctx-mobile');
+    document.body.classList.add(ctx === 'pc' ? 'ctx-pc' : 'ctx-mobile');
 
-            const t = new URL(raw, location.href);
-            if (!(t.searchParams.has("mobile") || t.searchParams.has("mctx"))) {
-                t.searchParams.set("mobile", "1");
-            }
-            a.setAttribute("href", t.pathname + t.search + t.hash);
-        });
-    }
-    function stripMobileParams(root = document) {
-        root.querySelectorAll("a[href]").forEach(a => {
-            const raw = a.getAttribute("href");
-            if (!raw || raw.startsWith("#")) return;
-            const isExternal = /^https?:\/\//i.test(raw);
-            if (isExternal) return;
-            const t = new URL(raw, location.href);
-            t.searchParams.delete("mobile");
-            t.searchParams.delete("mctx");
-            a.setAttribute("href", t.pathname + t.search + t.hash);
-        });
-    }
+    // ホームは今の版へ
+    document.querySelectorAll('[data-home-link]')
+      .forEach(a => a.setAttribute('href', HOME[ctx]));
 
+    // 切替リンクのhref固定（相対）
+    document.querySelectorAll('[data-switch="to-pc"]').forEach(a => a.setAttribute('href', HOME.pc));
+    document.querySelectorAll('[data-switch="to-mobile"]').forEach(a => a.setAttribute('href', HOME.mobile));
 
-    // ---- H) 実行 ----
-    ready(() => {
-        // 1) PC優先のHOME正規化
-        normalizeHomeLinks(preferredMode);
+    // 今が pc → to-mobile を表示、今が mobile → to-pc を表示
+    const showSel = (ctx === 'pc') ? '[data-switch="to-mobile"]' : '[data-switch="to-pc"]';
+    const hideSel = (ctx === 'pc') ? '[data-switch="to-pc"]' : '[data-switch="to-mobile"]';
+    document.querySelectorAll(showSel).forEach(el => { el.style.setProperty('display', 'block', 'important'); el.hidden = false; });
+    document.querySelectorAll(hideSel).forEach(el => { el.style.setProperty('display', 'none', 'important'); });
 
-        // 2) PC時は “モバイル文脈” を無視＆クリーンアップ
-        if (preferredMode === "pc") {
-            try { sessionStorage.removeItem("fromMobileApp"); } catch { }
-            stripMobileParams(document);           // 既存リンクから ?mobile を除去
-            return;                                // 以降の「モバイル向け書き換え」は実行しない
-        }
-
-        // 3) モバイル文脈なら既存のロジックを継続
-        if (!fromMobileActive) return;
-
-        // 3-1) ロゴ/ホームの戻り先をモバイルに統一（再掲：normalizeで済むが安全のため二重化）
-        document.querySelectorAll('a[href$="index.html"], a[href="/index.html"]').forEach(a => {
-            a.setAttribute("href", "index-mobile.html");
-        });
-
-        // 3-2) 内部リンクに ?mobile=1 を統一付与（重複回避済）
-        stampLinksForMobile();
-
-        // 3-3) 動的追加にも対応
-        const mo = new MutationObserver(muts => {
-            muts.forEach(m => m.addedNodes.forEach(n => {
-                if (n.nodeType === 1) {
-                    if (preferredMode === "mobile") stampLinksForMobile(n);
-                }
-            }));
-        });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
-
-
-    });
+    // スマホ幅のときだけ「自分自身のページ」をナビから除去（PC幅では残す）
+    const hideSelfIfMobile = () => {
+      if (!mqMobile.matches) return;
+      const here = location.pathname.replace(/\/+$/, '');
+      document.querySelectorAll('nav .nav-link[href]').forEach(a => {
+        const p = new URL(a.getAttribute('href'), location.origin).pathname.replace(/\/+$/, '');
+        if (p === here) a.closest('li')?.remove();
+      });
+    };
+    hideSelfIfMobile();
+    mqMobile.addEventListener?.('change', hideSelfIfMobile);
+  });
 })();

@@ -5,7 +5,9 @@
 
 body {
     min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Arial, Meiryo, sans-serif;
+    font-family: "uddigikyokasho-pro", sans-serif;
+    font-weight: 400;
+    font-style: normal;
     font-size: 16px;
     line-height: 1.8;
     color: #333;
@@ -16,6 +18,14 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+}
+
+button,
+textarea,
+input,
+select {
+    font-family: "uddigikyokasho-pro", sans-serif;
+    font-weight: 400;
 }
 
 .background-image {
@@ -149,8 +159,7 @@ html.from-mobile .requires-auth,
 html.from-mobile .g_id_signin,
 html.from-mobile #g_id_onload,
 html.from-mobile .gsi-material-button,
-html.from-mobile .firebaseui-idp-list,
-html.from-mobile a[href*="/log.html"] {
+html.from-mobile .firebaseui-idp-list {
     display: none !important;
 }
 
@@ -163,15 +172,12 @@ html.from-mobile:not(.is-pc-home.is-authenticated) .auth-icon {
     display: none !important;
 }
 
-
-
 /* テキストとして見せる「Sign in」状態 */
 .auth-icon-container.signin-text::before {
     content: "Sign in";
-    font-family: "Roboto", sans-serif;
     font-size: 14px;
     color: #5f6368;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: 0.25px;
     padding: 6px 10px;
     border: 1px solid #ccc;
@@ -322,7 +328,7 @@ html.from-mobile:not(.is-pc-home.is-authenticated) .auth-icon {
 
     .nav-menu.show {
         /* display: block !important; */
-        max-height: 500px;
+        max-height: 700px;
         /* 中にある項目の高さ以上に */
         opacity: 1;
     }
@@ -358,8 +364,43 @@ html.from-mobile:not(.is-pc-home.is-authenticated) .auth-icon {
     background-color: #fff;
     text-align: center;
     padding: 15px 0;
-    font-family: "Georgia", serif;
     font-size: 0.9em;
     color: #666;
     border-top: 1px solid #ddd;
+}
+
+
+/* データスイッチ------------------
+片側だけ出す：スマホ版ナビにはPC版メニュー、PC版ナビにはスマホ版メニュー 
+--------------------------------*/
+/* デフォは両方隠す（強制） */
+/* nav a.nav-link[data-switch] {
+    display: none !important;
+} */
+
+/* 基本：data-switchは表示しておく */
+nav#nav-menu a.nav-link[data-switch] {
+    display: inline-flex;
+}
+
+/* PC文脈 → モバイルへ を残し、PCへ を隠す */
+body.ctx-pc nav#nav-menu a.nav-link[data-switch="to-mobile"],
+html[data-context="pc"] nav#nav-menu a.nav-link[data-switch="to-mobile"] {
+    display: inline-flex !important;
+}
+
+body.ctx-pc nav#nav-menu a.nav-link[data-switch="to-pc"],
+html[data-context="pc"] nav#nav-menu a.nav-link[data-switch="to-pc"] {
+    display: none !important;
+}
+
+/* モバイル文脈 → PCへ を残し、モバイルへ を隠す */
+body.ctx-mobile nav#nav-menu a.nav-link[data-switch="to-pc"],
+html[data-context="mobile"] nav#nav-menu a.nav-link[data-switch="to-pc"] {
+    display: inline-flex !important;
+}
+
+body.ctx-mobile nav#nav-menu a.nav-link[data-switch="to-mobile"],
+html[data-context="mobile"] nav#nav-menu a.nav-link[data-switch="to-mobile"] {
+    display: none !important;
 }

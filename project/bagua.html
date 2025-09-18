@@ -13,25 +13,42 @@
     <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
     <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
     <script src="mobile-view.js"></script>
+    <script src="https://use.typekit.net/mer0dxj.js"></script>
+    <script>
+        try {
+            Typekit.load({
+                async: true,
+                families: ['uddigikyokasho-pro'],   // ← 明示指定
+                loading() { console.log('[Typekit] loading'); },
+                active() { console.log('[Typekit] active'); },
+                inactive() { console.warn('[Typekit] inactive'); }
+            });
+        } catch (e) { console.error(e); }
+    </script>
 </head>
 
 <body>
     <div class="background-image"></div>
     <header class="main-header">
         <div class="title-container">
-            <div class="title-container">
-                <h1><a href="index.html"><img src="/assets/images/title.svg" alt="易経くじ" class="title-svg" /></a></h1>
-            </div>
+            <h1>
+                <a data-home-link aria-label="易経くじに戻る">
+                    <img src="./assets/images/title.svg" alt="易経くじロゴ" class="title-svg" />
+                </a>
+            </h1>
         </div>
         <nav class="nav-menu" id="nav-menu">
             <ul>
-                <li><a href="/index.html" class="nav-link">易経くじ</a></li>
-                <li><a href="/about-iching.html" class="nav-link">易経とは</a></li>
-                <li><a href="/how-to.html" class="nav-link">占い方</a></li>
-                <li><a href="/hexagrams.html" class="nav-link">六十四卦</a></li>
-                <li><span class="nav-link active">八卦</span></li>
-                <li><a href="/how-to-read.html" class="nav-link">卦の見方</a></li>
-                <li><a href="/log.html" class="nav-link">ログ一覧</a></li>
+                <li><a class="nav-link" data-home-link>易経くじ</a></li>
+                <li><a href="about-iching.html" class="nav-link">易経とは</a></li>
+                <li><a href="how-to.html" class="nav-link">占い方</a></li>
+                <li><a href="hexagrams.html" class="nav-link">六十四卦</a></li>
+                <li><a hfef="bagua.html" class="nav-link active">八卦</a></li>
+                <li><a href="how-to-read.html" class="nav-link">卦の見方</a></li>
+                <li><a href="log.html" class="nav-link">ログ一覧</a></li>
+                <li><a class="nav-link" data-switch="to-pc" href="index.html?pc=1">PC版 易経くじ</a></li>
+                <li><a class="nav-link" data-switch="to-mobile" href="index-mobile.html?mobile=1">スマホ版 易経くじ</a></li>
+
             </ul>
         </nav>
         <!-- PC用のgoogleログイン -->
@@ -54,26 +71,41 @@
     </header>
 
     <main class="main-container">
-        <a title="Benoît Stella alias BenduKiwi, CC BY-SA 3.0 &lt;http://creativecommons.org/licenses/by-sa/3.0/&gt;, via Wikimedia Commons"
-            href="https://commons.wikimedia.org/wiki/File:Pakua_with_name.svg"><img width="300" alt="Pakua with name"
-                class="rotate-on-load"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Pakua_with_name.svg/512px-Pakua_with_name.svg.png?20060923211647"></a>
+        <div class="bagua-wrap">
+            <svg class="bagua-svg" viewBox="0 0 1000 1000" aria-label="八卦">
+                <!-- 画像をSVG内に配置（座標0–1000で固定） -->
+                <image href="/images/Bagua.png" x="0" y="0" width="1000" height="1000"
+                    preserveAspectRatio="xMidYMid meet" style="pointer-events:none" />
+
+                <!-- ここに透明の扇形パスを置く（クリック可） -->
+                <!-- JSで生成しても、手描きしてもOK -->
+            </svg>
+
+            <!-- モバイル専用ヒント（CSSでモバイル時のみ表示） -->
+            <p class="bagua-hint">
+                <span class="u-strong">個別の卦名</span>や<span class="u-strong">卦象</span>を押すと、
+                性質やイメージが表示されます。
+            </p>
+        </div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+            <div class="toast-body"></div>
+        </div>
 
         <h2 class="h2-mobile">八卦とは</h2>
 
         <blockquote>「道は一を生じ、一は二を生じ、二は三を生じ、三は万物を生ず」道徳経42章</blockquote>
 
-        <img src="/assets/images/bagua.jpg" alt="Bagua structure" width="500" class="hero-page">
         <h3>大極（タオ）</h3>
-        <p>「宇宙＝太極」が誕生したとき、万物はまだ分化しておらず、あらゆる矛盾や分別を包み込む混沌とした状態にありました。この太極こそが宇宙の正体であり、生まれる前の人間の状態です。それは、老子のいう<strong>「道（タオ）」</strong>であり、かたちはなく、名前もなく、言葉でも表わすことのできないものです。太極＝道は、自然の理屈、人間関係の原理として、目には見えないが、いまのわたしたちの人生の根幹にあるものと捉えられます。
+        <p><strong>「宇宙＝太極」</strong>が生まれたとき、万物はあらゆる矛盾や分別を包み込む混沌とした状態にありました。この太極が宇宙の正体であり、生まれる前の人間の状態です。それは、老子のいう<strong>「道（タオ）」</strong>であり、かたちがなく、名前もなく、言葉で表わすこともできないものです。太極＝道は、自然の理屈、人間関係の原理として、目には見えないがわたしたちの根幹にあるものといえます。
         </p>
 
         <h3>陰と陽（両儀）</h3>
-        <p>この太極が動いた時、混沌は『陰（--）』と『陽（ー）』の二元に分化し（両儀）、そのバランスにより宇宙のリズムが形成されるようになりました。陽は一般に積極的で強く固いものを指し、陰は消極的で柔らかいものを指します。これは電気でいうと陽子（プラス）と陰子（マイナス）の関係であり、あらゆるものは二元的な対応関係によって成立することになりました。陰陽はそれぞれが独立して存在するものではなく、陰がなければ陽はなく、陽がなければ陰もありません（互根=相互依存関係）。そして季節が巡るように陰陽のバランスは常に変化しています（消長＝どちらかが盛んになるとどちらかが衰える）。物事を理解し、バランスを保つため、物事はつねにこうした補完関係や対立関係で捉えることが重要です
+        <p>この太極が動いたとき、混沌は<strong>『陰（--）』</strong>と<strong>『陽（ー）』</strong>の二元に分かれ（＝両儀）、宇宙のリズムが生まれました。陽は一般に積極的で強く固いものを、陰は消極的で柔らかいものを指します。電気でいうと陽子（プラス）と陰子（マイナス）の関係です。これにより、あらゆるものは二元的な対応関係によって成立するようになりました。陰陽はそれぞれ独立して存在するものではなく、陰がなければ陽はなく、陽がなければ陰もありません（互根=相互依存関係）。季節がめぐるように陰陽のバランスは常に変化しています（消長＝どちらかが盛んになるとどちらかが衰える）。物事を理解し、バランスを保つには、物事をつねにこうした補完関係や対立関係で捉えることが重要です。
         </p>
 
         <h3>陰陽のサイクル（四象）</h3>
-        <p>陰陽のバランスは絶えず変動し、陽は変化して陰と結びつき、陰もまた変化して陽と結びつきます。たとえば季節でいえば、冬（老陰）から少しずつ陽が育って春になり（少陽）、さらに陽が強くなると、陰が消滅して夏になり（老陽）、そこから再び陰が生まれて日中の時間が徐々に短くなって秋を迎え（少陰）、陽が死に絶えると再び陰一色の冬（老陰）を迎えます。易はこれを両儀から派生した四象として２本の爻で表します。
+        <p>陰陽のバランスは絶えず移り変わり、陽は変化して陰と結びつき、陰もまた変化して陽と結びつきます。たとえば季節でいえば、冬（=老陰）から少しずつ陽が育って春になり（=少陽）、さらに陽が強くなると、陰が消えて夏になり（=老陽）、そこから再び陰が生まれて日中の時間が徐々に短くなって秋を迎え（=少陰）、陽が死に絶えると再び陰一色の冬（老陰）を迎えます。易はこれを両儀から派生した四象として２本の爻で表します。
         </p>
 
         <h3>さらなる分化——八卦の誕生</h3>
@@ -82,94 +114,8 @@
         <p>八卦は六十四卦が<strong>大成卦</strong>と呼ばれるのに対し、別名<strong>小成卦</strong>ともいわれます。古代中国の伝説上の帝王である<strong>伏羲（ふくぎ）</strong>によって考案されたとされていますが、真相は明らかではありません。
         </p>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>卦名</th>
-                    <th>記号</th>
-                    <th>かたち</th>
-                    <th>自然</th>
-                    <th>性質</th>
-                    <th>方位</th>
-                    <th>イメージ</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 💻 PC 表示用行 -->
-                <tr class="desktop-row">
-                    <td class="name">乾<br><span class="furigana">けん</span></td>
-                    <td class="bigger-symbol">&#9776;</td>
-                    <td>すべて陽</td>
-                    <td>天</td>
-                    <td>剛健・創造</td>
-                    <td>北西</td>
-                    <td>父性・リーダーシップ</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">兌<br><span class="furigana">だ</span></td>
-                    <td class="bigger-symbol">&#9777;</td>
-                    <td>二陽の上に陰</td>
-                    <td>沢</td>
-                    <td>喜悦・柔和</td>
-                    <td>西</td>
-                    <td>少女・楽しみ</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">離<br><span class="furigana">り</span></td>
-                    <td class="bigger-symbol">&#9778;</td>
-                    <td>中が空虚で陽気を発散</td>
-                    <td>火</td>
-                    <td>明朗・情熱</td>
-                    <td>南</td>
-                    <td>中女・知性</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">震<br><span class="furigana">しん</span></td>
-                    <td class="bigger-symbol">&#9779;</td>
-                    <td>二陰の下で陽が発生</td>
-                    <td>雷</td>
-                    <td>活動・発展</td>
-                    <td>東</td>
-                    <td>長男・行動力</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">巽<br><span class="furigana">そん</span></td>
-                    <td class="bigger-symbol">&#9780;</td>
-                    <td>二陽の下に陰が入り込む</td>
-                    <td>風</td>
-                    <td>柔順、拡散</td>
-                    <td>南東</td>
-                    <td>長女・柔軟性</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">坎<br><span class="furigana">かん</span></td>
-                    <td class="bigger-symbol">&#9781;</td>
-                    <td>陰が陽を包む</td>
-                    <td>水</td>
-                    <td>陥没・知恵</td>
-                    <td>北</td>
-                    <td>中男・困難</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">艮<br><span class="furigana">ごん</span></td>
-                    <td class="bigger-symbol">&#9782;</td>
-                    <td>二陰を陽が抑える</td>
-                    <td>山</td>
-                    <td>静止・障害</td>
-                    <td>北東</td>
-                    <td>少男・堅実</td>
-                </tr>
-                <tr class="desktop-row">
-                    <td class="name">坤<br><span class="furigana">こん</span></td>
-                    <td class="bigger-symbol">&#9783;</td>
-                    <td>すべて陰</td>
-                    <td>地</td>
-                    <td>受容・柔軟</td>
-                    <td>南西</td>
-                    <td>母性・安定</td>
-                </tr>
-                <!-- モバイル -->
-                <tr class="mobile-card">
+        <!-- モバイル -->
+        <!-- <tr class="mobile-card">
                     <td colspan="7">
                         <div class="bagua-header">
                             <span class="bagua-name"><img src="/assets/images/bagua/b-1.svg" alt="乾（けん）"></span>
@@ -292,7 +238,7 @@
                     </td>
                 </tr>
             </tbody>
-        </table>
+        </table> -->
 
 
         <p>この8種類の卦を上下に組み合わせた64通り（8 x 8 = 64）の六十四卦によって世の中のあらゆる現象を読み解くことができるのです。</p>
@@ -305,8 +251,10 @@
     <!-- Javascript読み込み-->
     <script src="firebase/env.js"></script>
     <script src="ui.js"></script>
+    <script src="bagua.js"></script>
     <script type="module" src="/firebase/auth.js"></script>
-    
+    <script src="mobile-view.js" defer></script>
+
 </body>
 
 </html>
