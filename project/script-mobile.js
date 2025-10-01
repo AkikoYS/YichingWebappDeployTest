@@ -170,138 +170,165 @@ function init() {
     });
 }
 
-//指操作
-function showTapHelper() {
-    const helper = document.getElementById('tap-helper');
-    if (!helper) return;
+//-------指操作
+const FINGER_JSON = 'assets/animations/finger.json';
 
-    // Lottie 初期化（多重ロード防止）
+//なければ#tap-helperを作る
+function getTapHelper() {
+    let el = document.getElementById('tap-helper');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'tap-helper';
+        el.setAttribute('aria-hidden', 'true');
+        const box = document.createElement('div');
+        box.id = 'finger-lottie';
+        box.className = 'finger-lottie';
+        el.appendChild(box);
+        document.body.appendChild(el);
+    }
+    return el;
+}
+//指タップ用の Lottie コンテナがサイズ 0 で見えなくなる事故を防ぐ保険
+function ensureFingerSized() {
     const box = document.getElementById('finger-lottie');
-    if (box && window.lottie && !fingerAnim) {
+    if (!box) return;
+    // 念のためサイズ明示（CSSが壊れても出るよう保険）
+    box.style.width = box.style.width || '140px';
+    box.style.height = box.style.height || '140px';
+    const svg = box.querySelector('svg');
+    if (svg) {
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.style.display = 'block';
+    }
+}
+//指タップを出す関数
+function showTapHelper() {
+    const helper = getTapHelper();
+    const box = helper.querySelector('#finger-lottie');
+
+    // 競合クラスの掃除（念のため）
+    helper.classList.remove('hidden', 'vanish');
+
+    // Lottieを一度だけ初期化
+    if (window.lottie && !fingerAnim) {
         fingerAnim = lottie.loadAnimation({
             container: box,
             renderer: 'svg',
             loop: true,
             autoplay: true,
-            path: 'assets/animations/finger.json' // ← finger.json を置いたパス
+            path: FINGER_JSON
         });
-    } else if (fingerAnim) {
-        fingerAnim.play();
+        fingerAnim.addEventListener('DOMLoaded', ensureFingerSized);
+    } else {
+        fingerAnim?.play();
+        ensureFingerSized();
     }
-    // 表示（もしCSSで初期opacity:0にしていたら外すなど）
-    helper.classList.remove('vanish');
-    helper.style.opacity = '1';
-    helper.style.transform = 'none';
-}
 
+    helper.classList.add('visible');   // ← これだけで表示
+}
+//指タップを隠す関数
 function hideTapHelper() {
     const helper = document.getElementById('tap-helper');
+    console.log('[tap] hide called', helper?.className);
     if (!helper) return;
-    helper.classList.add('vanish');
-    // 完了後に停止＆非表示化（任意）
-    helper.addEventListener('transitionend', () => {
-        if (fingerAnim) fingerAnim.pause();
-        // helper.style.display = 'none'; // 後続画面で完全に消したい場合
-    }, { once: true });
+    helper.classList.remove('visible'); // ← これだけで非表示
+    fingerAnim?.pause();                // 再表示時に再生される
 }
 
-// ▼ あなたの開始ボタン → スピナー画面に遷移するところで呼ぶ
+
+// ▼ 開始ボタン → スピナー画面に遷移するところで呼ぶ
 document.getElementById('startBtn')?.addEventListener('click', () => {
     document.getElementById('screen-start')?.classList.add('hidden');
     document.getElementById('screen-spinner')?.classList.remove('hidden');
 
     didFirstTap = false;
-    showTapHelper();
-});
-
-// ▼ スピナーの“最初の押下”でフェード＆ズームアウト
-
-['mainSpinner', 'lottie-spinner'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    el.addEventListener('click', () => {
-        if (didFirstTap) return;
-        didFirstTap = true;
-        hideTapHelper();
-    }, { capture: true });
 });
 
 //❹screen2: スピナーを６回クリックして本卦を出す
 function handleSpinnerClick() {
-
-
     const currentScreen = document.querySelector(".screen.active")?.id;
-    if (currentScreen !== "screen-spinner") return; // ✅ スピナー画面以外は無視
+    if (currentScreen !== "screen-spinner") return; // スピナー画面以外は無視
     if (alreadyClicked || !animation) return;
-
-    const startInstruction = document.getElementById("startInstruction");
-    const guide = document.getElementById("instructionText");
-
-    // 初回クリックで最初の説明をフェードアウト
-    if (clickCount === 0 && startInstruction) {
-        startInstruction.classList.remove("visible");
-        startInstruction.classList.add("hidden"); // CSSで hidden={opacity:0;display:none;} など
-    }
 
     const spinnerEl = document.getElementById("mainSpinner");
 
+    // 初回クリック → ガイド文を非表示に
+    if (clickCount === 0) {
+        const startInstruction = document.getElementById("startInstruction");
+        startInstruction?.classList.replace("visible", "hidden");
+    }
+
+    // スピン開始
     if (!isSpinning) {
         animation.play();
         isSpinning = true;
         return;
     }
+
     // === スピン停止（結果確定） ===
     isSpinning = false;
     const currentFrame = animation.currentFrame;
     animation.goToAndStop(currentFrame, true);
 
-    // scale up/downのアニメーション
+    // スピナーのフィードバック演出
     const spinnerFeedbackWrapper = document.getElementById("spinner-anim-wrapper");
     if (spinnerFeedbackWrapper) {
         spinnerFeedbackWrapper.classList.add("spinner-feedback");
+        spinnerFeedbackWrapper.addEventListener(
+            "animationend",
+            () => spinnerFeedbackWrapper.classList.remove("spinner-feedback"),
+            { once: true }
+        );
+    }
 
-        spinnerFeedbackWrapper.addEventListener("animationend", () => {
-            spinnerFeedbackWrapper.classList.remove("spinner-feedback");
-        }, { once: true });
+    navigator.vibrate?.(100);
+    playSoundEffect("./assets/sounds/click.mp3");
 
-        navigator.vibrate?.(100);
-        playSoundEffect("./assets/sounds/click.mp3");
+    // 陰陽決定
+    const yinYang = Math.random() < 0.5 ? "0" : "1";
+    resultArray += yinYang;
+    clickCount++;
 
-        // 陰陽決定
-        const yinYang = Math.random() < 0.5 ? "0" : "1";
-        resultArray += yinYang;
-        clickCount++;
+    // ガイド文更新（クリック数に応じて）
+    showGuideForClick(clickCount);
 
-        // 🟣 ガイド要素は重なり防止のため一旦フェードアウト（従来通りのクラス運用）
-        console.log("showGuideForClick called with:", clickCount);
-        showGuideForClick(clickCount);
-
-        // 🟣 爻メッセージはスライド演出で差し替え
-        const label = ["初", "二", "三", "四", "五", "上"][clickCount - 1] || `${clickCount}`;
-        const yy = (yinYang === "0")
+    // 爻メッセージ更新
+    const labels = ["初", "二", "三", "四", "五", "上"];
+    const label = labels[clickCount - 1] || `${clickCount}`;
+    const yy =
+        yinYang === "0"
             ? '<span class="yy yin">陰</span>'
             : '<span class="yy yang">陽</span>';
-        updateInstruction(`${label}爻は${yy}です`);
+    updateInstruction(`${label}爻は${yy}です`);
 
-        // 6本そろったら遷移
-        if (clickCount >= 6) {
-            alreadyClicked = true;
+    // ------------------------
+    // 6本揃ったら結果画面へ
+    // ------------------------
+    if (clickCount >= 6) {
+        alreadyClicked = true;
+        spinnerEl.removeEventListener("click", handleSpinnerClick);
 
-            spinnerEl.removeEventListener("click", handleSpinnerClick);
+        // 本卦をセット
+        originalHexagram = getHexagramByArray(resultArray);
 
-            spinnerEl.style.transition = "transform 1s ease";
+        // 「やった！」を少し見せるタメの時間
+        const SIXTH_HOLD_MS = 1000;     // ← ここで調整
+        const SPINNER_SHRINK_MS = 1000; // スピナー縮小時間（CSSと揃える）
+
+        // 少し待ってからスピナー縮小開始
+        setTimeout(() => {
+            spinnerEl.style.transition = `transform ${SPINNER_SHRINK_MS}ms ease`;
             spinnerEl.style.transform = "scale(0)";
 
-            // ✅ 本卦をセット
-            originalHexagram = getHexagramByArray(resultArray);
-
+            // 縮小が終わったら結果画面へ
             setTimeout(() => {
-                showResultScreenWithTransition(); // アニメで切り替え
-            }, 800);
-        }
+                showResultScreenWithTransition();
+            }, SPINNER_SHRINK_MS);
+        }, SIXTH_HOLD_MS);
     }
 }
+
 
 // --- 爻の結果のスライド演出
 function updateInstruction(html) {
@@ -329,8 +356,6 @@ function updateInstruction(html) {
         el.classList.add('show');
     }
 }
-
-//---ガイド文のスライド演出
 // --- ガイド文のスライド演出（競合対策版）
 function showGuideForClick(count) {
     const el = document.getElementById("instructionText");
@@ -347,13 +372,21 @@ function showGuideForClick(count) {
     const msg = messages[count];
     if (!msg) return;
 
-    // 6回目を一度出したら以後は触らない
-    if (el._locked) return;
+    // 6回目は即「やった！」を固定表示
+    if (count === 6) {
+        el.classList.remove("hide", "show");
+        el.textContent = msg;
+        void el.offsetWidth;
+        el.classList.add("show", "locked");
+        el._locked = true;
+        return;
+    }
+
+    if (el._locked) return; // 以後変更禁止
 
     el.classList.add("instruction", "tip", "line");
     clearTimeout(el._guideTimer);
 
-    // 退場中に来たら、メッセージだけ更新して終了（transitionendで表示）
     if (el._exiting) {
         el._pendingMsg = msg;
         el._pendingCount = count;
@@ -361,33 +394,21 @@ function showGuideForClick(count) {
     }
 
     el._guideTimer = setTimeout(() => {
-        // すでに表示中なら一度退場 → 完了後に入場
         if (el.classList.contains("show")) {
             el._exiting = true;
             el._pendingMsg = msg;
             el._pendingCount = count;
 
-            // まず show を外し、退場へ
             el.classList.remove("show");
-            // 強制リフローでトランジション確定
             void el.offsetWidth;
             el.classList.add("hide");
 
             el.addEventListener("transitionend", () => {
-                // 退場完了：hide を外して次の文に差し替え → 再入場
                 el.classList.remove("hide");
                 const nextMsg = el._pendingMsg ?? msg;
-                const nextCount = el._pendingCount ?? count;
-
                 el.textContent = nextMsg;
                 void el.offsetWidth;
                 el.classList.add("show");
-
-                // 固定表示（以後変更禁止）
-                if (nextCount === 6) {
-                    el.classList.add("locked");
-                    el._locked = true;
-                }
 
                 el._exiting = false;
                 el._pendingMsg = undefined;
@@ -395,55 +416,40 @@ function showGuideForClick(count) {
             }, { once: true });
 
         } else {
-            // 非表示状態：クリーンにしてから入場
             el.classList.remove("hide", "show", "locked");
             el.textContent = msg;
             void el.offsetWidth;
             el.classList.add("show");
-
-            if (count === 6) {
-                el.classList.add("locked");
-                el._locked = true;
-            }
         }
-    }, 300); // 爻の表示から少し遅らせる
+    }, 300);
 }
-
 
 //❺ screen3->4: 卦の結果表示に伴うスピナーズームアウト、結果のズームイン
 function showResultScreenWithTransition() {
-    const guide = document.getElementById("instructionText");
-    if (guide) {
-        guide._locked = false;          // ロック解除
-        // 必要なら消しておく
-        guide.classList.remove("show", "hide");
-    }
     const spinnerWrapper = document.getElementById("spinner-anim-wrapper");
     const resultScreen = document.getElementById("screen-result");
-    const instructionText = document.getElementById("instructionText");
     const spinnerEl = document.getElementById("mainSpinner");
+    const guide = document.getElementById("instructionText");
 
-    // ✅ テキスト非表示をスピナーと同時に
-    if (instructionText) {
-        instructionText.classList.remove("visible");
-        instructionText.classList.add("hidden");
+    // ✅ 「やった！」もスピナーと同時に退場
+    if (guide && guide.classList.contains("locked")) {
+        guide.classList.remove("show");
+        guide.classList.add("hide");
     }
-    // スピナーをズームアウト（アニメーション）
+
+    // スピナーをズームアウト
     spinnerWrapper.classList.add("spinner-zoom-out");
 
-    // 600ms後に結果画面へ遷移＆本卦描画
     setTimeout(() => {
-        // ✅ ここでスピナーのクリック無効化（完全に非表示にする）
         spinnerEl.classList.add("hidden", "inactive");
         showScreenByIndex(2);
 
-        // ズームインエフェクト
         resultScreen.classList.add("result-zoom-in");
-        void resultScreen.offsetWidth; // ← 再描画トリガー
+        void resultScreen.offsetWidth;
         resultScreen.classList.add("result-zoom-in");
-
     }, 600);
 }
+
 // ❻卦の結果表示関数
 function createHexagramHTML(hexagram) {
     const description = hexagram.description || "説明は準備中です";
@@ -546,10 +552,11 @@ function drawHexagramWithButtons(hexagram) {
     resultContainer.innerHTML = createHexagramHTML(hexagram) + `
         <div class="variant-buttons">
             <button class="variant-btn" data-key="future-expansion">今後の展開</button>
-            <button class="variant-btn" data-key="reverse">裏の意味</button>
-            <button class="variant-btn" data-key="sou">客観的に運命を見ると</button>
-            <button class="variant-btn" data-key="go">卦の本質は</button>
-        </div>
+           <!--
+        <button class="variant-btn" data-key="reverse">裏の意味</button>
+        <button class="variant-btn" data-key="sou">客観的に運命を見ると</button>
+        <button class="variant-btn" data-key="go">卦の本質は</button>
+        -->
     `;
     document.querySelectorAll(".variant-btn").forEach((btn) => {
         const newBtn = btn.cloneNode(true); // ✅ 古いイベントを除去
@@ -970,6 +977,7 @@ let maxVisitedScreenIndex = 0;
 
 //✅ ステップ3：表示処理の統合関数
 function showScreenByIndex(index) {
+    console.log('[showScreenByIndex] index=', index, screenStates[index]);
     const state = screenStates[index];
     currentScreenIndex = index;
     maxVisitedScreenIndex = Math.max(maxVisitedScreenIndex, index);
@@ -999,6 +1007,27 @@ function showScreenByIndex(index) {
         renderResultContent(state);
     } else {
         showScreen("screen-" + state);
+    }
+    // 指タップの表示制御
+    currentScreenIdx = index;
+    // 指タップの表示制御
+    switch (state) {
+        case 'spinner':      // 本卦スピナー画面
+        case 'future':       // 今後の展開スピナー画面
+            console.log('[tap] show (state=' + state + ')');
+            showTapHelper();
+            break;
+
+        case 'result':       // 結果画面
+        case 'final':        // 最終画面
+            console.log('[tap] hide (state=' + state + ')');
+            hideTapHelper();
+            break;
+
+        default:
+            console.log('[tap] hide immediate (state=' + state + ')');
+            hideTapHelper({ immediate: true });
+            break;
     }
 
     // ✅ フッターボタンの状態更新
@@ -1131,6 +1160,7 @@ btnBack.addEventListener("click", () => {
         showScreenByIndex(2);
         renderMainHexagram();
         hideMobileSpinner();
+        showTapHelper();
 
         // ✅ すぐ解除せず、UI描画後に解除（100ms後がベスト）
         setTimeout(() => {

@@ -150,21 +150,26 @@ main {
 }
 
 /* フィンガー表示 */
+/* 画面最上位のオーバーレイ */
 #tap-helper {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    display: grid;
+    display: none;
     place-items: center;
-    /* 中央配置 */
     pointer-events: none;
-    /* 下のスピナーを押せる */
-    z-index: 9999;
+    z-index: 2147483647;
 }
 
+/* 表示状態 */
+#tap-helper.visible {
+    /* ← 付け外しはこのクラスだけ */
+    display: grid;
+}
+
+/* 中身の箱は必ずサイズを持たせる（0x0対策） */
+#finger-lottie,
 .finger-lottie {
-    width: 100px;
-    height: 100px;
-    transform: translate(100px, -30px);
+    transform: translate(100px, 120px) scale(0.7);
 }
 
 
@@ -209,16 +214,16 @@ main {
 --------------*/
 #mainSpinner {
     position: absolute;
-    top: calc(50% - 135px);
+    top: calc(50% - 80px);
     /* 270px / 2 */
     left: 50%;
     width: 270px;
     height: 270px;
     z-index: 5;
     /* 必要なら screen より前面に */
-    transition: transform 1s ease;
     pointer-events: auto;
     /* ← 初期状態はクリック禁止 */
+    transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 #mainSpinner.hidden,
@@ -248,30 +253,26 @@ main {
 
 /* スピナー画面、今後の展開、最後の１回クリック：コンテンツ縦並び＆中央 */
 
-/* instructionText */
 .instruction-wrap {
     position: absolute;
     top: 16px;
     left: 0;
-    transform: none;
     width: 100%;
-    padding: 0 16px;
     z-index: 6;
     pointer-events: none;
-}
-
-#startInstruction {
-    opacity: 1;
     text-align: center;
-    margin: 50px 20px;
+    /* ★ここに中央揃え */
+}
+
+#startInstruction,
+#instructionText {
+    display: inline-block;
+    /* 中央揃え対象 */
+    margin: 80px 20px 80px;
+    /* 上下は残して左右は自動 */
     font-size: 0.8em;
 }
 
-/* 爻ごとのメッセージはアニメ制御 */
-
-.instruction {
-    font-size: 0.8em;
-}
 
 /* ガイドの通常アニメ */
 .instruction.tip.line {
@@ -295,18 +296,13 @@ main {
 
 /* ← 最優先：固定表示（やった！） */
 .instruction.tip.line.locked {
-    transition: none !important;
-    /* 以後アニメしない */
-    opacity: 1 !important;
-    transform: translateX(0) !important;
-    visibility: visible !important;
+    opacity: 1;
+    transform: translateX(0) scale(1.2);
+    /* transitionを残す：アニメ可能にする */
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    font-size: 1.5em;
 }
 
-/* 汎用 .hidden/.visible を使っているなら、ガイドだけは無効化 */
-.instruction.tip.line.locked.hidden {
-    visibility: visible !important;
-    opacity: 1 !important;
-}
 
 
 /*爻の結果*/
@@ -320,18 +316,13 @@ main {
     position: relative;
 }
 
-
 /* 🟣 爻メッセージ専用：スライドアニメ */
 .ko-result.line {
-    position: absolute;
-    left: 50%;
-    top: 400px;
-    transform: translateX(-150%);
-    /* 初期位置＝画面外右 */
+    margin-top: 120px;
+    text-align: center;
     opacity: 0;
     white-space: nowrap;
     transition: transform 0.25s ease, opacity 0.25s ease;
-    z-index: 5;
 }
 
 /* 「陰」「陽」だけ強調 */
@@ -352,13 +343,18 @@ main {
 
 .ko-result.line.show {
     opacity: 1;
-    transform: translateX(-50%);
+    transform: translateX(0);
 }
 
 .ko-result.line.hide {
     pointer-events: none;
     transform: translateX(50%);
     opacity: 0;
+}
+
+#futureInstruction {
+    margin-top: 150px;
+    /* 値を大きくすると下にずれる */
 }
 
 /* スピナー反応アニメーション */
@@ -603,16 +599,16 @@ resultの内部
 --------------*/
 /*スタートボタン*/
 #startBtn {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 400;
-    padding: 12px 100px;
+    padding: 10px 50px;
     border-radius: 8px;
-    background-color: #f5f5f5;
+    background-color: #d2ced8;
     color: #333;
     border: 1px solid #ccc;
     text-align: center;
     margin-top: auto;
-    margin-bottom: 300px;
+    margin-bottom: 250px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;
@@ -637,10 +633,15 @@ resultの内部
 }
 
 /*variantButtons*/
-.variant-buttons {
+/* .variant-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+    margin: 12px 20px 0 20px;
+} */
+.variant-buttons {
+    display: flex;
+    justify-content: center;
     margin: 12px 20px 0 20px;
 }
 
