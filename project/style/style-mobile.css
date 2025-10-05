@@ -253,26 +253,26 @@ main {
 
 /* スピナー画面、今後の展開、最後の１回クリック：コンテンツ縦並び＆中央 */
 
+/* ガイド文はそのまま（absoluteでもOK） */
 .instruction-wrap {
     position: absolute;
-    top: 16px;
+    top: 0;
     left: 0;
     width: 100%;
-    z-index: 6;
     pointer-events: none;
     text-align: center;
-    /* ★ここに中央揃え */
+    align-items: center;
+    flex-direction: column;
 }
 
 #startInstruction,
 #instructionText {
     display: inline-block;
     /* 中央揃え対象 */
-    margin: 80px 20px 80px;
+    margin: 40px 20px 80px;
     /* 上下は残して左右は自動 */
     font-size: 0.8em;
 }
-
 
 /* ガイドの通常アニメ */
 .instruction.tip.line {
@@ -297,13 +297,65 @@ main {
 /* ← 最優先：固定表示（やった！） */
 .instruction.tip.line.locked {
     opacity: 1;
-    transform: translateX(0) scale(1.2);
+    transform: translateX(0) scale(1.5);
     /* transitionを残す：アニメ可能にする */
     transition: transform 0.5s ease, opacity 0.5s ease;
     font-size: 1.5em;
 }
 
+/*卦の積み上げ*/
+:root {
+    --hex-width: 60px;
+    /* 爻の横幅（小さくしたいなら下げる） */
+    --hex-row: 10px;
+    /* 爻1本の高さ（小さくしたいなら下げる） */
+    --hex-gap: -1px;
+    /* 段間の隙間 */
+}
 
+.hexagram-build {
+    width: var(--hex-width);
+    margin: 100px auto 0;
+    /* ★左右中央 */
+    display: grid;
+    grid-template-rows: repeat(6, var(--hex-row));
+    gap: var(--hex-gap);
+    justify-items: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* 各段スロット：サイズの実体 */
+.hex-slot {
+    width: 100%;
+    height: var(--hex-row);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* 爻（SVG/IMG）— フィットのみ（アニメ無し） */
+.hex-slot img,
+.hex-slot svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.hex-line {
+    filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg);
+    transition: filter 0.4s ease;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.hex-line.active {
+    filter: brightness(0) saturate(100%) invert(26%) sepia(100%) saturate(7494%) hue-rotate(0deg) brightness(97%) contrast(118%);
+    /* ↑ 赤っぽくなるフィルター */
+}
 
 /*爻の結果*/
 .section-body {
@@ -315,6 +367,9 @@ main {
     height: 100%;
     position: relative;
 }
+
+
+
 
 /* 🟣 爻メッセージ専用：スライドアニメ */
 .ko-result.line {
@@ -512,7 +567,7 @@ main {
 }
 
 /* --------------
-resultの内部
+resultの中身
 ----------------*/
 /* 卦タイトル */
 .hexagram-title {
@@ -521,10 +576,18 @@ resultの内部
     text-align: center;
     line-height: 1;
     margin-bottom: 2px;
+    align-items: center;
+}
+
+.hexagram-title span {
+    font-size: 1.6em;
+    /* 大きい文字 */
+    line-height: 1;
+    /* 行高の余計な隙間を消す */
 }
 
 .hexagram-title-henko {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: 400;
     text-align: center;
     line-height: 1;
@@ -542,7 +605,7 @@ resultの内部
     text-align: center;
     font-size: 1rem;
     color: #333;
-    margin-bottom: 2px;
+    margin-bottom: 1em;
 }
 
 /* 図像（SVG） */
@@ -562,14 +625,6 @@ resultの内部
     height: auto;
 }
 
-/* 卦のイメージ説明 */
-.description-image {
-    font-size: 0.9rem;
-    color: #666;
-    padding-left: 10%;
-    padding-right: 10%;
-    text-align: left;
-}
 
 /* 卦の説明テキスト（個別調整） */
 .description-text {
@@ -579,10 +634,22 @@ resultの内部
     /* ← 共通の1.4ではなく1.6にしたいならここでのみ */
     padding-left: 10%;
     padding-right: 10%;
-    margin-top: 1em;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
     text-align: left;
     white-space: pre-wrap;
 }
+
+/* 卦のイメージ説明 */
+.description-image {
+    font-size: 0.9rem;
+    color: #666;
+    padding-left: 10%;
+    padding-right: 10%;
+    text-align: left;
+    line-height: 1.3;
+}
+
 
 /* 4つの派生ボタンエリア */
 .variant-button-wrapper {

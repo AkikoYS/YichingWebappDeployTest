@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 200 20" preserveAspectRatio="none">
+  <!-- 左 90px / ギャップ 20px / 右 90px ＝ 合計 200px -->
+  <rect x="0"   y="0" width="90"  height="20" fill="#231815"/>
+  <rect x="110" y="0" width="90"  height="20" fill="#231815"/>
+</svg>

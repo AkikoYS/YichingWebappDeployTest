@@ -101,17 +101,26 @@
 
         <!-- screen2: 本番スピナー画面 -->
         <section id="screen-spinner" class="screen centered hidden">
-           
 
-    <div class="instruction-wrap">
-        <!-- 最初だけ出すガイド -->
-        <p id="startInstruction" class="instruction visible">
-            こころに念じながら上爻が出るまでクリックを続けるよ。まず、一回クリックすると初爻が出るよ
-        </p>
-    
-        <!-- 爻ごとに出るメッセージ用（空で開始） -->
-        <p id="instructionText" class="instruction tip line"></p>
-    </div>
+            <div class="instruction-wrap">
+                <!-- 最初だけ出すガイド -->
+                <p id="startInstruction" class="instruction visible">
+                    こころに念じながら上爻が出るまでクリックを続けるよ。<br>まず一回クリックして
+                </p>
+
+                <!-- 爻ごとに出るメッセージ用（空で開始） -->
+                <p id="instructionText" class="instruction tip line"></p>
+</div>
+                <!-- ここに爻が1本ずつ積み上がる -->
+                <div id="hexagram-build" class="hexagram-build">
+                    <div class="hex-slot" data-line="6"></div>
+                    <div class="hex-slot" data-line="5"></div>
+                    <div class="hex-slot" data-line="4"></div>
+                    <div class="hex-slot" data-line="3"></div>
+                    <div class="hex-slot" data-line="2"></div>
+                    <div class="hex-slot" data-line="1"></div>
+                </div>
+          
 
             <!-- 爻の結果表示（画面下部中央） -->
             <div class="section-body">
@@ -155,7 +164,7 @@
             </div>
         </section>
     </main>
-    
+
     <!-- 指タップ誘導（オーバーレイ） -->
     <div id="tap-helper" aria-hidden="true">
         <div id="finger-lottie" class="finger-lottie"></div>

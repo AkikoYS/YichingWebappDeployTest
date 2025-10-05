@@ -100,13 +100,6 @@ function resetSpinnerState() {
     alreadyClicked = false;
     isSpinning = true;
 
-    const instructionText = document.getElementById("instructionText");
-    if (instructionText) {
-        instructionText.textContent = "こころに念じながら上爻が出るまでクリックを続けるよ。まず、一回クリックすると初爻が出るよ";
-
-        instructionText.classList.remove("show");
-        instructionText.classList.add("hide");
-    }
 
     const spinnerEl = document.getElementById("mainSpinner");
     if (spinnerEl) {
@@ -131,6 +124,7 @@ function resetSpinnerState() {
 function init() {
     showScreenByIndex(0); // ← 状態も初期化
     initSpinnerScreen();
+    resetHexagramStack()
 
     const startBtn = document.getElementById("startBtn");
     const instructionText = document.getElementById("instructionText");
@@ -236,7 +230,6 @@ function hideTapHelper() {
     fingerAnim?.pause();                // 再表示時に再生される
 }
 
-
 // ▼ 開始ボタン → スピナー画面に遷移するところで呼ぶ
 document.getElementById('startBtn')?.addEventListener('click', () => {
     document.getElementById('screen-start')?.classList.add('hidden');
@@ -290,6 +283,9 @@ function handleSpinnerClick() {
     resultArray += yinYang;
     clickCount++;
 
+    //爻を積み上げる
+    addHexLineToSlot(yinYang, clickCount);
+
     // ガイド文更新（クリック数に応じて）
     showGuideForClick(clickCount);
 
@@ -329,8 +325,7 @@ function handleSpinnerClick() {
     }
 }
 
-
-// --- 爻の結果のスライド演出
+// --- 爻の結果（テキスト）のスライド演出
 function updateInstruction(html) {
     const el = document.getElementById('koResult');
     if (!el) return;
@@ -356,6 +351,7 @@ function updateInstruction(html) {
         el.classList.add('show');
     }
 }
+
 // --- ガイド文のスライド演出（競合対策版）
 function showGuideForClick(count) {
     const el = document.getElementById("instructionText");
@@ -374,11 +370,14 @@ function showGuideForClick(count) {
 
     // 6回目は即「やった！」を固定表示
     if (count === 6) {
-        el.classList.remove("hide", "show");
-        el.textContent = msg;
-        void el.offsetWidth;
-        el.classList.add("show", "locked");
-        el._locked = true;
+        const DELAY_MS = 500; // ← 好きな遅延時間（ms）
+        setTimeout(() => {
+            el.classList.remove("hide", "show");
+            el.textContent = msg;
+            void el.offsetWidth;
+            el.classList.add("show", "locked");
+            el._locked = true;
+        }, DELAY_MS);
         return;
     }
 
@@ -424,6 +423,47 @@ function showGuideForClick(count) {
     }, 300);
 }
 
+// 陰陽の爻（Svg）の積み上げ
+const SVG_YIN = 'assets/images/yin.svg';
+const SVG_YANG = 'assets/images/yang.svg';
+
+/**
+ * 六爻のスロットに陰陽SVGを追加する
+ * @param {string} yinYang - '0' = 陰, '1' = 陽
+ * @param {number} count   - 爻の順序（1〜6）下から上へ
+ */
+function addHexLineToSlot(yinYang, count) {
+    const wrap = document.getElementById('hexagram-build');
+    if (!wrap) return;
+
+    // まず既存の「赤い」爻をすべて黒に戻す
+    const prevActive = wrap.querySelectorAll('.hex-line.active');
+    prevActive.forEach(el => el.classList.remove('active'));
+
+    // count（1..6）に対応するスロットを探す
+    const slot = wrap.querySelector(`.hex-slot[data-line="${count}"]`);
+    if (!slot) return;
+
+    // 古い要素をリセット（再占時にも安全）
+    slot.innerHTML = '';
+
+    // SVG画像を生成
+    const img = document.createElement('img');
+    img.src = yinYang === '0' ? SVG_YIN : SVG_YANG;
+    img.alt = yinYang === '0' ? '陰' : '陽';
+    img.className = 'hex-line active'; // 新しい爻は赤
+
+    // スロットへ追加
+    slot.appendChild(img);
+}
+
+//爻の積み上げのリセット
+function resetHexagramStack() {
+    const wrap = document.getElementById('hexagram-build');
+    if (!wrap) return;
+    wrap.querySelectorAll('.hex-slot').forEach(s => s.innerHTML = '');
+}
+
 //❺ screen3->4: 卦の結果表示に伴うスピナーズームアウト、結果のズームイン
 function showResultScreenWithTransition() {
     const spinnerWrapper = document.getElementById("spinner-anim-wrapper");
@@ -457,10 +497,11 @@ function createHexagramHTML(hexagram) {
     const nameWithRuby = `<ruby>${hexagram.name}<rt>${hexagram.reading}</rt></ruby>`;
 
     return `
-      <div class="hexagram-title">第${hexagram.number}卦：${nameWithRuby}<span style="font-size: 0.8em;">—${hexagram.composition}</span></div>
-      <div class="hexagram-reading" style="text-align: center;">${hexagram.summary}</div>
+      <div class="hexagram-title">第${hexagram.number}卦：<span>${nameWithRuby}</span></div>
+      <div class="hexagram-reading" style="text-align: center;">${hexagram.composition}——${hexagram.summary}</div>
+
       <div class="hexagram-svg">
-        <object data="/assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
+        <object data="assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
       </div>
       <div class="description-text">${formattedDescription}</div>
       <div class="description-image">⚪︎イメージ：${hexagram.desimage}</div>
@@ -742,7 +783,7 @@ function displayChangedLine(index, hexagram) {
     const yaoName = yaoNames[index];
     const yaoText = hexagram.yao_descriptions?.[(index + 1).toString()] || "該当する爻辞が見つかりません。";
     const nameWithRuby = `<ruby>${hexagram.name}<rt>${hexagram.reading}</rt></ruby>`;
-    const svgPath = `/assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
+    const svgPath = `assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
 
     // HTML生成（事前に全て構成）
     const html = `
@@ -1191,6 +1232,17 @@ btnBack.addEventListener("click", () => {
 
         if (prev === 1) { // スピナー画面
             resetCastingState(); // 先に初期化
+            resetHexagramStack();
+
+            const guide = document.getElementById('instructionText');
+            if (guide) {
+                guide.classList.remove('show', 'hide', 'locked');
+                guide._locked = false;
+                guide.textContent = '';
+            }
+            // （必要なら）最初の説明を復活
+            document.getElementById('startInstruction')
+                ?.classList.replace('hidden', 'visible');
         }
 
         showScreenByIndex(prev); // そのあと画面遷移
@@ -1291,7 +1343,6 @@ function updateFooterButtons() {
         btnNext.disabled = false;
     };
 }
-
 
 // 🔽 右半分フッターイベント定義（btnResetとbtnContact）
 btnReset?.addEventListener("click", () => {
