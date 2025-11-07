@@ -30,6 +30,11 @@ let isRestoringFromTemp = false; // ✅ 復元中フラグ
 document.addEventListener("DOMContentLoaded", () => {
     result = document.getElementById("result");
     restoreFortuneFromTemp();
+    //スピナーを回っている状態にする
+    if (typeof spinnerAnimation !== "undefined") {
+        spinnerAnimation.play();
+        isSpinning = true;
+    }
 });
 
 // Firebase 初期化後にユーザー状態を監視
@@ -59,7 +64,7 @@ const spinnerAnimation = lottie.loadAnimation({
     renderer: 'svg',
     loop: true,
     autoplay: false,
-    path: './assets/animations/spinner.json',
+    path: 'assets/animations/spinner.json',
     rendererSettings: {
         preserveAspectRatio: 'none' // ← これがポイント！
     }
@@ -183,13 +188,7 @@ function resetSpinnerState() {
         spinner.style.display = "block";
     }
 }
-// ✅ 結果表示をふわっとせり上げる
-function revealResult() {
-    const result = document.getElementById('result');
-    if (!result) return;
 
-    result.classList.add('result-reveal');
-}
 //総合的な易断ボタン生成の条件
 function allVariantsShown() {
     return cachedChangedHexagram !== null;
@@ -209,7 +208,7 @@ function maybeShowFinalFortuneButton() {
         finalButton.textContent = "総合的な易断を見る";
         finalButton.className = "variant-button";
         finalButton.onclick = () => {
-            playSoundEffect("./assets/sounds/click_final.mp3");
+            playSoundEffect("assets/sounds/click_final.mp3");
             displayFinalFortune();
         }
 
@@ -384,15 +383,21 @@ function restoreFortuneFromTemp() {
     }
 
 }
-// ✅ スピナー停止時に音を鳴らす（beep）
-function playSoundEffect(src) {
-    const audio = new Audio(src);
-    audio.volume = 0.5; // 音量（0〜1で調整）
-    audio.play();
+// ✅ 音声効果関数
+function playSoundEffect(path) {
+    try {
+        const audio = new Audio(path);
+        audio.volume = 0.8;
+        audio.play().catch(err => {
+            console.warn("🔇 音声再生失敗:", path, err.message);
+        });
+    } catch (err) {
+        console.warn("🔇 サウンドエラー:", err.message);
+    }
 }
 
 // ===== 5. 表示処理 =====
-// 卦の表示処理の関数（まずスピナー縮小）
+// 卦の表示処理①（まずスピナー縮小）
 function showHexagram(hexagram, isOriginal = false) {
     if (!result) {
         console.warn("❌ result が未定義です");
@@ -400,7 +405,7 @@ function showHexagram(hexagram, isOriginal = false) {
     }
     selectedHexagram = hexagram;
 
-    // ✅ スピナーを縮小（スマホは消す）→ 結果表示を後にまわす
+    // ✅ PCはスピナーを縮小、スマホは消す）→ 結果表示を後にまわす
     if (isOriginal && window.innerWidth <= 768) {
         hideSpinnerAnimated();
         setTimeout(() => renderHexagramHTML(hexagram, isOriginal), 600); // アニメーション完了後に表示
@@ -409,7 +414,7 @@ function showHexagram(hexagram, isOriginal = false) {
         setTimeout(() => renderHexagramHTML(hexagram, isOriginal), 600);
     }
 }
-// 卦の表示処理（次に結果が表示）
+// 卦の表示処理②（次に結果表示）
 function renderHexagramHTML(hexagram, isOriginal) {
     result.innerHTML = createHexagramHTML(hexagram);
     updateResultBorder();
@@ -439,7 +444,6 @@ function renderHexagramHTML(hexagram, isOriginal) {
         maybeShowFinalFortuneButton();
     }, 0); // 0msでも「描画
 }
-
 //卦の結果を示すHTML構成の関数
 function createHexagramHTML(hexagram) {
     const description = hexagram.description || "説明は準備中です";
@@ -451,7 +455,7 @@ function createHexagramHTML(hexagram) {
       <div class="hexagram-title">第${hexagram.number}卦：${nameWithRuby}<span style="font-size: 0.8em;">—${hexagram.composition}</span></div>
       <div class="hexagram-reading" style="text-align: center;">${hexagram.summary}</div>
       <div class="hexagram-svg">
-        <object data="./assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
+        <object data="assets/images/hexagrams/hexagram_${hexagram.number.toString().padStart(2, '0')}.svg" type="image/svg+xml"></object>
       </div>
       <div class="description-text">${formattedDescription}</div>
       <div class="description-image">⚪︎イメージ：${hexagram.desimage}</div>
@@ -464,7 +468,7 @@ function createBackToOriginalButton() {
     button.className = "variant-button";
     button.id = "back-to-original-button";
     button.onclick = () => {
-        playSoundEffect("./assets/sounds/click_button.mp3");
+        playSoundEffect("assets/sounds/click_button.mp3");
         const existingBackButton = document.getElementById("back-to-original-button");
         if (existingBackButton) existingBackButton.remove();
 
@@ -508,12 +512,12 @@ function showVariantButtons(originalHexagram) {
     const wrapper = document.createElement("div");
     wrapper.className = "variant-button-wrapper";
     wrapper.id = "variant-buttons";
-
+    //今後の展開ボタンのみを表示
     const variants = [
         { label: "今後の展開", key: "future-expansion" },
-        { label: "裏の意味", key: "reverse" },
-        { label: "客観的に運命を見ると", key: "sou" },
-        { label: "卦の本質は", key: "go" }
+        // { label: "裏の意味", key: "reverse" },
+        // { label: "客観的に運命を見ると", key: "sou" },
+        // { label: "卦の本質は", key: "go" }
     ];
 
     variants.forEach(variant => {
@@ -522,7 +526,7 @@ function showVariantButtons(originalHexagram) {
         button.classList.add("variant-button");
 
         button.onclick = () => {
-            playSoundEffect("./assets/sounds/click_button.mp3")// ボタン音
+            playSoundEffect("assets/sounds/click_button.mp3")// ボタン音
             const buttonContainer = document.getElementById("variant-buttons");
             if (buttonContainer) buttonContainer.remove();
 
@@ -617,7 +621,7 @@ export function handleLoginRequiredAction(callback) {
 }
 
 // ===== 6. 今後の展開関連処理 =====
-// 今後の展開（変爻と変卦）の準備関数
+// 今後の展開（変爻と変卦）の初期化
 function prepareForFutureExpansion() {
     result.innerHTML = "";
     updateResultBorder();
@@ -670,17 +674,35 @@ function setupSpinnerForChangedHexagram(originalHex) {
 //今後の展開ボタン１回目クリックにより変爻と変卦を決めるロジック
 function startChangedHexagramSpin(originalHex) {
     let clickedOnce = false;//１回目と2回目のクリックを区別
+    spinnerAnimation.play();
+    isSpinning = true;
+
 
     spinnerContainer.onclick = () => {
-        if (!clickedOnce) {
-            spinnerAnimation.play();
-            isSpinning = true;
-            clickedOnce = true;
-            return;
-        }
+        if (!isSpinning) return;
+        //スピナー停止
         spinnerAnimation.goToAndStop(spinnerAnimation.currentFrame, true);
         isSpinning = false;
-        playSoundEffect("./assets/sounds/click.mp3");
+        playSoundEffect("assets/sounds/click.mp3");
+
+        // 🟡 停止時にピョコン効果を追加
+        const wrapper = document.getElementById('lottie-spinner');
+        if (wrapper) {
+            const target =
+                wrapper.querySelector('canvas, svg, img, .lottie, .bodymovin, .spinner-core') || wrapper;
+
+            target.classList.remove('spinner-feedback');
+            target.style.animation = 'none';
+            void target.offsetWidth; // reflow
+            requestAnimationFrame(() => {
+                target.style.animation = '';
+                target.classList.add('spinner-feedback');
+            });
+
+            target.addEventListener('animationend', () => {
+                target.classList.remove('spinner-feedback');
+            }, { once: true });
+        }
 
         //ランダムな位置で爻を反転させ、変卦を生成
         cachedChangedLineIndex = Math.floor(Math.random() * 6);
@@ -763,7 +785,7 @@ function displayChangedLine(index, hexagram) {
         const nameWithRuby = `<ruby>${hexagram.name}<rt>${hexagram.reading}</rt></ruby>`;
         const yaoName = yaoNames[index];
         const title = `第${hexagram.number}卦：${nameWithRuby} の ${yaoName}`;
-        const svgPath = `./assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
+        const svgPath = `assets/images/hexagram_lines/${hexagram.number}_${index + 1}.svg`;
         // ✅ ここで画像の読み込み確認
         const img = new Image();
         img.src = svgPath;
@@ -789,7 +811,7 @@ function createFutureButton(originalHexagram, index) {
     button.style.display = "block";
     button.style.margin = "20px auto";
     button.onclick = () => {
-        playSoundEffect("/assets/sounds/click_button.mp3");
+        playSoundEffect("assets/sounds/click_button.mp3");
         toggleYinYangAtIndex(index);
         const changedArray = resultArray.split("").map((bit, i) =>
             i === index ? (bit === "0" ? "1" : "0") : bit
@@ -848,7 +870,7 @@ function toggleYinYangAtIndex(index) {
 // ===== 7. イベントハンドラ =====
 //占い開始ボタン
 document.getElementById("start-button").addEventListener("click", async () => {
-    playSoundEffect("/assets/sounds/click_button.mp3")
+    playSoundEffect("assets/sounds/click_button.mp3")
     const input = document.getElementById("question-input");
     userQuestion = input.value.trim();
 
@@ -887,16 +909,28 @@ spinnerContainer.addEventListener("click", async () => {
     // あとは既存処理そのまま
     if (alreadyClicked) return;
 
-    if (!isSpinning) {
-        isSpinning = true;
-        clickTime = Date.now();
-        spinnerAnimation.play();
-        if (clickCount === 0) {
-            initializeProgressMessages();  // ✅ 最初のクリック時に6行の空行を用意
-        }
+    if (isSpinning) {
+        playSoundEffect("assets/sounds/click.mp3")// 停止処理（beep付き）
+//ピョコンアニメーション
+        const wrapper = document.getElementById('lottie-spinner');
+        if (wrapper) {
+            const target =
+                wrapper.querySelector('canvas, svg, img, .lottie, .bodymovin, .spinner-core') || wrapper;
 
-    } else {
-        playSoundEffect("/assets/sounds/click.mp3")// 停止処理（beep付き）
+            // アニメーションをリスタート
+            target.classList.remove('spinner-feedback');
+            target.style.animation = 'none';
+            void target.offsetWidth; // reflow
+            requestAnimationFrame(() => {
+                target.style.animation = '';
+                target.classList.add('spinner-feedback');
+            });
+
+            // アニメーション終了後にクラスを外す
+            target.addEventListener('animationend', () => {
+                target.classList.remove('spinner-feedback');
+            }, { once: true });
+        }
         isSpinning = false;
         const currentFrame = spinnerAnimation.currentFrame;
         spinnerAnimation.goToAndStop(currentFrame, true);
@@ -904,6 +938,9 @@ spinnerContainer.addEventListener("click", async () => {
         const yinYang = Math.random() < 0.5 ? "0" : "1";
         resultArray += yinYang;
         clickCount++;
+
+        // 初回クリック時だけ進捗行を生成
+        if (clickCount === 1) initializeProgressMessages();
 
         const progress = getProgressMessage(clickCount, yinYang);
         setTimeout(() => {
@@ -938,6 +975,12 @@ spinnerContainer.addEventListener("click", async () => {
             }, 500);
 
             alreadyClicked = true;
+        } else {
+            // 🌀 まだ6爻未満なら再回転
+            setTimeout(() => {
+                spinnerAnimation.play();
+                isSpinning = true;
+            }, 500);
         }
     }
 });
@@ -945,7 +988,7 @@ spinnerContainer.addEventListener("click", async () => {
 //リセットボタンによる初期化（もう一度占う）
 resetButton.style.display = "none";
 resetButton.addEventListener("click", () => {
-    playSoundEffect("/assets/sounds/click_button.mp3");
+    playSoundEffect("assets/sounds/click_button.mp3");
     // 🔁 保存ボタン初期化・非表示
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
@@ -999,7 +1042,7 @@ resetButton.addEventListener("click", () => {
     //h2テキスト初期化
     const instructionText = document.getElementById("instructionText");
     if (instructionText) {
-        instructionText.innerHTML = "こころに念じながら６回クリックしてください";
+        instructionText.innerHTML = "こころに念じながら６回クリック！";
     }
     // ✅ 表示を最初の画面に戻す
     const questionSection = document.getElementById("question-section");
@@ -1024,7 +1067,7 @@ resetButton.addEventListener("click", () => {
 
 // ===== 6. 総合的な易断表示処理 =====
 //表示ボタンを押したときの処理（1.5秒で結果表示）
-// ✅ displayFinalFortune: 総合易断の表示、保存ボタン表示、PDF生成は10秒後にモーダル確認
+// ✅ 総合易断の表示、保存ボタン表示、PDF生成は10秒後にモーダル確認
 function displayFinalFortune() {
     if (!originalHexagram || !cachedChangedHexagram || cachedChangedLineIndex === null) {
         result.innerHTML = "<div class='error-message'>必要な情報がそろっていません。</div>";
@@ -1066,7 +1109,7 @@ function displayFinalFortune() {
                 renderer: "svg",
                 loop: false,
                 autoplay: true,
-                path: "/assets/animations/confetti.json" // 実パスに合わせて変更
+                path: "assets/animations/confetti.json" // 実パスに合わせて変更
             });
             overlay.classList.remove("visible");
             overlay.classList.add("hidden");
@@ -1116,7 +1159,7 @@ function displayFinalFortune() {
                 saveButton.parentNode.insertBefore(ctaBox, saveButton);
 
                 document.getElementById("purchase-button").addEventListener("click", () => {
-                    playSoundEffect("./assets/sounds/click_button.mp3")// ボタン音
+                    playSoundEffect("assets/sounds/click_button.mp3")// ボタン音
                     handleLoginRequiredAction(() => {
                         window.location.href = "/ai-advice.html";
                     });
@@ -1144,12 +1187,30 @@ function displayFinalFortune() {
 }
 //総合的な易断の内容
 function generateFortunesSummaryHTML() {
+    //各卦を取得
     const reverseHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.reverse);
     const souHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.sou);
     const goHexagram = sixtyFourHexagrams.find(h => h.number === originalHexagram.go);
 
+    //爻情報
     const yaoText = originalHexagram.yao_descriptions?.[(cachedChangedLineIndex + 1).toString()] || "該当する爻辞が見つかりません";
     const yaoName = ["初", "二", "三", "四", "五", "上"][cachedChangedLineIndex];
+
+    // 卦名＋読み
+    const makeNameWithSymbolRuby = (hex) => {
+        if (!hex) return "不明";
+        const symbol = hex.unicode || "";           // 例: "䷀"
+        const name = hex.name || "";           // 例: 夬（天沢夬）
+        const reading = hex.reading || "";
+        // 卦記号は文字化け回避のため専用フォント指定用クラスを付与
+        const symbolSpan = symbol ? `<span class="hex-symbol">${symbol}</span>` : "";
+        // reading が無い場合は素のテキストにフォールバック
+        const nameWithRuby = reading
+            ? `<ruby>${name}<rt>${reading}</rt></ruby>`
+            : name;
+
+        return `${symbolSpan}${nameWithRuby}`;
+    }
 
     const originalName = `<ruby>${originalHexagram.name}<rt>${originalHexagram.reading}</rt></ruby>`;
     const changedName = `<ruby>${cachedChangedHexagram.name}<rt>${cachedChangedHexagram.reading}</rt></ruby>`;
@@ -1157,22 +1218,121 @@ function generateFortunesSummaryHTML() {
     const souName = souHexagram ? `<ruby>${souHexagram.name}<rt>${souHexagram.reading}</rt></ruby>` : "不明";
     const goName = goHexagram ? `<ruby>${goHexagram.name}<rt>${goHexagram.reading}</rt></ruby>` : "不明";
 
+    // return `
+    // <div id="final-fortune-wrapper" class="final-fortune hidden">
+
+    // <div id="confetti-lottie"></div>`;
+
+    // ★ 陰陽判定
+    const lines = (originalHexagram.array || "").split("");
+
+    let changedDirection = "陽";
+    if (lines[cachedChangedLineIndex] === "1") changedDirection = "陰";
+    else if (lines[cachedChangedLineIndex] === "0") changedDirection = "陽";
+
+    // -------------------------------
+    // 🆕 グリッド（本卦～互卦）
+    // -------------------------------
+    const gridHTML = `
+  <div class="hex-grid">
+    <div class="cell">
+      <span class="label">本卦</span>
+      <span class="hexname">${makeNameWithSymbolRuby(originalHexagram)}</span>
+    </div>
+        <div class="cell">
+      <span class="label">裏卦</span>
+      <span class="hexname">${makeNameWithSymbolRuby(reverseHexagram)}</span>
+    </div>
+    <div class="cell">
+      <span class="label">変爻</span>
+      <span class="hexname">${yaoName}爻</span>
+    </div>
+ 
+    <div class="cell">
+      <span class="label">綜卦</span>
+      <span class="hexname">${makeNameWithSymbolRuby(souHexagram)}</span>
+    </div>
+       <div class="cell">
+      <span class="label">変卦</span>
+      <span class="hexname">${makeNameWithSymbolRuby(cachedChangedHexagram)}</span>
+    </div>
+    <div class="cell">
+      <span class="label">互卦</span>
+      <span class="hexname">${makeNameWithSymbolRuby(goHexagram)}</span>
+    </div>
+  </div>
+`;
+
     return `
-    <div id="final-fortune-wrapper" class="final-fortune hidden">
-    <div id="confetti-lottie"></div>
-        <div class="fortune-summary">
+      <div id="final-fortune-wrapper" class="final-fortune hidden">
+    <div id="confetti-lottie"></div>   <!-- ←ここを移動して入れる -->
+    <div class="fortune-summary">
+      <span class="corner-top" aria-hidden="true"></span>
+  <span class="corner-bottom" aria-hidden="true"></span>
             <h3>🔮 総合的な易断</h3>
-            <p>今のあなたの状況は、本卦である「<strong>${originalName}</strong>（${originalHexagram.summary}）」に示されています。<strong>${originalHexagram.description}</strong></p>
+      ${gridHTML}
+      <div class="orn"></div>
+            <p>今のあなたの状況は、本卦である「<a href="#" class="hex-link" data-name="${originalHexagram.name}"><strong>${originalName}</strong></a>」
+が示すように（${originalHexagram.summary}）」の段階にあります。
             <p>とくに注目すべきは <strong>${yaoName}爻</strong> の変化であり、</p>
-            <p>この爻辞である「<strong>${yaoText}</strong>」があなたの今後の行動の鍵です。</p>
-            <p>この変化により、中長期的に状況は「<strong>${changedName}</strong> (${cachedChangedHexagram.summary})」へと展開していきます。</p>
-            <hr>
-            <p>この本卦に隠されている裏の意味は「<strong>${reverseName || "不明"}</strong> (${reverseHexagram?.summary || "不明"})」です。</p>
-            <p>状況を俯瞰すると「<strong>${souName || "不明"}</strong> (${souHexagram?.summary || "不明"})」となります。</p>
-            <p>そもそも本質は「<strong>${goName || "不明"}</strong> (${goHexagram?.summary || "不明"})」です。</p>
+            <p>その爻辞である「<strong>${yaoText}</strong>」があなたの今後の行動の鍵です。</p>
+            <p>この${yaoName}爻が${changedDirection}に転じることにより、中長期的には「<a href="#" class= "hex-link" data-name="${cachedChangedHexagram.name}"><strong>${changedName}</strong></a>（${cachedChangedHexagram.summary}）
+」へと展開していくでしょう。</p>
+
+  <div class="orn"></div>
+            <p>この本卦に隠されている裏の意味は「<a href="#" class="hex-link" data-name="${reverseHexagram.name}"><strong>${reverseName}</strong></a>（${reverseHexagram?.summary || "不明"}）
+」です。</p>
+            <p>状況を俯瞰して見れば「<a href ="#" class="hex-link" data-name="${souHexagram.name}"><strong>${souName}</strong></a>（${souHexagram?.summary || "不明"}）
+」となります。</p>
+            <p>そもそも本質は「<a href="#" class="hex-link" data-name="${goHexagram.name}"><strong>${goName}</strong></a>（${goHexagram?.summary || "不明"}）
+」に通じます。</p>
         </div></div>
     `;
 }
+
+//21 modalイベント
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('hexagram-modal');
+    const body = document.getElementById('modal-body');
+    const close = modal?.querySelector('.close');
+    if (!modal || !body) return;
+
+    // 卦リンクをクリック → モーダルに差し込み
+    document.addEventListener('click', (e) => {
+        const a = e.target.closest('.hex-link');
+        if (!a) return;
+        console.log('✅ hex-link clicked', a);
+        e.preventDefault();
+
+        const data =
+            (Array.isArray(window.sixtyFourHexagrams) && window.sixtyFourHexagrams.length)
+                ? window.sixtyFourHexagrams
+                : (Array.isArray(window.hexagramData) && window.hexagramData.length)
+                    ? window.hexagramData
+                    : [];
+        const key = a.dataset.key;
+        const name = a.dataset.name;
+        const hex = key
+            ? data.find(h => String(h.number ?? h.key) === String(key))
+            : data.find(h => h.name === name);
+
+        if (!hex) return console.warn('該当データなし', { key, name });
+
+        body.innerHTML = `
+        <h2> ${hex.name}${hex.reading ? `（${hex.reading}）` : ''}</h2>
+      <p><strong>卦辞：</strong>${hex.hexagram_text ?? ''}</p>
+      <p><strong>象徴：</strong>${hex.symbolism ?? ''}</p>
+      <p><strong>物語：</strong>${hex.story ?? ''}</p>
+    `;
+        modal.classList.remove('hidden');
+        modal.style.display = 'block';
+    });
+
+    // 閉じる
+    close?.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+});
+
 //結果保存ボタンを生成、ログインしてなければトースト表示
 function renderSaveButton(pdfUri) {
     // PDF URI を保存しておく（あとで再利用できる）
@@ -1191,7 +1351,7 @@ function renderSaveButton(pdfUri) {
 
     //googleにログイン
     saveButton.onclick = () => {
-        playSoundEffect("./assets/sounds/click_button.mp3");
+        playSoundEffect("assets/sounds/click_button.mp3");
         handleLoginRequiredAction(() => {
             saveCurrentFortuneToLog(currentPdfUri);
         });
@@ -1314,7 +1474,6 @@ function saveCurrentFortuneToLog(pdfUri) {
     }
 }
 
-
 //PDFを保存しますか？というトースト表示
 function showPdfDownloadToast(pdfUri) {
     showToast("易断結果をPDFにできます", {
@@ -1353,7 +1512,7 @@ firebaseReady.then(() => {
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", () => {
-            playSoundEffect("./assets/sounds/click_button.mp3")// ボタン音
+            playSoundEffect("assets/sounds/click_button.mp3")// ボタン音
             generatePdfFromSummary((pdfUri) => {
                 saveCurrentFortuneToLog(pdfUri);
             });

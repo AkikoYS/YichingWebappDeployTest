@@ -108,17 +108,18 @@ main {
 スクリーンの遷移
 ---------------- */
 .screen {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+    position: absolute;
     width: 100%;
-    min-height: auto;
-    box-sizing: border-box;
-    padding-bottom: 40px;
-    flex: 1;
-    overflow-y: auto;
+    height: 100%;
+    inset: 0;
 }
 
 .screen.active {
-    display: block;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 
@@ -128,7 +129,7 @@ main {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 0 16px;
+    /* padding: 0 16px; */
     height: 100%;
     position: relative;
 }
@@ -220,7 +221,6 @@ main {
     width: 270px;
     height: 270px;
     z-index: 5;
-    /* 必要なら screen より前面に */
     pointer-events: auto;
     /* ← 初期状態はクリック禁止 */
     transition: transform 0.5s ease, opacity 0.5s ease;
@@ -232,9 +232,14 @@ main {
     /* ← ✅ 見えなくなったら完全に無効に */
 }
 
+/* wrapper とターゲット共通の下地 */
 #spinner-anim-wrapper {
-    width: 100%;
-    height: 100%;
+    display: inline-block;
+    transform-origin: center;
+    /* スムーズな処理 */
+    will-change: transform, filter;
+    /* 影が親で切れないように */
+    overflow: visible;
 }
 
 /* Spinner visibility control */
@@ -251,7 +256,6 @@ main {
     transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
-/* スピナー画面、今後の展開、最後の１回クリック：コンテンツ縦並び＆中央 */
 
 /* ガイド文はそのまま（absoluteでもOK） */
 .instruction-wrap {
@@ -266,12 +270,18 @@ main {
 }
 
 #startInstruction,
-#instructionText {
+#instructionText,
+#futureInstruction {
     display: inline-block;
     /* 中央揃え対象 */
     margin: 40px 20px 80px;
     /* 上下は残して左右は自動 */
     font-size: 0.8em;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+#futureInstruction {
+    margin-bottom: 0px !important;
 }
 
 /* ガイドの通常アニメ */
@@ -297,11 +307,41 @@ main {
 /* ← 最優先：固定表示（やった！） */
 .instruction.tip.line.locked {
     opacity: 1;
-    transform: translateX(0) scale(1.5);
+    transform: translateX(0) scale(2);
     /* transitionを残す：アニメ可能にする */
-    transition: transform 0.5s ease, opacity 0.5s ease;
+    transition: transform 1s ease, opacity 1s ease;
     font-size: 1.5em;
 }
+
+/* ／＼ の表示 */
+.enc-brackets::before,
+.enc-brackets::after {
+    display: inline-block;
+    line-height: 1;
+    vertical-align: baseline;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* 左の＼ */
+.enc-brackets::before {
+    content: "\\";
+    font-size: 1.8em;
+    transform: scaleX(1.3) rotate(-11deg) translateY(2px);
+    /* ← 下方向に寄せる */
+    margin-right: 0.25em;
+    opacity: 0.6;
+}
+
+/* 右の／ */
+.enc-brackets::after {
+    content: "/";
+    font-size: 1.8em;
+    transform: scaleX(1.3) rotate(11deg) translateY(2px);
+    /* ← 下方向に寄せる */
+    margin-left: 0.25em;
+    opacity: 0.6;
+}
+
 
 /*卦の積み上げ*/
 :root {
@@ -325,6 +365,11 @@ main {
     box-sizing: border-box;
 }
 
+#hexagram-build-future {
+    transform: translateY(calc(-60% - 50px));
+    /* 24pxぶん上へ。値は好みで調整 */
+}
+
 /* 各段スロット：サイズの実体 */
 .hex-slot {
     width: 100%;
@@ -333,6 +378,13 @@ main {
     align-items: center;
     justify-content: center;
     position: relative;
+}
+
+/* 最新以外は黒のまま（何も指定しない or 明示的に消す） */
+#screen-spinner .hex-slot .hex-line {
+    /* ベースの黒表示（画像そのまま） */
+    filter: none;
+    transition: filter 160ms ease;
 }
 
 /* 爻（SVG/IMG）— フィットのみ（アニメ無し） */
@@ -352,10 +404,22 @@ main {
     display: block;
 }
 
+/* 汎用の .active があればリセット（陰陽色が最後に勝つ） */
 .hex-line.active {
-    filter: brightness(0) saturate(100%) invert(26%) sepia(100%) saturate(7494%) hue-rotate(0deg) brightness(97%) contrast(118%);
-    /* ↑ 赤っぽくなるフィルター */
+    filter: none !important;
 }
+
+/* 未来画面にも効く共通ルール（!important で上書き勝ちにする） */
+.hex-line.active.active-yang,
+.hex-line.active[data-yy="yang"] {
+    filter: invert(17%) sepia(94%) saturate(7060%) hue-rotate(1deg) brightness(92%) contrast(103%) !important;
+}
+
+.hex-line.active.active-yin,
+.hex-line.active[data-yy="yin"] {
+    filter: invert(16%) sepia(79%) saturate(2896%) hue-rotate(195deg) brightness(86%) contrast(106%) !important;
+}
+
 
 /*爻の結果*/
 .section-body {
@@ -367,9 +431,6 @@ main {
     height: 100%;
     position: relative;
 }
-
-
-
 
 /* 🟣 爻メッセージ専用：スライドアニメ */
 .ko-result.line {
@@ -407,11 +468,6 @@ main {
     opacity: 0;
 }
 
-#futureInstruction {
-    margin-top: 150px;
-    /* 値を大きくすると下にずれる */
-}
-
 /* スピナー反応アニメーション */
 @keyframes spinnerPulse {
     0% {
@@ -432,12 +488,14 @@ main {
 
 .spinner-feedback {
     animation: spinnerPulse 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 50%;
+    will-change: transform, filter;
+    isolation: isolate;
 }
 
 /* スピナーをズームアウトして非表示にする */
 .spinner-zoom-out {
     animation: zoomOut 0.6s ease forwards !important;
+    will-change: transform, opacity;
 }
 
 @keyframes zoomOut {
@@ -455,6 +513,7 @@ main {
 /* スピナーをズームインして表示する */
 .spinner-zoom-in {
     animation: zoomIn 0.6s ease forwards !important;
+    will-change: transform, opacity;
 }
 
 @keyframes zoomIn {
@@ -504,6 +563,11 @@ main {
     }
 }
 
+.face-out {
+    opacity: 0;
+    transition: opacity .5s ease;
+}
+
 /*---------------- 
 結果表示 (screen3)
 ------------------*/
@@ -511,7 +575,7 @@ main {
     width: 100%;
     max-width: 360px;
     padding: 30px 0px 40px;
-    margin: 0;
+    margin: 80px auto;
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -553,7 +617,7 @@ main {
     width: 100%;
     max-width: 360px;
     padding: 16px 0px 40px;
-    margin: 0 auto;
+    margin: 30px auto;
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -587,7 +651,7 @@ resultの中身
 }
 
 .hexagram-title-henko {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 400;
     text-align: center;
     line-height: 1;
@@ -678,7 +742,7 @@ resultの中身
     margin-bottom: 250px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s ease;
+    transition: opacity 1s ease, transform 1s ease;
     position: relative;
     z-index: 10;
 }
@@ -686,12 +750,14 @@ resultの中身
 #startBtn.visible {
     opacity: 1;
     pointer-events: auto;
+    transform: scale(1);
     display: block;
 }
 
 #startBtn.hidden {
-    display: none;
+    display: block;
     opacity: 0;
+    transform: scale(0.95);
     pointer-events: none;
 }
 
@@ -699,13 +765,7 @@ resultの中身
     background-color: #eaeaea;
 }
 
-/*variantButtons*/
-/* .variant-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin: 12px 20px 0 20px;
-} */
+
 .variant-buttons {
     display: flex;
     justify-content: center;
@@ -881,21 +941,101 @@ resultの中身
 
 /* 易断の全体枠 */
 .fortune-summary {
+    margin-top: 50px;
+    position: relative;
     background-color: white;
     margin-bottom: 15px;
     border-radius: 10px;
-    padding: 16px 16px 5px;
+    padding: 30px 35px 100px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     font-size: 0.8rem;
     line-height: 1.4;
     text-align: left;
+    border: 2px solid #c4a490;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* 四隅共通設定 */
+.fortune-summary::before,
+.fortune-summary::after {
+    content: "";
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: url("../assets/images/fringe.svg") no-repeat 0 0 / contain;
+    pointer-events: none;
+    opacity: 0.95;
+    mix-blend-mode: multiply;
+}
+
+/* 左上 */
+.fortune-summary::before {
+    top: 10px;
+    left: 10px;
+    transform-origin: top left;
+}
+
+/* 右下 */
+.fortune-summary::after {
+    bottom: 90px;
+    right: 90px;
+    transform: scale(-1);
+    transform-origin: bottom right;
+}
+
+/* 上下分担 → 追加の疑似要素で右上・左下を作る */
+.fortune-summary::before,
+.fortune-summary::after {
+    z-index: 2;
+}
+
+/* 右上・左下を別要素で（擬似要素2つでは足りないため） */
+.fortune-summary::before,
+.fortune-summary::after {
+    content: "";
+}
+
+/* 追加定義（上側と下側を別CSSに分ける） */
+.fortune-summary .corner-top,
+.fortune-summary .corner-bottom {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: url("../assets/images/fringe.svg") no-repeat 0 0 / contain;
+    pointer-events: none;
+    opacity: 0.95;
+    mix-blend-mode: multiply;
+}
+
+/* 右上（左右反転） */
+.fortune-summary .corner-top {
+    top: 10px;
+    right: 90px;
+    transform: scaleX(-1);
+    transform-origin: top right;
+}
+
+/* 左下（上下反転） */
+.fortune-summary .corner-bottom {
+    bottom: 90px;
+    left: 10px;
+    transform: scaleY(-1);
+    transform-origin: bottom left;
+}
+
+.orn {
+    height: 9px;
+    background: url("../assets/images/line.svg") center/auto 9px repeat-x;
+    opacity: 0.9;
+    margin: 16px 0;
 }
 
 .fortune-summary h3 {
     text-align: center;
     margin-top: 0;
     margin-bottom: 16px;
-    font-size: 1.2em;
+    font-size: 1.5em;
 }
 
 .final-fortune-note {
@@ -905,6 +1045,156 @@ resultの中身
     margin: 0 40px 0;
     line-height: 1.5;
     flex-shrink: 0;
+}
+
+/* グリッド本体：3×2、罫線あり、文字大きめ */
+.hex-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-auto-rows: auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    border: 1px solid #dccec6;
+    border-radius: 12px;
+    padding-top: 10px;
+    position: relative;
+}
+
+/* 左右を仕切る中央の縦線 */
+.hex-grid::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background-color: #dccec6;
+    transform: translateX(-0.5px);
+    pointer-events: none;
+    z-index: 1;
+    /* 背景より上に出す */
+}
+
+/* 各セルの罫線 */
+.hex-grid .cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .6rem;
+    padding: 12px 10px 12px 0.1em;
+    border-bottom: 1px solid #dccec6;
+    box-sizing: border-box;
+}
+
+.cell:nth-child(5),
+.cell:nth-child(6) {
+    border-bottom: none;
+    /* 各列の最下行だけ線なし */
+}
+
+/* ラベルと内容の文字サイズUP */
+.hex-grid .label {
+    width: 3em;
+    font-weight: 500;
+    text-align: right;
+    color: #444;
+    font-size: 0.9rem;
+}
+
+.hex-grid .hexname {
+    font-size: 1rem;
+}
+
+/* 卦記号は文字化け防止フォントで少し大きく */
+.hex-symbol {
+    font-family: "Noto Sans Symbols 2", "Apple Symbols", "Segoe UI Symbol", Symbola, "Arial Unicode MS", sans-serif;
+    font-size: 1.25em;
+    margin-right: .1em;
+}
+
+/* ルビは小さめで行間詰め */
+ruby rt {
+    font-size: .6em;
+    line-height: 1;
+}
+
+.hex-link {
+    text-decoration: none;
+    color: #0056b3;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+
+/* hoverまたはfocus時に下線代わりの効果 */
+.hex-link:hover,
+.hex-link:focus {
+    color: #003d80;
+    /* 濃い青 */
+    border-bottom-color: #80b3ff;
+    /* 明るい青の下線（動的） */
+}
+
+/* モバイルでタップしたときも反応 */
+.hex-link:active {
+    color: #002d66;
+    border-bottom-color: #4d94ff;
+}
+
+/* ーーーーーーーー
+モーダル 
+ーーーーーーーーーー*/
+.modal-content {
+    font-size: 0.95em;
+    padding: 1em;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    /* 上位に */
+    left: 0;
+    top: 0;
+    width: 90vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 1.5em;
+    max-width: 600px;
+    width: 100%;
+    margin: 5vh auto;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.close {
+    position: absolute;
+    top: 0.5em;
+    right: 1em;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: #666;
+}
+
+.close:hover {
+    color: #c9302c;
 }
 
 /*---------------------

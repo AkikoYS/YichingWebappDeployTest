@@ -6,6 +6,9 @@ fetch("hexagram.json")
     .then((res) => res.json())
     .then((data) => {
         hexagramData = data;
+        // 代入後すぐ ↓ を追加
+        window.hexagramData = hexagramData;  // ← 他ファイルから参照可にする
+        window.dispatchEvent(new CustomEvent('hexagrams:ready', { detail: hexagramData })); // ← 準備完了の合図
 
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
@@ -14,6 +17,8 @@ fetch("hexagram.json")
             buildHexagramTable(); // ✅ PC用テーブル表示
         }
     });
+
+
 
 //初期化時に画面を見て表示、非表示を切り替え
 document.addEventListener("DOMContentLoaded", () => {
@@ -135,6 +140,7 @@ function renderGridCards() {
     setupModalEvents(); // ✅ スマホでもモーダル機能を有効に
 }
 
+
 // 📦 モーダル表示処理
 function setupModalEvents() {
     document.querySelectorAll(".hex-link").forEach((link) => {
@@ -166,3 +172,5 @@ function setupModalEvents() {
         }
     };
 }
+
+

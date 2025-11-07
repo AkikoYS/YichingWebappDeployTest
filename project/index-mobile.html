@@ -30,8 +30,6 @@
     <link rel="icon" type="image/x-icon" sizes="32x32" href="./assets/icons/favicon-32x32_v2.ico">
     <link rel="icon" type="image/x-icon" sizes="16x16" href="./assets/icons/favicon-16x16_v2.ico">
     <link rel="manifest" href="manifest.json" />
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet"> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
     <script src="mobile-view.js"></script>
     <script src="https://use.typekit.net/mer0dxj.js"></script>
@@ -107,20 +105,19 @@
                 <p id="startInstruction" class="instruction visible">
                     こころに念じながら上爻が出るまでクリックを続けるよ。<br>まず一回クリックして
                 </p>
-
                 <!-- 爻ごとに出るメッセージ用（空で開始） -->
                 <p id="instructionText" class="instruction tip line"></p>
-</div>
-                <!-- ここに爻が1本ずつ積み上がる -->
-                <div id="hexagram-build" class="hexagram-build">
-                    <div class="hex-slot" data-line="6"></div>
-                    <div class="hex-slot" data-line="5"></div>
-                    <div class="hex-slot" data-line="4"></div>
-                    <div class="hex-slot" data-line="3"></div>
-                    <div class="hex-slot" data-line="2"></div>
-                    <div class="hex-slot" data-line="1"></div>
-                </div>
-          
+            </div>
+            <!-- ここに爻が1本ずつ積み上がる -->
+            <div id="hexagram-build" class="hexagram-build">
+                <div class="hex-slot" data-line="6"></div>
+                <div class="hex-slot" data-line="5"></div>
+                <div class="hex-slot" data-line="4"></div>
+                <div class="hex-slot" data-line="3"></div>
+                <div class="hex-slot" data-line="2"></div>
+                <div class="hex-slot" data-line="1"></div>
+            </div>
+
 
             <!-- 爻の結果表示（画面下部中央） -->
             <div class="section-body">
@@ -135,8 +132,10 @@
 
         <!-- screen4: 今後の展開 - 最後の1回クリック -->
         <section id="screen-future" class="screen centered hidden">
-            <div class="section-body">
-                <p id="futureInstruction" class="instruction visible">最後に１回だけクリック！</p>
+            <div class="instruction-wrap">
+                <p id="futureInstruction" class="instruction visible enc-brackets">最後に１回だけクリック！</p>
+                <!-- 卦を表示する領域 -->
+                <div id="hexagram-build-future" class="hexagram-build"></div>
             </div>
         </section>
 
@@ -150,11 +149,12 @@
 
             <!-- ✅ 本文 -->
             <div id="final-fortune-wrapper" class="invisible">
-                <div id="finalFortune"></div>
+                <div id="finalFortune">
+                </div>
 
                 <!-- ✅ 補足文 -->
                 <div class="final-fortune-note invisible">
-                    個別の占いたい内容についてAI易経助言（300円）もご提供しています。
+                    個別の占いたい内容にはAI易経助言（100円）もご提供しています。
                 </div>
                 <!-- ✅ ctaボタン -->
                 <div class="cta-buttons invisible" id="final-cta">
@@ -170,9 +170,9 @@
         <div id="finger-lottie" class="finger-lottie"></div>
     </div>
 
-    <!-- 画面下部に常に表示されるフッター -->
+    <!-- 画面下部に常に表示されるフッター 2つだけ-->
     <footer class="mobile-footer">
-        <button id="btn-back" class="footer-btn" aria-label="前に戻る">
+        <!-- <button id="btn-back" class="footer-btn" aria-label="前に戻る">
             <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M15 18l-6-6 6-6" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"
                     stroke-linejoin="round" />
@@ -183,7 +183,7 @@
                 <path d="M9 18l6-6-6-6" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"
                     stroke-linejoin="round" />
             </svg>
-        </button>
+        </button> -->
         <button id="btn-home" class="footer-btn" aria-label="最初に戻る">
             <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M3 12l9-9 9 9M4 10v10h5v-6h6v6h5V10" stroke="#333" stroke-width="2" fill="none"
@@ -200,8 +200,15 @@
     <div id="nav-overlay" class="nav-overlay hidden">
     </div>
 
-    <script src="script-mobile.js" defer></script>
+    <div id="hexagram-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" aria-label="閉じる">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <script src="logic.js" defer></script>
+    <script src="script-mobile.js" defer></script>
     <script src="ui.js" defer></script>
     <script src="mobile-view.js" defer></script>
 

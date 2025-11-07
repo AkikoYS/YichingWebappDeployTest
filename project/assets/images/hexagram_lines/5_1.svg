@@ -1,1 +1,56 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 202 216"><g id="Ying"><g id="_1"><rect x="1" y="196" width="90" height="20" fill="#231815"/><rect x="111" y="196" width="90" height="20" fill="#231815"/></g><g id="_2"><rect x="1" y="156.8" width="90" height="20" fill="#231815"/><rect x="111" y="156.8" width="90" height="20" fill="#231815"/></g><g id="_3"><rect x="1" y="117.6" width="90" height="20" fill="#231815"/><rect x="111" y="117.6" width="90" height="20" fill="#231815"/></g><g id="_4"><rect x="1" y="78.4" width="90" height="20" fill="#231815"/><rect x="111" y="78.4" width="90" height="20" fill="#231815"/></g><g id="_5"><rect x="1" y="39.2" width="90" height="20" fill="#231815"/><rect x="111" y="39.2" width="90" height="20" fill="#231815"/></g><g id="_6"><rect x="1" width="90" height="20" fill="#231815"/><rect x="111" width="90" height="20" fill="#231815"/></g></g><g id="Yang"><g id="_1-2"><rect x="1" y="196" width="200" height="20" fill="#e60012"/></g><g id="_2-2"><rect x="1" y="156.8" width="200" height="20" fill="#231815"/></g><g id="_3-2"><rect x="1" y="117.6" width="200" height="20" fill="#231815"/></g><g id="_5-2"><rect x="1" y="39.2" width="200" height="20" fill="#231815"/></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 270 216">
+  <!-- Generator: Adobe Illustrator 29.8.2, SVG Export Plug-In . SVG Version: 2.1.1 Build 3)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #231815;
+      }
+
+      .st1 {
+        fill: red;
+      }
+    </style>
+  </defs>
+  <g id="Ying">
+    <g id="_1">
+      <rect class="st0" x="35.7" y="196" width="90" height="20"/>
+      <rect class="st0" x="145.7" y="196" width="90" height="20"/>
+    </g>
+    <g id="_2">
+      <rect class="st0" x="35.7" y="156.8" width="90" height="20"/>
+      <rect class="st0" x="145.7" y="156.8" width="90" height="20"/>
+    </g>
+    <g id="_3">
+      <rect class="st0" x="35.7" y="117.6" width="90" height="20"/>
+      <rect class="st0" x="145.7" y="117.6" width="90" height="20"/>
+    </g>
+    <g id="_4">
+      <rect class="st0" x="35.7" y="78.4" width="90" height="20"/>
+      <rect class="st0" x="145.7" y="78.4" width="90" height="20"/>
+    </g>
+    <g id="_5">
+      <rect class="st0" x="35.7" y="39.2" width="90" height="20"/>
+      <rect class="st0" x="145.7" y="39.2" width="90" height="20"/>
+    </g>
+    <g id="_6">
+      <rect class="st0" x="35.7" width="90" height="20"/>
+      <rect class="st0" x="145.7" width="90" height="20"/>
+    </g>
+  </g>
+  <g id="Yang">
+    <g id="_1-2">
+      <rect x="35.7" y="196" width="200" height="20"/>
+    </g>
+    <g id="_2-2">
+      <rect class="st0" x="35.7" y="156.8" width="200" height="20"/>
+    </g>
+    <g id="_3-2">
+      <rect class="st0" x="35.7" y="117.6" width="200" height="20"/>
+    </g>
+    <g id="_5-2">
+      <rect class="st0" x="35.7" y="39.2" width="200" height="20"/>
+    </g>
+  </g>
+  <rect class="st1" x="0" y="194.6" width="28.2" height="22.2"/>
+</svg>

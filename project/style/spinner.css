@@ -1,20 +1,19 @@
 /* スピナーの表示 */
+
+
 #lottie-spinner {
     width: 280px;
     height: 280px;
     margin: 0 auto 20px;
     display: block;
-    overflow: hidden;
     transition: transform 0.6s ease, opacity 0.6s ease;
     transform-origin: center center
-        /* border: 1px dashed  blue; */
-        /* 位置確認用、あとで削除可 */
 }
 
 /* =========================
    スピナー：PC用アニメーション
 ========================= */
-/* スピナーを縮小、拡大する*/
+/* スピナーの縮小、拡大*/
 @media (min-width: 769px) {
 
     /* アニメーション */
@@ -113,3 +112,32 @@
         }
     }
 }
+
+
+/* =========================
+   スピナー：ピョコン
+========================= */
+@keyframes spinnerPulse {
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 0 rgba(180, 100, 255, 0));
+    }
+
+    5% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 50px rgba(180, 100, 255, 0.8));
+    }
+
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 0 rgba(180, 100, 255, 0));
+    }
+}
+
+.spinner-feedback  {
+    animation: spinnerPulse 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, filter;
+    transform-origin: center center;
+    overflow:visible;
+}
+

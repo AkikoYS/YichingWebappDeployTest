@@ -27,9 +27,8 @@
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/base.css">
     <link rel="stylesheet" href="style/spinner.css">
-    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/icons/favicon-32x32_v2.ico">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/icons/favicon-16x16_v2.ico">
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet"> -->
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="assets/icons/favicon-32x32_v2.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="assets/icons/favicon-16x16_v2.ico">
     <script src="https://use.typekit.net/mer0dxj.js"></script>
     <script>
         try {
@@ -92,7 +91,7 @@
     <main class="main-container">
         <div id="question-section" class="fade show">
             <h2 style="text-align:center">
-                天に問いたい内容を記してください（任意）
+                天に問いたいことはなんですか？（スキップ可能）
             </h2>
             <textarea id="question-input" maxlength="50" placeholder="例：転職するべきでしょうか？"></textarea>
             <div id="question-warning" style="color: red; font-size: 0.9em; text-align: center; display: none;">
@@ -124,6 +123,13 @@
             <!-- もう一度引くボタン -->
             <button id="reset-button" style="display: none; margin: 30px auto; display: block;">他の内容を占う</button>
         </div>
+<!-- 総合的な易断のモーダル -->
+        <div id="hexagram-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-content">
+                <span class="close" aria-label="閉じる">&times;</span>
+                <div id="modal-body"></div>
+            </div>
+        </div>
     </main>
 
     <footer class="simple-footer">
@@ -133,14 +139,12 @@
 
     <!-- JavaScriptを読み込む -->
     <script src="firebase/env.js"></script>
+    <script type="module" src="firebase/auth.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.11/lottie.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
-
     <script src="logic.js"></script>
     <script src="ui.js" defer></script>
     <script type="module" src="script.js"></script>
-    <script type="module" src="firebase/auth.js"></script>
     <script src="mobile-view.js" defer></script>
 
 

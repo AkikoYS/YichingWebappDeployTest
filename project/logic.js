@@ -8,7 +8,11 @@ window.hexagramsReady = fetch("./hexagram.json", { cache: "no-store" })
     })
     .then((data) => {
         window.HEXAGRAMS = data; // 既存ロジック互換のためグローバルに置く
+        window.sixtyFourHexagrams = data;
+        window.dispatchEvent(new CustomEvent("hexagrams:ready", { detail: data }));
+        console.log("✅ 六十四卦データを読み込みました:", data.length);
         return data;
+
     })
     .catch((err) => {
         console.error(err);
@@ -78,7 +82,10 @@ function stripHtml(html) {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
     return tmp.innerText.trim();
-  }
+}
+
+
+
 
 
 

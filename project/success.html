@@ -8,17 +8,17 @@
     <link rel="stylesheet" href="style/base.css" />
     <link rel="stylesheet" href="style/success.css" />
     <script src="https://use.typekit.net/mer0dxj.js" async></script>
-        <script>
-            try {
-                Typekit.load({
-                    async: true,
-                    families: ['uddigikyokasho-pro'],   // ← 明示指定
-                    loading() { console.log('[Typekit] loading'); },
-                    active() { console.log('[Typekit] active'); },
-                    inactive() { console.warn('[Typekit] inactive'); }
-                });
-            } catch (e) { console.error(e); }
-        </script>
+    <script>
+        try {
+            Typekit.load({
+                async: true,
+                families: ['uddigikyokasho-pro'],   // ← 明示指定
+                loading() { console.log('[Typekit] loading'); },
+                active() { console.log('[Typekit] active'); },
+                inactive() { console.warn('[Typekit] inactive'); }
+            });
+        } catch (e) { console.error(e); }
+    </script>
 </head>
 
 <body>
@@ -28,9 +28,10 @@
         <header class="main-header" style="margin-bottom:0;">
             <div class="title-container">
                 <h1><!-- 例：ロゴ or 「易経くじ」など、ホームに戻すリンク -->
-                <a data-home-link aria-label="易経くじに戻る">
-                    <img src="/assets/images/title.svg" alt="易経くじロゴ" class="title-svg" />
-                </a></h1>
+                    <a data-home-link aria-label="易経くじに戻る">
+                        <img src="/assets/images/title.svg" alt="易経くじロゴ" class="title-svg" />
+                    </a>
+                </h1>
             </div>
             <nav class="nav-menu" id="nav-menu">
                 <ul>
@@ -46,10 +47,10 @@
                 </ul>
             </nav>
             <!-- PC用のgoogleログイン -->
-            <div class="login-container">
+            <!-- <div class="login-container">
                 <button id="login-button" class="auth-button">Googleでログイン</span></button>
                 <button id="logout-button" class="auth-button" style="display: none;">ログアウト</button>
-            </div>
+            </div> -->
             <!-- スマホ用 コンテナー -->
             <div class="auth-hamburger-wrapper">
                 <!-- ハンバーガー -->
@@ -59,10 +60,10 @@
                     <span></span>
                 </div>
                 <!-- スマホ用 Google アイコン -->
-                <div class="auth-icon-container">
+                <!-- <div class="auth-icon-container">
                     <img id="auth-icon" src="/assets/icons/google-icon-1.svg" alt="Googleアカウント" class="auth-icon"
                         title="ログイン中 - タップでログアウト" />
-                </div>
+                </div> -->
             </div>
         </header>
         <main class="container">
@@ -85,10 +86,10 @@
     <script src="firebase/env.js"></script>
     <script type="module" src="firebase/auth.js"></script>
     <script type="module" src="success.js"></script>
-<script type="module" src="./ui.js"></script>
-<script src="mobile-view.js" defer></script>
+    <script type="module" src="./ui.js"></script>
+    <script src="mobile-view.js" defer></script>
 
-    
+
 </body>
 
 </html>
