@@ -189,7 +189,11 @@ function resetSpinnerState() {
     }
 }
 
+
+
+//------------
 //総合的な易断ボタン生成の条件
+//----------
 function allVariantsShown() {
     return cachedChangedHexagram !== null;
 }
@@ -404,6 +408,7 @@ function showHexagram(hexagram, isOriginal = false) {
         return;
     }
     selectedHexagram = hexagram;
+    hideTapHelper();
 
     // ✅ PCはスピナーを縮小、スマホは消す）→ 結果表示を後にまわす
     if (isOriginal && window.innerWidth <= 768) {
@@ -642,6 +647,7 @@ function handleFutureExpansion(originalHex) {
     // ✅ スピナーを再表示（初回のみ）
     if (isFirstTime && window.innerWidth <= 768) {
         showSpinnerAnimated();
+        showTapHelper();
     } else {
         expandSpinnerForPC();
     }
@@ -684,6 +690,7 @@ function startChangedHexagramSpin(originalHex) {
         spinnerAnimation.goToAndStop(spinnerAnimation.currentFrame, true);
         isSpinning = false;
         playSoundEffect("assets/sounds/click.mp3");
+        hideTapHelper();
 
         // 🟡 停止時にピョコン効果を追加
         const wrapper = document.getElementById('lottie-spinner');
@@ -892,6 +899,7 @@ document.getElementById("start-button").addEventListener("click", async () => {
 
         setTimeout(() => {
             mainApp.classList.add("show");
+            showTapHelper();
         }, 20);
     }, 1000);
 });
@@ -911,7 +919,7 @@ spinnerContainer.addEventListener("click", async () => {
 
     if (isSpinning) {
         playSoundEffect("assets/sounds/click.mp3")// 停止処理（beep付き）
-//ピョコンアニメーション
+        //ピョコンアニメーション
         const wrapper = document.getElementById('lottie-spinner');
         if (wrapper) {
             const target =
@@ -954,6 +962,7 @@ spinnerContainer.addEventListener("click", async () => {
             setTimeout(() => {
                 result.innerHTML = `<div class="waiting-message">本卦を表示します...</div>`;
                 updateResultBorder();
+
 
                 setTimeout(() => {
                     const instructionText = document.getElementById("instructionText");

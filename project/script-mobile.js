@@ -211,7 +211,7 @@ function getTapHelper() {
     }
     return el;
 }
-//指タップ用の Lottie コンテナがサイズ 0 で見えなくなる事故を防ぐ保険
+// //指タップ用の Lottie コンテナがサイズ 0 で見えなくなる事故を防ぐ保険
 function ensureFingerSized() {
     const box = document.getElementById('finger-lottie');
     if (!box) return;
@@ -234,6 +234,7 @@ function showTapHelper() {
     helper.classList.remove('hidden', 'vanish');
 
     // Lottieを一度だけ初期化
+    if (!box) return;
     if (window.lottie && !fingerAnim) {
         fingerAnim = lottie.loadAnimation({
             container: box,
@@ -247,7 +248,6 @@ function showTapHelper() {
         fingerAnim?.play();
         ensureFingerSized();
     }
-
     helper.classList.add('visible');   // ← これだけで表示
 }
 //指タップを隠す関数
@@ -258,7 +258,9 @@ function hideTapHelper() {
     fingerAnim?.pause();                // 再表示時に再生される
 }
 
-//❹screen2: スピナーを６回クリックして本卦を出す 重要
+//-----------
+// ❹screen2: スピナーを６回クリックして本卦を出す 重要
+//-----------
 function handleSpinnerClick() {
     // ---- 早期リターン（不必要な実行を防止）----
     const currentScreen = document.querySelector('.screen.active')?.id;
@@ -404,7 +406,6 @@ function updateInstruction(html) {
         el.classList.add('show');               // 右からイン
     }, { once: true });
 }
-
 
 // --- ガイド文のスライド演出（競合対策版）
 function showGuideForClick(count) {

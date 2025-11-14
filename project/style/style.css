@@ -89,6 +89,37 @@ rt {
     background-color: #c9302c;
 }
 
+/* ---------
+指タップ表示 
+------------*/
+/* 画面最上位のオーバーレイ */
+#tap-helper {
+    position: fixed;
+    inset: 0;
+    display: none;
+    place-items: center;
+    pointer-events: none;
+    z-index: 2147483647;
+}
+
+/* 表示状態 */
+#tap-helper.visible {
+    /* ← 付け外しはこのクラスだけ */
+    display: grid;
+}
+
+/* 中身の箱は必ずサイズを持たせる（0x0対策） */
+#finger-lottie {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    right: 30%;
+    bottom: 30%;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    z-index: 10000;
+}
+
 /* ================================
    進行状況メッセージ表示
 ================================= */

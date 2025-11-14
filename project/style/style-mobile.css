@@ -150,7 +150,9 @@ main {
     pointer-events: none;
 }
 
-/* フィンガー表示 */
+/* ---------
+指タップ表示 
+------------*/
 /* 画面最上位のオーバーレイ */
 #tap-helper {
     position: fixed;
@@ -173,8 +175,9 @@ main {
     transform: translate(100px, 120px) scale(0.7);
 }
 
-
-/* 結果表示（卦、爻） */
+/* --------
+結果表示（卦、爻） 
+-----------*/
 #screen-result {
     height: 100%;
     padding: 20px 16px;

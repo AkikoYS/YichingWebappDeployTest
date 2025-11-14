@@ -84,8 +84,36 @@ function stripHtml(html) {
     return tmp.innerText.trim();
 }
 
+//指タップ関数
+// ---- 指タップLottie制御 ----
+function showTapHelper() {
+    const tap = document.getElementById("tap-helper");
+    const box = document.getElementById("finger-lottie");
+    if (!tap || !box) return;
 
+    tap.style.display = "grid";
+    tap.setAttribute("aria-hidden", "false");
 
+    if (window.lottie && !window.fingerAnim) {
+        // 🟢 一度だけ読み込む
+        window.fingerAnim = lottie.loadAnimation({
+            container: box,
+            renderer: "svg",
+            loop: true,
+            autoplay: true,
+            path: "./assets/animations/finger.json",
+            name: "fingerGuide"
+        });
+    } else {
+        // 🟢 2回目以降は再生のみ
+        window.fingerAnim?.play();
+    }
+}
 
-
-
+function hideTapHelper() {
+    const tap = document.getElementById("tap-helper");
+    if (!tap) return;
+    tap.style.display = "none";
+    tap.setAttribute("aria-hidden", "true");
+    window.fingerAnim?.stop();
+}

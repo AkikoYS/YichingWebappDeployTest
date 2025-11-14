@@ -123,12 +123,17 @@
             <!-- もう一度引くボタン -->
             <button id="reset-button" style="display: none; margin: 30px auto; display: block;">他の内容を占う</button>
         </div>
-<!-- 総合的な易断のモーダル -->
+        <!-- 総合的な易断のモーダル -->
         <div id="hexagram-modal" class="modal hidden" aria-hidden="true">
             <div class="modal-content">
                 <span class="close" aria-label="閉じる">&times;</span>
                 <div id="modal-body"></div>
             </div>
+        </div>
+
+        <!-- 指タップ誘導（オーバーレイ） -->
+        <div id="tap-helper" aria-hidden="true">
+            <div id="finger-lottie" class="finger-lottie"></div>
         </div>
     </main>
 
